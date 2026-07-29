@@ -1,0 +1,114 @@
+[
+  {
+    "id": "ls_pre_birth_planning",
+    "slug": "pre_birth_planning",
+    "label": "Pre-birth planning",
+    "sort_order": 1,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_pregnancy",
+    "slug": "pregnancy",
+    "label": "Pregnancy",
+    "sort_order": 2,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_labor_and_birth",
+    "slug": "labor_and_birth",
+    "label": "Labor and birth",
+    "sort_order": 3,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_first_week",
+    "slug": "first_week",
+    "label": "First week",
+    "sort_order": 4,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_newborn_0_3",
+    "slug": "newborn_0_3",
+    "label": "Newborn (0–3 months)",
+    "sort_order": 5,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_infant_3_12",
+    "slug": "infant_3_12",
+    "label": "Infant (3–12 months)",
+    "sort_order": 6,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_young_toddler_1_2",
+    "slug": "young_toddler_1_2",
+    "label": "Young toddler (1–2 years)",
+    "sort_order": 7,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_older_toddler_2_3",
+    "slug": "older_toddler_2_3",
+    "label": "Older toddler (2–3 years)",
+    "sort_order": 8,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_preschool_3_5",
+    "slug": "preschool_3_5",
+    "label": "Preschool (3–5 years)",
+    "sort_order": 9,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_early_elementary_5_8",
+    "slug": "early_elementary_5_8",
+    "label": "Early elementary (5–8 years)",
+    "sort_order": 10,
+    "babymoon_weighted": true
+  },
+  {
+    "id": "ls_later_elementary_8_11",
+    "slug": "later_elementary_8_11",
+    "label": "Later elementary (8–11 years)",
+    "sort_order": 11,
+    "babymoon_weighted": false
+  },
+  {
+    "id": "ls_preteen",
+    "slug": "preteen",
+    "label": "Preteen",
+    "sort_order": 12,
+    "babymoon_weighted": false
+  },
+  {
+    "id": "ls_teen",
+    "slug": "teen",
+    "label": "Teen",
+    "sort_order": 13,
+    "babymoon_weighted": false
+  },
+  {
+    "id": "ls_young_adult",
+    "slug": "young_adult",
+    "label": "Young adult",
+    "sort_order": 14,
+    "babymoon_weighted": false
+  },
+  {
+    "id": "ls_adult_child",
+    "slug": "adult_child",
+    "label": "Adult child",
+    "sort_order": 15,
+    "babymoon_weighted": false
+  },
+  {
+    "id": "ls_all_stages",
+    "slug": "all_stages",
+    "label": "All stages",
+    "sort_order": 16,
+    "babymoon_weighted": false
+  }
+]

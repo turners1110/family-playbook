@@ -1,0 +1,932 @@
+[
+  {
+    "id": "outcome_integrity",
+    "slug": "integrity",
+    "domain_slug": "character",
+    "label": "Integrity",
+    "definition": "Integrity is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Integrity supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of integrity looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 1
+  },
+  {
+    "id": "outcome_honesty",
+    "slug": "honesty",
+    "domain_slug": "character",
+    "label": "Honesty",
+    "definition": "Honesty is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Honesty supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of honesty looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 2
+  },
+  {
+    "id": "outcome_responsibility",
+    "slug": "responsibility",
+    "domain_slug": "character",
+    "label": "Responsibility",
+    "definition": "Responsibility is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Responsibility supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of responsibility looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 3
+  },
+  {
+    "id": "outcome_humility",
+    "slug": "humility",
+    "domain_slug": "character",
+    "label": "Humility",
+    "definition": "Humility is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Humility supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of humility looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 4
+  },
+  {
+    "id": "outcome_courage",
+    "slug": "courage",
+    "domain_slug": "character",
+    "label": "Courage",
+    "definition": "Courage is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Courage supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of courage looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 5
+  },
+  {
+    "id": "outcome_gratitude",
+    "slug": "gratitude",
+    "domain_slug": "character",
+    "label": "Gratitude",
+    "definition": "Gratitude is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Gratitude supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of gratitude looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 6
+  },
+  {
+    "id": "outcome_kindness",
+    "slug": "kindness",
+    "domain_slug": "character",
+    "label": "Kindness",
+    "definition": "Kindness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Kindness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of kindness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 7
+  },
+  {
+    "id": "outcome_fairness",
+    "slug": "fairness",
+    "domain_slug": "character",
+    "label": "Fairness",
+    "definition": "Fairness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Fairness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of fairness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 8
+  },
+  {
+    "id": "outcome_reliability",
+    "slug": "reliability",
+    "domain_slug": "character",
+    "label": "Reliability",
+    "definition": "Reliability is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Reliability supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of reliability looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 9
+  },
+  {
+    "id": "outcome_work_ethic",
+    "slug": "work_ethic",
+    "domain_slug": "character",
+    "label": "Work ethic",
+    "definition": "Work ethic is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Work ethic supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of work ethic looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 10
+  },
+  {
+    "id": "outcome_self_respect",
+    "slug": "self_respect",
+    "domain_slug": "character",
+    "label": "Self-respect",
+    "definition": "Self-respect is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Self-respect supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of self-respect looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 11
+  },
+  {
+    "id": "outcome_respect_for_others",
+    "slug": "respect_for_others",
+    "domain_slug": "character",
+    "label": "Respect for others",
+    "definition": "Respect for others is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Respect for others supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of respect for others looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 12
+  },
+  {
+    "id": "outcome_emotional_regulation",
+    "slug": "emotional_regulation",
+    "domain_slug": "emotional_development",
+    "label": "Emotional regulation",
+    "definition": "Emotional regulation is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Emotional regulation supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of emotional regulation looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 13
+  },
+  {
+    "id": "outcome_resilience",
+    "slug": "resilience",
+    "domain_slug": "emotional_development",
+    "label": "Resilience",
+    "definition": "Resilience is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Resilience supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of resilience looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 14
+  },
+  {
+    "id": "outcome_confidence",
+    "slug": "confidence",
+    "domain_slug": "emotional_development",
+    "label": "Confidence",
+    "definition": "Confidence is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Confidence supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of confidence looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 15
+  },
+  {
+    "id": "outcome_patience",
+    "slug": "patience",
+    "domain_slug": "emotional_development",
+    "label": "Patience",
+    "definition": "Patience is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Patience supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of patience looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 16
+  },
+  {
+    "id": "outcome_self_awareness",
+    "slug": "self_awareness",
+    "domain_slug": "emotional_development",
+    "label": "Self-awareness",
+    "definition": "Self-awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Self-awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of self-awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 17
+  },
+  {
+    "id": "outcome_self_control",
+    "slug": "self_control",
+    "domain_slug": "emotional_development",
+    "label": "Self-control",
+    "definition": "Self-control is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Self-control supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of self-control looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 18
+  },
+  {
+    "id": "outcome_healthy_optimism",
+    "slug": "healthy_optimism",
+    "domain_slug": "emotional_development",
+    "label": "Healthy optimism",
+    "definition": "Healthy optimism is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy optimism supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy optimism looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 19
+  },
+  {
+    "id": "outcome_ability_to_handle_frustration",
+    "slug": "ability_to_handle_frustration",
+    "domain_slug": "emotional_development",
+    "label": "Ability to handle frustration",
+    "definition": "Ability to handle frustration is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to handle frustration supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to handle frustration looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 20
+  },
+  {
+    "id": "outcome_ability_to_ask_for_help",
+    "slug": "ability_to_ask_for_help",
+    "domain_slug": "emotional_development",
+    "label": "Ability to ask for help",
+    "definition": "Ability to ask for help is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to ask for help supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to ask for help looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 21
+  },
+  {
+    "id": "outcome_comfort_with_failure",
+    "slug": "comfort_with_failure",
+    "domain_slug": "emotional_development",
+    "label": "Comfort with failure",
+    "definition": "Comfort with failure is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Comfort with failure supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of comfort with failure looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 22
+  },
+  {
+    "id": "outcome_healthy_independence",
+    "slug": "healthy_independence",
+    "domain_slug": "emotional_development",
+    "label": "Healthy independence",
+    "definition": "Healthy independence is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy independence supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy independence looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 23
+  },
+  {
+    "id": "outcome_secure_attachment",
+    "slug": "secure_attachment",
+    "domain_slug": "emotional_development",
+    "label": "Secure attachment",
+    "definition": "Secure attachment is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Secure attachment supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of secure attachment looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 24
+  },
+  {
+    "id": "outcome_curiosity",
+    "slug": "curiosity",
+    "domain_slug": "thinking_and_learning",
+    "label": "Curiosity",
+    "definition": "Curiosity is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Curiosity supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of curiosity looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 25
+  },
+  {
+    "id": "outcome_critical_thinking",
+    "slug": "critical_thinking",
+    "domain_slug": "thinking_and_learning",
+    "label": "Critical thinking",
+    "definition": "Critical thinking is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Critical thinking supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of critical thinking looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 26
+  },
+  {
+    "id": "outcome_love_of_learning",
+    "slug": "love_of_learning",
+    "domain_slug": "thinking_and_learning",
+    "label": "Love of learning",
+    "definition": "Love of learning is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Love of learning supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of love of learning looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 27
+  },
+  {
+    "id": "outcome_creativity",
+    "slug": "creativity",
+    "domain_slug": "thinking_and_learning",
+    "label": "Creativity",
+    "definition": "Creativity is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Creativity supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of creativity looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 28
+  },
+  {
+    "id": "outcome_focus",
+    "slug": "focus",
+    "domain_slug": "thinking_and_learning",
+    "label": "Focus",
+    "definition": "Focus is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Focus supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of focus looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 29
+  },
+  {
+    "id": "outcome_problem_solving",
+    "slug": "problem_solving",
+    "domain_slug": "thinking_and_learning",
+    "label": "Problem solving",
+    "definition": "Problem solving is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Problem solving supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of problem solving looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 30
+  },
+  {
+    "id": "outcome_sound_judgment",
+    "slug": "sound_judgment",
+    "domain_slug": "thinking_and_learning",
+    "label": "Sound judgment",
+    "definition": "Sound judgment is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Sound judgment supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of sound judgment looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 31
+  },
+  {
+    "id": "outcome_adaptability",
+    "slug": "adaptability",
+    "domain_slug": "thinking_and_learning",
+    "label": "Adaptability",
+    "definition": "Adaptability is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Adaptability supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of adaptability looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 32
+  },
+  {
+    "id": "outcome_intellectual_humility",
+    "slug": "intellectual_humility",
+    "domain_slug": "thinking_and_learning",
+    "label": "Intellectual humility",
+    "definition": "Intellectual humility is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Intellectual humility supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of intellectual humility looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 33
+  },
+  {
+    "id": "outcome_media_literacy",
+    "slug": "media_literacy",
+    "domain_slug": "thinking_and_learning",
+    "label": "Media literacy",
+    "definition": "Media literacy is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Media literacy supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of media literacy looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 34
+  },
+  {
+    "id": "outcome_ability_to_change_ones_mind",
+    "slug": "ability_to_change_ones_mind",
+    "domain_slug": "thinking_and_learning",
+    "label": "Ability to change one’s mind",
+    "definition": "Ability to change one’s mind is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to change one’s mind supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to change one’s mind looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 35
+  },
+  {
+    "id": "outcome_decision_making_ability",
+    "slug": "decision_making_ability",
+    "domain_slug": "thinking_and_learning",
+    "label": "Decision-making ability",
+    "definition": "Decision-making ability is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Decision-making ability supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of decision-making ability looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 36
+  },
+  {
+    "id": "outcome_empathy",
+    "slug": "empathy",
+    "domain_slug": "relationships",
+    "label": "Empathy",
+    "definition": "Empathy is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Empathy supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of empathy looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 37
+  },
+  {
+    "id": "outcome_communication",
+    "slug": "communication",
+    "domain_slug": "relationships",
+    "label": "Communication",
+    "definition": "Communication is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Communication supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of communication looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 38
+  },
+  {
+    "id": "outcome_conflict_resolution",
+    "slug": "conflict_resolution",
+    "domain_slug": "relationships",
+    "label": "Conflict resolution",
+    "definition": "Conflict resolution is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Conflict resolution supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of conflict resolution looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 39
+  },
+  {
+    "id": "outcome_friendship_skills",
+    "slug": "friendship_skills",
+    "domain_slug": "relationships",
+    "label": "Friendship skills",
+    "definition": "Friendship skills is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Friendship skills supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of friendship skills looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 40
+  },
+  {
+    "id": "outcome_teamwork",
+    "slug": "teamwork",
+    "domain_slug": "relationships",
+    "label": "Teamwork",
+    "definition": "Teamwork is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Teamwork supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of teamwork looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 41
+  },
+  {
+    "id": "outcome_leadership",
+    "slug": "leadership",
+    "domain_slug": "relationships",
+    "label": "Leadership",
+    "definition": "Leadership is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Leadership supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of leadership looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 42
+  },
+  {
+    "id": "outcome_listening",
+    "slug": "listening",
+    "domain_slug": "relationships",
+    "label": "Listening",
+    "definition": "Listening is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Listening supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of listening looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 43
+  },
+  {
+    "id": "outcome_healthy_boundaries",
+    "slug": "healthy_boundaries",
+    "domain_slug": "relationships",
+    "label": "Healthy boundaries",
+    "definition": "Healthy boundaries is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy boundaries supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy boundaries looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 44
+  },
+  {
+    "id": "outcome_trustworthiness",
+    "slug": "trustworthiness",
+    "domain_slug": "relationships",
+    "label": "Trustworthiness",
+    "definition": "Trustworthiness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Trustworthiness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of trustworthiness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 45
+  },
+  {
+    "id": "outcome_ability_to_apologize",
+    "slug": "ability_to_apologize",
+    "domain_slug": "relationships",
+    "label": "Ability to apologize",
+    "definition": "Ability to apologize is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to apologize supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to apologize looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 46
+  },
+  {
+    "id": "outcome_ability_to_forgive",
+    "slug": "ability_to_forgive",
+    "domain_slug": "relationships",
+    "label": "Ability to forgive",
+    "definition": "Ability to forgive is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to forgive supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to forgive looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 47
+  },
+  {
+    "id": "outcome_ability_to_choose_healthy_partners",
+    "slug": "ability_to_choose_healthy_partners",
+    "domain_slug": "relationships",
+    "label": "Ability to choose healthy partners",
+    "definition": "Ability to choose healthy partners is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to choose healthy partners supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to choose healthy partners looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 48
+  },
+  {
+    "id": "outcome_independence",
+    "slug": "independence",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Independence",
+    "definition": "Independence is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Independence supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of independence looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 49
+  },
+  {
+    "id": "outcome_time_management",
+    "slug": "time_management",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Time management",
+    "definition": "Time management is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Time management supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of time management looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 50
+  },
+  {
+    "id": "outcome_organization",
+    "slug": "organization",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Organization",
+    "definition": "Organization is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Organization supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of organization looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 51
+  },
+  {
+    "id": "outcome_planning",
+    "slug": "planning",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Planning",
+    "definition": "Planning is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Planning supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of planning looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 52
+  },
+  {
+    "id": "outcome_cooking",
+    "slug": "cooking",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Cooking",
+    "definition": "Cooking is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Cooking supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of cooking looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 53
+  },
+  {
+    "id": "outcome_cleaning",
+    "slug": "cleaning",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Cleaning",
+    "definition": "Cleaning is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Cleaning supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of cleaning looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 54
+  },
+  {
+    "id": "outcome_personal_hygiene",
+    "slug": "personal_hygiene",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Personal hygiene",
+    "definition": "Personal hygiene is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Personal hygiene supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of personal hygiene looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 55
+  },
+  {
+    "id": "outcome_basic_home_care",
+    "slug": "basic_home_care",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Basic home care",
+    "definition": "Basic home care is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Basic home care supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of basic home care looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 56
+  },
+  {
+    "id": "outcome_transportation_skills",
+    "slug": "transportation_skills",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Transportation skills",
+    "definition": "Transportation skills is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Transportation skills supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of transportation skills looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 57
+  },
+  {
+    "id": "outcome_safety_awareness",
+    "slug": "safety_awareness",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Safety awareness",
+    "definition": "Safety awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Safety awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of safety awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 58
+  },
+  {
+    "id": "outcome_self_advocacy",
+    "slug": "self_advocacy",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Self-advocacy",
+    "definition": "Self-advocacy is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Self-advocacy supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of self-advocacy looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 59
+  },
+  {
+    "id": "outcome_ability_to_manage_responsibilities",
+    "slug": "ability_to_manage_responsibilities",
+    "domain_slug": "independence_and_life_skills",
+    "label": "Ability to manage responsibilities",
+    "definition": "Ability to manage responsibilities is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ability to manage responsibilities supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ability to manage responsibilities looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 60
+  },
+  {
+    "id": "outcome_delayed_gratification",
+    "slug": "delayed_gratification",
+    "domain_slug": "financial_skills",
+    "label": "Delayed gratification",
+    "definition": "Delayed gratification is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Delayed gratification supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of delayed gratification looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 61
+  },
+  {
+    "id": "outcome_saving",
+    "slug": "saving",
+    "domain_slug": "financial_skills",
+    "label": "Saving",
+    "definition": "Saving is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Saving supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of saving looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 62
+  },
+  {
+    "id": "outcome_budgeting",
+    "slug": "budgeting",
+    "domain_slug": "financial_skills",
+    "label": "Budgeting",
+    "definition": "Budgeting is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Budgeting supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of budgeting looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 63
+  },
+  {
+    "id": "outcome_investing",
+    "slug": "investing",
+    "domain_slug": "financial_skills",
+    "label": "Investing",
+    "definition": "Investing is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Investing supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of investing looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 64
+  },
+  {
+    "id": "outcome_understanding_debt",
+    "slug": "understanding_debt",
+    "domain_slug": "financial_skills",
+    "label": "Understanding debt",
+    "definition": "Understanding debt is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Understanding debt supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of understanding debt looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 65
+  },
+  {
+    "id": "outcome_consumer_awareness",
+    "slug": "consumer_awareness",
+    "domain_slug": "financial_skills",
+    "label": "Consumer awareness",
+    "definition": "Consumer awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Consumer awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of consumer awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 66
+  },
+  {
+    "id": "outcome_negotiation",
+    "slug": "negotiation",
+    "domain_slug": "financial_skills",
+    "label": "Negotiation",
+    "definition": "Negotiation is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Negotiation supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of negotiation looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 67
+  },
+  {
+    "id": "outcome_earning",
+    "slug": "earning",
+    "domain_slug": "financial_skills",
+    "label": "Earning",
+    "definition": "Earning is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Earning supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of earning looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 68
+  },
+  {
+    "id": "outcome_giving",
+    "slug": "giving",
+    "domain_slug": "financial_skills",
+    "label": "Giving",
+    "definition": "Giving is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Giving supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of giving looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 69
+  },
+  {
+    "id": "outcome_risk_assessment",
+    "slug": "risk_assessment",
+    "domain_slug": "financial_skills",
+    "label": "Risk assessment",
+    "definition": "Risk assessment is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Risk assessment supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of risk assessment looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 70
+  },
+  {
+    "id": "outcome_understanding_taxes",
+    "slug": "understanding_taxes",
+    "domain_slug": "financial_skills",
+    "label": "Understanding taxes",
+    "definition": "Understanding taxes is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Understanding taxes supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of understanding taxes looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 71
+  },
+  {
+    "id": "outcome_long_term_planning",
+    "slug": "long_term_planning",
+    "domain_slug": "financial_skills",
+    "label": "Long-term planning",
+    "definition": "Long-term planning is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Long-term planning supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of long-term planning looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 72
+  },
+  {
+    "id": "outcome_avoiding_status_spending",
+    "slug": "avoiding_status_spending",
+    "domain_slug": "financial_skills",
+    "label": "Avoiding status spending",
+    "definition": "Avoiding status spending is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Avoiding status spending supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of avoiding status spending looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 73
+  },
+  {
+    "id": "outcome_learning_from_small_financial_mistakes",
+    "slug": "learning_from_small_financial_mistakes",
+    "domain_slug": "financial_skills",
+    "label": "Learning from small financial mistakes",
+    "definition": "Learning from small financial mistakes is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Learning from small financial mistakes supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of learning from small financial mistakes looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 74
+  },
+  {
+    "id": "outcome_healthy_eating",
+    "slug": "healthy_eating",
+    "domain_slug": "health",
+    "label": "Healthy eating",
+    "definition": "Healthy eating is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy eating supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy eating looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 75
+  },
+  {
+    "id": "outcome_exercise_habits",
+    "slug": "exercise_habits",
+    "domain_slug": "health",
+    "label": "Exercise habits",
+    "definition": "Exercise habits is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Exercise habits supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of exercise habits looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 76
+  },
+  {
+    "id": "outcome_sleep_habits",
+    "slug": "sleep_habits",
+    "domain_slug": "health",
+    "label": "Sleep habits",
+    "definition": "Sleep habits is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Sleep habits supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of sleep habits looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 77
+  },
+  {
+    "id": "outcome_stress_management",
+    "slug": "stress_management",
+    "domain_slug": "health",
+    "label": "Stress management",
+    "definition": "Stress management is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Stress management supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of stress management looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 78
+  },
+  {
+    "id": "outcome_body_awareness",
+    "slug": "body_awareness",
+    "domain_slug": "health",
+    "label": "Body awareness",
+    "definition": "Body awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Body awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of body awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 79
+  },
+  {
+    "id": "outcome_preventive_care",
+    "slug": "preventive_care",
+    "domain_slug": "health",
+    "label": "Preventive care",
+    "definition": "Preventive care is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Preventive care supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of preventive care looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 80
+  },
+  {
+    "id": "outcome_healthy_relationship_with_food",
+    "slug": "healthy_relationship_with_food",
+    "domain_slug": "health",
+    "label": "Healthy relationship with food",
+    "definition": "Healthy relationship with food is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy relationship with food supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy relationship with food looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 81
+  },
+  {
+    "id": "outcome_healthy_relationship_with_appearance",
+    "slug": "healthy_relationship_with_appearance",
+    "domain_slug": "health",
+    "label": "Healthy relationship with appearance",
+    "definition": "Healthy relationship with appearance is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Healthy relationship with appearance supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of healthy relationship with appearance looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 82
+  },
+  {
+    "id": "outcome_substance_awareness",
+    "slug": "substance_awareness",
+    "domain_slug": "health",
+    "label": "Substance awareness",
+    "definition": "Substance awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Substance awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of substance awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 83
+  },
+  {
+    "id": "outcome_sexual_health_knowledge",
+    "slug": "sexual_health_knowledge",
+    "domain_slug": "health",
+    "label": "Sexual health knowledge",
+    "definition": "Sexual health knowledge is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Sexual health knowledge supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of sexual health knowledge looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 84
+  },
+  {
+    "id": "outcome_digital_wellness",
+    "slug": "digital_wellness",
+    "domain_slug": "health",
+    "label": "Digital wellness",
+    "definition": "Digital wellness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Digital wellness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of digital wellness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 85
+  },
+  {
+    "id": "outcome_service",
+    "slug": "service",
+    "domain_slug": "citizenship_and_community",
+    "label": "Service",
+    "definition": "Service is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Service supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of service looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 86
+  },
+  {
+    "id": "outcome_civic_awareness",
+    "slug": "civic_awareness",
+    "domain_slug": "citizenship_and_community",
+    "label": "Civic awareness",
+    "definition": "Civic awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Civic awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of civic awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 87
+  },
+  {
+    "id": "outcome_respect_for_differences",
+    "slug": "respect_for_differences",
+    "domain_slug": "citizenship_and_community",
+    "label": "Respect for differences",
+    "definition": "Respect for differences is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Respect for differences supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of respect for differences looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 88
+  },
+  {
+    "id": "outcome_community_responsibility",
+    "slug": "community_responsibility",
+    "domain_slug": "citizenship_and_community",
+    "label": "Community responsibility",
+    "definition": "Community responsibility is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Community responsibility supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of community responsibility looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 89
+  },
+  {
+    "id": "outcome_environmental_responsibility",
+    "slug": "environmental_responsibility",
+    "domain_slug": "citizenship_and_community",
+    "label": "Environmental responsibility",
+    "definition": "Environmental responsibility is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Environmental responsibility supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of environmental responsibility looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 90
+  },
+  {
+    "id": "outcome_appreciation_for_family_history",
+    "slug": "appreciation_for_family_history",
+    "domain_slug": "citizenship_and_community",
+    "label": "Appreciation for family history",
+    "definition": "Appreciation for family history is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Appreciation for family history supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of appreciation for family history looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 91
+  },
+  {
+    "id": "outcome_cultural_awareness",
+    "slug": "cultural_awareness",
+    "domain_slug": "citizenship_and_community",
+    "label": "Cultural awareness",
+    "definition": "Cultural awareness is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Cultural awareness supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of cultural awareness looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 92
+  },
+  {
+    "id": "outcome_ethical_use_of_influence",
+    "slug": "ethical_use_of_influence",
+    "domain_slug": "citizenship_and_community",
+    "label": "Ethical use of influence",
+    "definition": "Ethical use of influence is the capacity to practice this trait consistently in age-appropriate ways.",
+    "why_it_matters": "Ethical use of influence supports long-term wellbeing, relationships, and the adult your child becomes.",
+    "healthy_development": "Healthy development of ethical use of influence looks like gradual growth, repair after setbacks, and encouragement without shame.",
+    "sort_order": 93
+  }
+]

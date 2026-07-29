@@ -1,0 +1,42 @@
+{
+  "family": {
+    "id": "family_turner",
+    "name": "Turner Family",
+    "created_at": "2026-07-29T12:57:27.097Z",
+    "updated_at": "2026-07-29T12:57:27.097Z"
+  },
+  "members": [
+    {
+      "id": "member_sam",
+      "family_id": "family_turner",
+      "user_id": "user_sam",
+      "display_name": "Sam",
+      "role": "parent",
+      "sort_order": 1,
+      "created_at": "2026-07-29T12:57:27.097Z"
+    },
+    {
+      "id": "member_michelle",
+      "family_id": "family_turner",
+      "user_id": "user_michelle",
+      "display_name": "Michelle",
+      "role": "parent",
+      "sort_order": 2,
+      "created_at": "2026-07-29T12:57:27.097Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "user_sam",
+      "email": "sam@turner.family",
+      "display_name": "Sam Turner",
+      "created_at": "2026-07-29T12:57:27.097Z"
+    },
+    {
+      "id": "user_michelle",
+      "email": "michelle@turner.family",
+      "display_name": "Michelle Turner",
+      "created_at": "2026-07-29T12:57:27.097Z"
+    }
+  ]
+}

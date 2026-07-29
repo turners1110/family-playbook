@@ -1,0 +1,492 @@
+[
+  {
+    "id": "cat_family_identity",
+    "slug": "family_identity",
+    "label": "Family identity",
+    "parent_slug": null,
+    "sort_order": 1
+  },
+  {
+    "id": "cat_family_mission",
+    "slug": "family_mission",
+    "label": "Family mission",
+    "parent_slug": null,
+    "sort_order": 2
+  },
+  {
+    "id": "cat_core_values",
+    "slug": "core_values",
+    "label": "Core values",
+    "parent_slug": null,
+    "sort_order": 3
+  },
+  {
+    "id": "cat_desired_adult_outcomes",
+    "slug": "desired_adult_outcomes",
+    "label": "Desired adult outcomes",
+    "parent_slug": null,
+    "sort_order": 4
+  },
+  {
+    "id": "cat_parent_partnership",
+    "slug": "parent_partnership",
+    "label": "Parent partnership",
+    "parent_slug": null,
+    "sort_order": 5
+  },
+  {
+    "id": "cat_division_of_labor",
+    "slug": "division_of_labor",
+    "label": "Division of labor",
+    "parent_slug": null,
+    "sort_order": 6
+  },
+  {
+    "id": "cat_conflict_between_parents",
+    "slug": "conflict_between_parents",
+    "label": "Conflict between parents",
+    "parent_slug": null,
+    "sort_order": 7
+  },
+  {
+    "id": "cat_extended_family",
+    "slug": "extended_family",
+    "label": "Extended family",
+    "parent_slug": null,
+    "sort_order": 8
+  },
+  {
+    "id": "cat_grandparents",
+    "slug": "grandparents",
+    "label": "Grandparents",
+    "parent_slug": null,
+    "sort_order": 9
+  },
+  {
+    "id": "cat_family_boundaries",
+    "slug": "family_boundaries",
+    "label": "Family boundaries",
+    "parent_slug": null,
+    "sort_order": 10
+  },
+  {
+    "id": "cat_pregnancy",
+    "slug": "pregnancy",
+    "label": "Pregnancy",
+    "parent_slug": null,
+    "sort_order": 11
+  },
+  {
+    "id": "cat_birth",
+    "slug": "birth",
+    "label": "Birth",
+    "parent_slug": null,
+    "sort_order": 12
+  },
+  {
+    "id": "cat_postpartum_recovery",
+    "slug": "postpartum_recovery",
+    "label": "Postpartum recovery",
+    "parent_slug": null,
+    "sort_order": 13
+  },
+  {
+    "id": "cat_newborn_care",
+    "slug": "newborn_care",
+    "label": "Newborn care",
+    "parent_slug": null,
+    "sort_order": 14
+  },
+  {
+    "id": "cat_feeding",
+    "slug": "feeding",
+    "label": "Feeding",
+    "parent_slug": null,
+    "sort_order": 15
+  },
+  {
+    "id": "cat_breastfeeding",
+    "slug": "breastfeeding",
+    "label": "Breastfeeding",
+    "parent_slug": null,
+    "sort_order": 16
+  },
+  {
+    "id": "cat_formula",
+    "slug": "formula",
+    "label": "Formula",
+    "parent_slug": null,
+    "sort_order": 17
+  },
+  {
+    "id": "cat_nutrition",
+    "slug": "nutrition",
+    "label": "Nutrition",
+    "parent_slug": null,
+    "sort_order": 18
+  },
+  {
+    "id": "cat_food_culture",
+    "slug": "food_culture",
+    "label": "Food culture",
+    "parent_slug": null,
+    "sort_order": 19
+  },
+  {
+    "id": "cat_sleep",
+    "slug": "sleep",
+    "label": "Sleep",
+    "parent_slug": null,
+    "sort_order": 20
+  },
+  {
+    "id": "cat_crying",
+    "slug": "crying",
+    "label": "Crying",
+    "parent_slug": null,
+    "sort_order": 21
+  },
+  {
+    "id": "cat_soothing",
+    "slug": "soothing",
+    "label": "Soothing",
+    "parent_slug": null,
+    "sort_order": 22
+  },
+  {
+    "id": "cat_attachment",
+    "slug": "attachment",
+    "label": "Attachment",
+    "parent_slug": null,
+    "sort_order": 23
+  },
+  {
+    "id": "cat_emotional_development",
+    "slug": "emotional_development",
+    "label": "Emotional development",
+    "parent_slug": null,
+    "sort_order": 24
+  },
+  {
+    "id": "cat_discipline",
+    "slug": "discipline",
+    "label": "Discipline",
+    "parent_slug": null,
+    "sort_order": 25
+  },
+  {
+    "id": "cat_boundaries",
+    "slug": "boundaries",
+    "label": "Boundaries",
+    "parent_slug": null,
+    "sort_order": 26
+  },
+  {
+    "id": "cat_tantrums",
+    "slug": "tantrums",
+    "label": "Tantrums",
+    "parent_slug": null,
+    "sort_order": 27
+  },
+  {
+    "id": "cat_independence",
+    "slug": "independence",
+    "label": "Independence",
+    "parent_slug": null,
+    "sort_order": 28
+  },
+  {
+    "id": "cat_responsibility",
+    "slug": "responsibility",
+    "label": "Responsibility",
+    "parent_slug": null,
+    "sort_order": 29
+  },
+  {
+    "id": "cat_chores",
+    "slug": "chores",
+    "label": "Chores",
+    "parent_slug": null,
+    "sort_order": 30
+  },
+  {
+    "id": "cat_allowance",
+    "slug": "allowance",
+    "label": "Allowance",
+    "parent_slug": null,
+    "sort_order": 31
+  },
+  {
+    "id": "cat_financial_education",
+    "slug": "financial_education",
+    "label": "Financial education",
+    "parent_slug": null,
+    "sort_order": 32
+  },
+  {
+    "id": "cat_family_finances",
+    "slug": "family_finances",
+    "label": "Family finances",
+    "parent_slug": null,
+    "sort_order": 33
+  },
+  {
+    "id": "cat_education",
+    "slug": "education",
+    "label": "Education",
+    "parent_slug": null,
+    "sort_order": 34
+  },
+  {
+    "id": "cat_daycare",
+    "slug": "daycare",
+    "label": "Daycare",
+    "parent_slug": null,
+    "sort_order": 35
+  },
+  {
+    "id": "cat_preschool",
+    "slug": "preschool",
+    "label": "Preschool",
+    "parent_slug": null,
+    "sort_order": 36
+  },
+  {
+    "id": "cat_school_choice",
+    "slug": "school_choice",
+    "label": "School choice",
+    "parent_slug": null,
+    "sort_order": 37
+  },
+  {
+    "id": "cat_learning",
+    "slug": "learning",
+    "label": "Learning",
+    "parent_slug": null,
+    "sort_order": 38
+  },
+  {
+    "id": "cat_reading",
+    "slug": "reading",
+    "label": "Reading",
+    "parent_slug": null,
+    "sort_order": 39
+  },
+  {
+    "id": "cat_creativity",
+    "slug": "creativity",
+    "label": "Creativity",
+    "parent_slug": null,
+    "sort_order": 40
+  },
+  {
+    "id": "cat_play",
+    "slug": "play",
+    "label": "Play",
+    "parent_slug": null,
+    "sort_order": 41
+  },
+  {
+    "id": "cat_childcare",
+    "slug": "childcare",
+    "label": "Childcare",
+    "parent_slug": null,
+    "sort_order": 42
+  },
+  {
+    "id": "cat_technology",
+    "slug": "technology",
+    "label": "Technology",
+    "parent_slug": null,
+    "sort_order": 43
+  },
+  {
+    "id": "cat_screens",
+    "slug": "screens",
+    "label": "Screens",
+    "parent_slug": null,
+    "sort_order": 44
+  },
+  {
+    "id": "cat_internet",
+    "slug": "internet",
+    "label": "Internet",
+    "parent_slug": null,
+    "sort_order": 45
+  },
+  {
+    "id": "cat_social_media",
+    "slug": "social_media",
+    "label": "Social media",
+    "parent_slug": null,
+    "sort_order": 46
+  },
+  {
+    "id": "cat_health",
+    "slug": "health",
+    "label": "Health",
+    "parent_slug": null,
+    "sort_order": 47
+  },
+  {
+    "id": "cat_mental_health",
+    "slug": "mental_health",
+    "label": "Mental health",
+    "parent_slug": null,
+    "sort_order": 48
+  },
+  {
+    "id": "cat_safety",
+    "slug": "safety",
+    "label": "Safety",
+    "parent_slug": null,
+    "sort_order": 49
+  },
+  {
+    "id": "cat_medical_decisions",
+    "slug": "medical_decisions",
+    "label": "Medical decisions",
+    "parent_slug": null,
+    "sort_order": 50
+  },
+  {
+    "id": "cat_faith",
+    "slug": "faith",
+    "label": "Faith",
+    "parent_slug": null,
+    "sort_order": 51
+  },
+  {
+    "id": "cat_culture",
+    "slug": "culture",
+    "label": "Culture",
+    "parent_slug": null,
+    "sort_order": 52
+  },
+  {
+    "id": "cat_holidays",
+    "slug": "holidays",
+    "label": "Holidays",
+    "parent_slug": null,
+    "sort_order": 53
+  },
+  {
+    "id": "cat_traditions",
+    "slug": "traditions",
+    "label": "Traditions",
+    "parent_slug": null,
+    "sort_order": 54
+  },
+  {
+    "id": "cat_privacy",
+    "slug": "privacy",
+    "label": "Privacy",
+    "parent_slug": null,
+    "sort_order": 55
+  },
+  {
+    "id": "cat_praise",
+    "slug": "praise",
+    "label": "Praise",
+    "parent_slug": null,
+    "sort_order": 56
+  },
+  {
+    "id": "cat_failure",
+    "slug": "failure",
+    "label": "Failure",
+    "parent_slug": null,
+    "sort_order": 57
+  },
+  {
+    "id": "cat_competition",
+    "slug": "competition",
+    "label": "Competition",
+    "parent_slug": null,
+    "sort_order": 58
+  },
+  {
+    "id": "cat_achievement",
+    "slug": "achievement",
+    "label": "Achievement",
+    "parent_slug": null,
+    "sort_order": 59
+  },
+  {
+    "id": "cat_kindness",
+    "slug": "kindness",
+    "label": "Kindness",
+    "parent_slug": null,
+    "sort_order": 60
+  },
+  {
+    "id": "cat_gratitude",
+    "slug": "gratitude",
+    "label": "Gratitude",
+    "parent_slug": null,
+    "sort_order": 61
+  },
+  {
+    "id": "cat_resilience",
+    "slug": "resilience",
+    "label": "Resilience",
+    "parent_slug": null,
+    "sort_order": 62
+  },
+  {
+    "id": "cat_honesty",
+    "slug": "honesty",
+    "label": "Honesty",
+    "parent_slug": null,
+    "sort_order": 63
+  },
+  {
+    "id": "cat_consumerism",
+    "slug": "consumerism",
+    "label": "Consumerism",
+    "parent_slug": null,
+    "sort_order": 64
+  },
+  {
+    "id": "cat_service",
+    "slug": "service",
+    "label": "Service",
+    "parent_slug": null,
+    "sort_order": 65
+  },
+  {
+    "id": "cat_future_siblings",
+    "slug": "future_siblings",
+    "label": "Future siblings",
+    "parent_slug": null,
+    "sort_order": 66
+  },
+  {
+    "id": "cat_crisis_planning",
+    "slug": "crisis_planning",
+    "label": "Crisis planning",
+    "parent_slug": null,
+    "sort_order": 67
+  },
+  {
+    "id": "cat_work_and_leave",
+    "slug": "work_and_leave",
+    "label": "Work and parental leave",
+    "parent_slug": null,
+    "sort_order": 68
+  },
+  {
+    "id": "cat_marriage",
+    "slug": "marriage",
+    "label": "Marriage",
+    "parent_slug": null,
+    "sort_order": 69
+  },
+  {
+    "id": "cat_family_routines",
+    "slug": "family_routines",
+    "label": "Family routines",
+    "parent_slug": null,
+    "sort_order": 70
+  }
+]
