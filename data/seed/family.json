@@ -2,8 +2,8 @@
   "family": {
     "id": "family_turner",
     "name": "Turner Family",
-    "created_at": "2026-07-29T12:57:27.097Z",
-    "updated_at": "2026-07-29T12:57:27.097Z"
+    "created_at": "2026-07-31T22:04:27.065Z",
+    "updated_at": "2026-07-31T22:04:27.065Z"
   },
   "members": [
     {
@@ -13,7 +13,7 @@
       "display_name": "Sam",
       "role": "parent",
       "sort_order": 1,
-      "created_at": "2026-07-29T12:57:27.097Z"
+      "created_at": "2026-07-31T22:04:27.065Z"
     },
     {
       "id": "member_michelle",
@@ -22,7 +22,7 @@
       "display_name": "Michelle",
       "role": "parent",
       "sort_order": 2,
-      "created_at": "2026-07-29T12:57:27.097Z"
+      "created_at": "2026-07-31T22:04:27.065Z"
     }
   ],
   "users": [
@@ -30,13 +30,13 @@
       "id": "user_sam",
       "email": "sam@turner.family",
       "display_name": "Sam Turner",
-      "created_at": "2026-07-29T12:57:27.097Z"
+      "created_at": "2026-07-31T22:04:27.065Z"
     },
     {
       "id": "user_michelle",
       "email": "michelle@turner.family",
       "display_name": "Michelle Turner",
-      "created_at": "2026-07-29T12:57:27.097Z"
+      "created_at": "2026-07-31T22:04:27.065Z"
     }
   ]
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProgressBar, StatCard } from "@/components/shared/ui";
 import { getDashboardStats } from "@/lib/services/stats";
@@ -8,14 +7,8 @@ import { readStore } from "@/lib/db/local-store";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  let stats;
-  let store;
-  try {
-    store = await readStore();
-    stats = await getDashboardStats();
-  } catch {
-    redirect("/login");
-  }
+  const store = await readStore();
+  const stats = await getDashboardStats();
 
   return (
     <AppShell

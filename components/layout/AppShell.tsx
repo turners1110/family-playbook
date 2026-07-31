@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { NAV_ITEMS } from "@/lib/constants/enums";
-import { getFamilyContext } from "@/lib/services/family";
-import { UserSwitcher } from "@/components/layout/UserSwitcher";
+import { requireFamilyContext } from "@/lib/auth/family-context";
+import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
+import { AuthStatus } from "@/components/layout/AuthStatus";
 
 export async function AppShell({
   children,
@@ -14,7 +15,8 @@ export async function AppShell({
   subtitle?: string;
   actions?: React.ReactNode;
 }) {
-  const ctx = await getFamilyContext();
+  const ctx = await requireFamilyContext();
+  await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
 
   return (
     <div className="min-h-screen">
@@ -31,7 +33,7 @@ export async function AppShell({
               Turner Family Principles
             </div>
             <div className="truncate text-xs text-ink-subtle">
-              Private parenting decision system
+              {ctx.family.name}
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -41,16 +43,13 @@ export async function AppShell({
             <Link href="/babymoon" className="btn btn-secondary hidden md:inline-flex">
               Babymoon
             </Link>
-            <UserSwitcher
-              users={ctx.users}
-              currentUserId={ctx.currentUser.id}
+            <AuthStatus
+              displayName={ctx.member.display_name || ctx.profile.display_name}
+              email={ctx.profile.email}
             />
           </div>
         </div>
-        <nav
-          aria-label="Primary"
-          className="border-t border-border/60"
-        >
+        <nav aria-label="Primary" className="border-t border-border/60">
           <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 py-2 scrollbar-none">
             {NAV_ITEMS.map((item) => (
               <Link

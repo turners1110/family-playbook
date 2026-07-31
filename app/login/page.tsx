@@ -1,16 +1,22 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { readStore } from "@/lib/db/local-store";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { getOptionalUser } from "@/lib/auth/family-context";
+import { publicAuthMessage } from "@/lib/auth/errors";
 
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
-  try {
-    await readStore();
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; next?: string }>;
+}) {
+  const params = await searchParams;
+  const user = await getOptionalUser();
+  if (user) {
     redirect("/home");
-  } catch {
-    // store missing
   }
+
+  const errorMessage = publicAuthMessage(params.error);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
@@ -22,28 +28,14 @@ export default async function LoginPage() {
           Turner Family Principles
         </h1>
         <p className="mt-3 text-ink-muted">
-          This release uses a secure local family store for Sam and Michelle. For
-          production, connect Supabase Auth (magic link) using the included schema and RLS.
+          Sign in with a magic link sent to your email. Only invited family members
+          can access this space.
         </p>
-        <ol className="mt-5 list-decimal space-y-2 pl-5 text-sm text-ink-muted">
-          <li>
-            Run <code className="rounded bg-bg-muted px-1">pnpm generate:questions</code>
-          </li>
-          <li>
-            Run <code className="rounded bg-bg-muted px-1">pnpm seed</code>
-          </li>
-          <li>
-            Open <Link href="/home" className="text-accent underline">Home</Link>
-          </li>
-        </ol>
-        <div className="mt-6 rounded-xl border border-border bg-bg-muted p-4 text-sm text-ink-muted">
-          Demo emails after seeding: sam@turner.family · michelle@turner.family
-          <br />
-          Switch users from the header once signed into the local session.
-        </div>
-        <Link href="/home" className="btn btn-primary mt-6 w-full">
-          Enter family space
-        </Link>
+        <LoginForm initialError={errorMessage} />
+        <p className="mt-6 text-xs text-ink-subtle">
+          After signing in for the first time, an administrator must link your account
+          to the Turner Family with <code>pnpm setup:family</code>.
+        </p>
       </div>
     </div>
   );

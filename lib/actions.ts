@@ -9,14 +9,23 @@ import {
   scheduleReview,
   toggleBookmark,
   updateSettings,
-  switchCurrentUser,
 } from "@/lib/services/family";
 import { savePlaybookSnapshot } from "@/lib/services/playbook";
 import type { SaveAnswerInput, CreateSessionInput, SaveDecisionInput } from "@/lib/validation/schemas";
 import { aiService } from "@/lib/services/ai";
 import { updateStore, id, nowIso } from "@/lib/db/local-store";
+import { requireFamilyContext } from "@/lib/auth/family-context";
+import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
+
+async function requireIdentity() {
+  const ctx = await requireFamilyContext();
+  await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
+  return ctx;
+}
 
 export async function actionSaveAnswer(input: SaveAnswerInput) {
+  await requireIdentity();
+  // Phase 1: product data remains on the local store. Phase 3 migrates answers.
   await saveAnswer(input);
   revalidatePath("/home");
   revalidatePath("/questions");
@@ -26,6 +35,7 @@ export async function actionSaveAnswer(input: SaveAnswerInput) {
 }
 
 export async function actionCreateSession(input: CreateSessionInput) {
+  await requireIdentity();
   const sessionId = await createSession(input);
   revalidatePath("/discuss");
   revalidatePath("/home");
@@ -37,6 +47,7 @@ export async function actionAdvanceSession(
   action: "answered" | "skipped" | "pause" | "complete",
   note?: string,
 ) {
+  await requireIdentity();
   await advanceSession(sessionId, action, note);
   revalidatePath(`/discuss/${sessionId}`);
   revalidatePath("/home");
@@ -44,6 +55,7 @@ export async function actionAdvanceSession(
 }
 
 export async function actionSaveDecision(input: SaveDecisionInput) {
+  await requireIdentity();
   await saveDecision(input);
   revalidatePath("/decisions");
   revalidatePath("/playbook");
@@ -59,6 +71,7 @@ export async function actionStartCoolingOff(input: {
   reason: string;
   notes?: string | null;
 }) {
+  await requireIdentity();
   await startCoolingOff(input);
   revalidatePath("/home");
   revalidatePath("/dashboard");
@@ -71,6 +84,7 @@ export async function actionScheduleReview(input: {
   review_date: string;
   reason?: string;
 }) {
+  await requireIdentity();
   await scheduleReview(input);
   revalidatePath("/home");
   revalidatePath("/dashboard");
@@ -78,6 +92,7 @@ export async function actionScheduleReview(input: {
 }
 
 export async function actionToggleBookmark(questionId: string, memberId: string) {
+  await requireIdentity();
   await toggleBookmark(questionId, memberId);
   revalidatePath("/questions");
   return { ok: true as const };
@@ -90,25 +105,22 @@ export async function actionUpdateSettings(input: {
   babymoon_daily_questions?: number;
   include_perspective_history_in_playbook?: boolean;
 }) {
+  await requireIdentity();
   await updateSettings(input);
   revalidatePath("/settings");
   revalidatePath("/playbook");
   return { ok: true as const };
 }
 
-export async function actionSwitchUser(userId: string) {
-  await switchCurrentUser(userId);
-  revalidatePath("/");
-  return { ok: true as const };
-}
-
 export async function actionSavePlaybook(includeHistory: boolean) {
+  await requireIdentity();
   const playbook = await savePlaybookSnapshot(includeHistory);
   revalidatePath("/playbook");
   return { id: playbook.id };
 }
 
 export async function actionGenerateAiSection(sectionSlug: string, sectionTitle: string) {
+  await requireIdentity();
   const result = await aiService.generateSection({
     sectionSlug,
     sectionTitle,

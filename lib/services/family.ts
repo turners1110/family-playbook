@@ -92,17 +92,9 @@ export async function updateSettings(input: z.infer<typeof settingsSchema>) {
   });
 }
 
-export async function switchCurrentUser(userId: string) {
-  await updateStore((store) => {
-    if (!store.users.some((u) => u.id === userId)) {
-      throw new Error("User not found");
-    }
-    store.current_user_id = userId;
-    return store;
-  });
-}
-
 export async function getFamilyContext() {
+  // Deprecated for identity: use requireFamilyContext() from lib/auth/family-context.
+  // Kept for local product-data callers during Phase 1.
   const store = await readStore();
   const currentUser = store.users.find((u) => u.id === store.current_user_id)!;
   const currentMember = store.members.find((m) => m.user_id === store.current_user_id)!;
@@ -115,4 +107,10 @@ export async function getFamilyContext() {
     settings: store.settings,
     demoMode: store.demo_mode,
   };
+}
+
+/** @deprecated Fake identity switching is removed. */
+export async function switchCurrentUser(_userId?: string) {
+  void _userId;
+  throw new Error("Identity switching is disabled. Sign in with your own magic link.");
 }
