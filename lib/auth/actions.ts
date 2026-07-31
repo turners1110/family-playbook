@@ -55,9 +55,20 @@ export async function requestMagicLink(emailInput: string): Promise<MagicLinkRes
 
   // Intentionally do not reveal whether the email exists.
   if (error) {
-    // Still show the generic success copy for enumeration resistance,
-    // but log server-side for operators.
-    console.error("[auth] magic link request failed");
+    // Temporary diagnostic logging for production debugging.
+    // Do not return these details to the browser.
+    console.error("[auth] magic link request failed", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      name: error.name,
+      details: {
+        ...error,
+        message: error.message,
+        status: error.status,
+        code: error.code,
+      },
+    });
   }
 
   return {
