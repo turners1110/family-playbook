@@ -128,6 +128,7 @@ describe("magic link redirect URL", () => {
     expect(source).toMatch(/shouldCreateUser:\s*false/);
     expect(source).toMatch(/getMagicLinkRedirectTo/);
     expect(source).toMatch(/createRouteHandlerClient/);
+    expect(source).toMatch(/pendingCookiesForOtpResponse/);
     expect(source).toMatch(/applyPendingCookies/);
     expect(source).not.toMatch(/localhost:3000/);
     expect(source).not.toMatch(/VERCEL_URL/);
@@ -173,6 +174,136 @@ describe("PKCE cookie handoff", () => {
     expect(summarizeAuthCookies(cookies).authCookieNames).toEqual([]);
   });
 
+  it("successful OTP send writes the new verifier cookie with path /", async () => {
+    const {
+      applyPendingCookies,
+      pendingCookiesForOtpResponse,
+    } = await import("@/lib/supabase/route");
+    const { NextResponse } = await import("next/server");
+
+    const buffered = [
+      {
+        name: "sb-test-auth-token-code-verifier",
+        value: "new-verifier-from-success",
+        options: { path: "/auth", sameSite: "lax" as const },
+      },
+    ];
+
+    const toWrite = pendingCookiesForOtpResponse(buffered, null);
+    expect(toWrite).toHaveLength(1);
+    expect(toWrite[0]?.options?.path).toBe("/");
+    expect(toWrite[0]?.options).not.toHaveProperty("domain");
+
+    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
+    expect(response.cookies.get("sb-test-auth-token-code-verifier")?.value).toBe(
+      "new-verifier-from-success",
+    );
+  });
+
+  it("failed OTP send writes no new verifier cookie", async () => {
+    const { pendingCookiesForOtpResponse, applyPendingCookies } = await import(
+      "@/lib/supabase/route"
+    );
+    const { NextResponse } = await import("next/server");
+
+    const buffered = [
+      {
+        name: "sb-test-auth-token-code-verifier",
+        value: "verifier-from-failed-attempt",
+        options: { path: "/" as const },
+      },
+    ];
+
+    const toWrite = pendingCookiesForOtpResponse(buffered, {
+      message: "email rate limit exceeded",
+      code: "over_email_send_rate_limit",
+      status: 429,
+    });
+    expect(toWrite).toEqual([]);
+
+    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
+    expect(response.cookies.getAll()).toEqual([]);
+  });
+
+  it("rate-limit failure preserves the prior verifier already in the browser", async () => {
+    const { pendingCookiesForOtpResponse, applyPendingCookies } = await import(
+      "@/lib/supabase/route"
+    );
+    const { NextResponse } = await import("next/server");
+    const { hasPkceCodeVerifierCookie } = await import("@/lib/auth/pkce-cookies");
+
+    const priorBrowserCookies = [
+      {
+        name: "sb-test-auth-token-code-verifier",
+        value: "prior-successful-verifier",
+      },
+    ];
+    expect(hasPkceCodeVerifierCookie(priorBrowserCookies)).toBe(true);
+
+    const bufferedFromFailedOtp = [
+      {
+        name: "sb-test-auth-token-code-verifier",
+        value: "rate-limit-overwritten-verifier",
+      },
+    ];
+
+    const toWrite = pendingCookiesForOtpResponse(bufferedFromFailedOtp, {
+      message: "email rate limit exceeded",
+      status: 429,
+    });
+    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
+
+    expect(response.cookies.getAll().map((c) => c.name)).not.toContain(
+      "sb-test-auth-token-code-verifier",
+    );
+    expect(hasPkceCodeVerifierCookie(priorBrowserCookies)).toBe(true);
+  });
+
+  it("callback succeeds when code and verifier come from the same successful request", async () => {
+    const {
+      applyPendingCookies,
+      pendingCookiesForOtpResponse,
+    } = await import("@/lib/supabase/route");
+    const { NextResponse } = await import("next/server");
+    const { hasPkceCodeVerifierCookie } = await import("@/lib/auth/pkce-cookies");
+
+    const successBuffered = [
+      {
+        name: "sb-proj-auth-token-code-verifier",
+        value: "verifier-v1-matching-email-challenge",
+      },
+    ];
+    const successCookies = pendingCookiesForOtpResponse(successBuffered, null);
+    const magicLinkResponse = applyPendingCookies(
+      NextResponse.json({ ok: true }),
+      successCookies,
+    );
+    const verifierFromSuccess = magicLinkResponse.cookies.get(
+      "sb-proj-auth-token-code-verifier",
+    )?.value;
+    expect(verifierFromSuccess).toBe("verifier-v1-matching-email-challenge");
+
+    const rateLimited = pendingCookiesForOtpResponse(
+      [
+        {
+          name: "sb-proj-auth-token-code-verifier",
+          value: "verifier-v2-from-rate-limit",
+        },
+      ],
+      { message: "email rate limit exceeded", status: 429 },
+    );
+    expect(rateLimited).toEqual([]);
+
+    const callbackRequestCookies = [
+      { name: "sb-proj-auth-token-code-verifier", value: verifierFromSuccess! },
+    ];
+    expect(hasPkceCodeVerifierCookie(callbackRequestCookies)).toBe(true);
+    expect(callbackRequestCookies[0]?.value).toBe(
+      "verifier-v1-matching-email-challenge",
+    );
+    expect(callbackRequestCookies[0]?.value).not.toBe("verifier-v2-from-rate-limit");
+  });
+
   it("route handler client buffers Set-Cookie writes for the response", async () => {
     const { applyPendingCookies } = await import("@/lib/supabase/route");
     const { NextResponse } = await import("next/server");
@@ -186,6 +317,18 @@ describe("PKCE cookie handoff", () => {
     const response = applyPendingCookies(NextResponse.json({ ok: true }), pending);
     const names = response.cookies.getAll().map((c) => c.name);
     expect(names).toContain("sb-test-auth-token-code-verifier");
+  });
+
+  it("normalizeAuthCookieOptions forces path / and drops domain", async () => {
+    const { normalizeAuthCookieOptions } = await import("@/lib/supabase/route");
+    const normalized = normalizeAuthCookieOptions({
+      path: "/nested",
+      domain: "evil.example",
+      sameSite: "none",
+    });
+    expect(normalized?.path).toBe("/");
+    expect(normalized).not.toHaveProperty("domain");
+    expect(normalized?.sameSite).toBe("none");
   });
 
   it("callback reads request cookies before exchangeCodeForSession", async () => {

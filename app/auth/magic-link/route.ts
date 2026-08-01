@@ -5,6 +5,8 @@ import { summarizeAuthCookies } from "@/lib/auth/pkce-cookies";
 import {
   applyPendingCookies,
   createRouteHandlerClient,
+  pendingCookieNames,
+  pendingCookiesForOtpResponse,
   type PendingCookie,
 } from "@/lib/supabase/route";
 
@@ -12,10 +14,17 @@ import type { MagicLinkResult } from "@/lib/auth/magic-link-types";
 
 const emailSchema = z.string().trim().email();
 
+const GENERIC_SUCCESS: MagicLinkResult = {
+  ok: true,
+  message:
+    "If that email can receive mail, a sign-in link will arrive shortly. Check your inbox and spam folder.",
+};
+
 /**
  * Initiates PKCE magic-link sign-in.
- * Uses a Route Handler so the code-verifier cookie is written onto this
- * HTTP response via Set-Cookie (reliable on Vercel).
+ * Buffers cookies from signInWithOtp and only writes the PKCE verifier to the
+ * response when OTP succeeds — failed/rate-limited requests must not overwrite
+ * a verifier that matches an earlier successfully sent email.
  */
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -84,6 +93,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const priorVerifier = summarizeAuthCookies(request.cookies.getAll());
   const email = parsed.data.toLowerCase();
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -93,28 +103,21 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  const successBody = {
-    ok: true,
-    message:
-      "If that email can receive mail, a sign-in link will arrive shortly. Check your inbox and spam folder.",
-  } satisfies MagicLinkResult;
-
+  // Buffer only — never flush verifier cookies on OTP failure (incl. rate limit).
+  const cookiesToWrite = pendingCookiesForOtpResponse(pendingCookies, error);
   const response = applyPendingCookies(
-    NextResponse.json(successBody),
-    pendingCookies,
+    NextResponse.json(GENERIC_SUCCESS),
+    cookiesToWrite,
   );
-
-  const writtenNames = pendingCookies.map((c) => c.name);
-  const cookieSummary = summarizeAuthCookies([
-    ...request.cookies.getAll(),
-    ...pendingCookies.map(({ name }) => ({ name })),
-  ]);
 
   console.info("[auth] magic link otp cookie state", {
     hasCode: false,
-    hasPkceCodeVerifier: cookieSummary.hasPkceCodeVerifier,
-    authCookieNames: cookieSummary.authCookieNames,
-    writtenCookieNames: writtenNames.filter((n) => n.startsWith("sb-")).sort(),
+    otpSucceeded: !error,
+    appliedPkceCookies: cookiesToWrite.length > 0,
+    priorHadPkceCodeVerifier: priorVerifier.hasPkceCodeVerifier,
+    priorAuthCookieNames: priorVerifier.authCookieNames,
+    bufferedCookieNames: pendingCookieNames(pendingCookies),
+    writtenCookieNames: pendingCookieNames(cookiesToWrite),
     emailRedirectToHost: (() => {
       try {
         return new URL(emailRedirectTo).host;
@@ -129,15 +132,16 @@ export async function POST(request: NextRequest) {
       message: error.message,
       status: error.status,
       code: error.code,
+      discardedBufferedCookieNames: pendingCookieNames(pendingCookies),
     });
   }
 
-  if (!cookieSummary.hasPkceCodeVerifier && !error) {
+  if (!error && cookiesToWrite.every((c) => !c.name.includes("-code-verifier"))) {
     console.error(
       "[auth] PKCE code-verifier cookie was not written to the magic-link response",
       {
-        authCookieNames: cookieSummary.authCookieNames,
-        writtenCookieNames: writtenNames.filter((n) => n.startsWith("sb-")).sort(),
+        writtenCookieNames: pendingCookieNames(cookiesToWrite),
+        bufferedCookieNames: pendingCookieNames(pendingCookies),
       },
     );
   }
