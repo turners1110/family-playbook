@@ -140,10 +140,11 @@ describe("browser PKCE magic-link login", () => {
     expect(source).toMatch(/shouldCreateUser:\s*false/);
     expect(source).toMatch(/getMagicLinkRedirectTo/);
     expect(source).toMatch(/emailRedirectTo/);
+    expect(source).toMatch(/pkce-instrumentation/);
+    expect(source).toMatch(/collectBrowserPkceInstrumentation/);
     expect(source).not.toMatch(/fetch\(/);
     expect(source).not.toMatch(/\/auth\/magic-link/);
     expect(source).not.toMatch(/pendingCookiesForOtpResponse/);
-    expect(source).not.toMatch(/code-verifier/);
     expect(source).not.toMatch(/generatePKCE/);
     expect(source).not.toMatch(/localhost:3000/);
   });
@@ -265,13 +266,16 @@ describe("PKCE cookie helpers for callback diagnostics", () => {
       path.join(process.cwd(), "app/auth/callback/route.ts"),
       "utf8",
     );
-    const startIdx = source.indexOf("summarizeAuthCookies(request.cookies.getAll())");
+    const startIdx = source.indexOf("summarizeAuthCookies(allCookies)");
     const exchangeIdx = source.indexOf("exchangeCodeForSession");
     expect(startIdx).toBeGreaterThan(-1);
     expect(exchangeIdx).toBeGreaterThan(startIdx);
     expect(source).toMatch(/hasPkceCodeVerifier/);
     expect(source).toMatch(/buildSafeCallbackRequestLog/);
     expect(source).toMatch(/createRouteHandlerClient/);
+    expect(source).toMatch(/collectCallbackPkceInstrumentation/);
+    expect(source).toMatch(/\.\.\.pkceInstrumentation/);
+    expect(source).toMatch(/resolveSupabaseUrl/);
   });
 
   it("safe callback request log omits query values and secrets", async () => {

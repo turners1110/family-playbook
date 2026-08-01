@@ -3,7 +3,9 @@ import {
   buildSafeCallbackRequestLog,
   redactRedirectTargetForLog,
 } from "@/lib/auth/callback-log";
+import { collectCallbackPkceInstrumentation } from "@/lib/auth/pkce-instrumentation";
 import { summarizeAuthCookies } from "@/lib/auth/pkce-cookies";
+import { resolveSupabaseUrl } from "@/lib/supabase/env";
 import {
   applyPendingCookies,
   createRouteHandlerClient,
@@ -28,19 +30,25 @@ export async function GET(request: NextRequest) {
   const { origin } = url;
 
   // Cookie name summary only — no values — before any auth exchange.
-  const incomingCookies = summarizeAuthCookies(request.cookies.getAll());
+  const allCookies = request.cookies.getAll();
+  const incomingCookies = summarizeAuthCookies(allCookies);
+  const pkceInstrumentation = await collectCallbackPkceInstrumentation({
+    cookies: allCookies,
+    supabaseUrl: resolveSupabaseUrl(),
+  });
   const requestLog = buildSafeCallbackRequestLog({
     url,
     method: request.method,
     headers: request.headers,
     hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
-    hasAnyCookies: request.cookies.getAll().length > 0,
+    hasAnyCookies: allCookies.length > 0,
     authCookieNames: incomingCookies.authCookieNames,
   });
 
   // Log the incoming request before ANY auth logic executes.
   logAuthCallback("info", "incoming_request", {
     ...requestLog,
+    ...pkceInstrumentation,
     reachedExchangeCodeForSession: false,
   });
 

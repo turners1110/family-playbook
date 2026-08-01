@@ -68,6 +68,29 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
               },
             });
 
+            // Instrumentation only — hashes / counts, never raw secrets.
+            try {
+              const { collectBrowserPkceInstrumentation } = await import(
+                "@/lib/auth/pkce-instrumentation"
+              );
+              const { resolveBrowserSupabaseUrl } = await import(
+                "@/lib/supabase/browser-env"
+              );
+              console.info(
+                "[auth] pkce instrumentation",
+                await collectBrowserPkceInstrumentation(
+                  resolveBrowserSupabaseUrl(),
+                ),
+              );
+            } catch (instrumentationError) {
+              console.error("[auth] pkce instrumentation failed", {
+                message:
+                  instrumentationError instanceof Error
+                    ? instrumentationError.message
+                    : String(instrumentationError),
+              });
+            }
+
             // Intentionally do not reveal whether the email exists or rate limits.
             if (otpError) {
               console.error("[auth] browser magic link request failed", {
