@@ -15,9 +15,9 @@ pnpm seed
 Copy `.env.example` to `.env.local` and set:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (preferred) **or** `NEXT_PUBLIC_SUPABASE_ANON_KEY` (legacy fallback)
 - `SUPABASE_SERVICE_ROLE_KEY` (setup/seed scripts only — never expose to the browser)
-- `NEXT_PUBLIC_APP_URL` (e.g. `http://localhost:3000`)
+- `NEXT_PUBLIC_APP_URL` (e.g. `http://localhost:3000` locally; your deployed URL in Preview/Production)
 - `TURNER_SAM_EMAIL` / `TURNER_MICHELLE_EMAIL` (for `pnpm setup:family` only)
 
 ### 2. Apply migrations

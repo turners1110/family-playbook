@@ -1,3 +1,8 @@
+import {
+  SupabaseConfigError,
+  logSupabaseConfigError,
+} from "@/lib/supabase/env";
+
 /**
  * Resolves the public app origin used for auth redirects.
  *
@@ -10,22 +15,39 @@ export function getAppOrigin(env: NodeJS.ProcessEnv = process.env): string {
   const isDevelopment = env.NODE_ENV === "development";
 
   if (configured) {
-    const origin = configured.replace(/\/$/, "");
+    let origin: string;
+    try {
+      origin = new URL(configured).origin;
+    } catch {
+      const error = new SupabaseConfigError(
+        "invalid_app_url",
+        `NEXT_PUBLIC_APP_URL is not a valid URL: ${configured}`,
+      );
+      logSupabaseConfigError(error);
+      throw error;
+    }
+
     if (!isDevelopment && isLocalhostOrigin(origin)) {
-      throw new Error(
+      const error = new SupabaseConfigError(
+        "invalid_app_url",
         "NEXT_PUBLIC_APP_URL must not point to localhost outside development. Set it to your deployed app URL (e.g. https://your-app.vercel.app).",
       );
+      logSupabaseConfigError(error);
+      throw error;
     }
-    return origin;
+    return origin.replace(/\/$/, "");
   }
 
   if (isDevelopment) {
     return "http://localhost:3000";
   }
 
-  throw new Error(
+  const error = new SupabaseConfigError(
+    "invalid_app_url",
     "NEXT_PUBLIC_APP_URL is required. Set it to your deployed app origin (e.g. https://your-app.vercel.app).",
   );
+  logSupabaseConfigError(error);
+  throw error;
 }
 
 /** Magic-link landing path: ${NEXT_PUBLIC_APP_URL}/auth/callback */

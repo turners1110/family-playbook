@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { promises as fs } from "fs";
 import path from "path";
 import { z } from "zod";
@@ -70,6 +70,10 @@ describe("magic link email validation", () => {
 });
 
 describe("magic link redirect URL", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("builds emailRedirectTo from NEXT_PUBLIC_APP_URL", () => {
     const env = {
       NODE_ENV: "production",
@@ -83,6 +87,8 @@ describe("magic link redirect URL", () => {
   });
 
   it("never generates localhost redirect URLs in production", () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
     expect(() =>
       getMagicLinkRedirectTo({
         NODE_ENV: "production",
@@ -102,6 +108,8 @@ describe("magic link redirect URL", () => {
         NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3000",
       } as NodeJS.ProcessEnv),
     ).toThrow(/must not point to localhost/);
+
+    expect(spy).toHaveBeenCalled();
   });
 
   it("still works with localhost in development", () => {
@@ -173,13 +181,22 @@ describe("browser PKCE magic-link login", () => {
     );
 
     for (const source of [browser, route, server]) {
-      expect(source).toMatch(/NEXT_PUBLIC_SUPABASE_URL/);
-      expect(source).toMatch(/NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+      expect(source).toMatch(/requireSupabasePublicConfig/);
+      expect(source).toMatch(/@\/lib\/supabase\/env/);
       expect(source).not.toMatch(/storageKey\s*:/);
       expect(source).not.toMatch(/flowType\s*:/);
       expect(source).not.toMatch(/generatePKCE/);
       expect(source).not.toMatch(/cookieOptions\s*:/);
+      expect(source).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
     }
+
+    const envHelper = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/env.ts"),
+      "utf8",
+    );
+    expect(envHelper).toMatch(/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+    expect(envHelper).toMatch(/NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+    expect(envHelper).toMatch(/resolveSupabasePublicKey/);
 
     expect(browser).toMatch(/createBrowserClient/);
     expect(route).toMatch(/createServerClient/);

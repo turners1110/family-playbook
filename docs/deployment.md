@@ -38,6 +38,7 @@ pnpm start
 
 ## Notes
 
+- Prefer `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`; `NEXT_PUBLIC_SUPABASE_ANON_KEY` is a legacy fallback
 - `SUPABASE_SERVICE_ROLE_KEY` is for setup/seed only
 - Phase 1 still uses `data/local-store.json` for product discussion data
 - Do not enable public signup for production; create invited users only

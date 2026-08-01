@@ -1,5 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  hasSupabasePublicConfig,
+  requireSupabasePublicConfig,
+} from "@/lib/supabase/env";
 
 const PUBLIC_PATHS = ["/login", "/auth/callback"];
 
@@ -39,10 +43,13 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!url || !key) {
+  if (!hasSupabasePublicConfig()) {
+    // requireSupabasePublicConfig logs missing_url vs missing_public_key.
+    try {
+      requireSupabasePublicConfig();
+    } catch {
+      /* already logged */
+    }
     if (isProtectedPath(pathname)) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/login";
@@ -51,6 +58,8 @@ export async function updateSession(request: NextRequest) {
     }
     return supabaseResponse;
   }
+
+  const { url, key } = requireSupabasePublicConfig();
 
   const supabase = createServerClient(url, key, {
     cookies: {

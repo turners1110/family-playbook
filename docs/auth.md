@@ -10,12 +10,20 @@ reads/writes `data/local-store.json` until later migration phases.
 | Variable | Used by | Notes |
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Public |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + server | Public anon key; RLS enforced |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Browser + server | Preferred public key (newer Supabase projects) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + server | Legacy public key fallback; used only if publishable key is unset |
 | `SUPABASE_SERVICE_ROLE_KEY` | `pnpm setup:family` only | Never ship to browser or ordinary app request paths |
 | `NEXT_PUBLIC_APP_URL` | Magic-link `emailRedirectTo` origin | Required on Vercel Preview/Production (deployed URL). Local only: `http://localhost:3000`. Never set localhost in Preview/Production. |
 | `TURNER_SAM_EMAIL` | setup script | Not committed with real values |
 | `TURNER_MICHELLE_EMAIL` | setup script | Not committed with real values |
 | `TURNER_FAMILY_NAME` | setup script | Optional, default `Turner Family` |
+
+Public key resolution order (see `lib/supabase/env.ts`):
+
+1. `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Server logs distinguish missing URL, missing public key, and invalid `NEXT_PUBLIC_APP_URL`. The browser always shows a generic configuration message.
 
 ## Migrations
 
@@ -28,7 +36,8 @@ reads/writes `data/local-store.json` until later migration phases.
 |---|---|
 | `proxy.ts` | Session refresh + coarse route redirects |
 | `lib/auth/family-context.ts` | `requireFamilyContext()` — authoritative identity |
-| `lib/auth/actions.ts` | Magic link + logout |
+| `lib/auth/actions.ts` | Logout + authenticated action helper |
+| `lib/supabase/env.ts` | Shared public key/URL resolution (publishable → anon) |
 | `lib/auth/local-bridge.ts` | Maps auth email → local store actor for Phase 1 product data |
 | `scripts/setup-family.ts` | Idempotent family linking (admin) |
 

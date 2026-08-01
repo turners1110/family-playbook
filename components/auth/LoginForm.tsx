@@ -6,12 +6,13 @@ import {
   createClient,
   hasSupabaseBrowserConfig,
 } from "@/lib/supabase/client";
+import {
+  SUPABASE_CONFIG_USER_MESSAGE,
+  requireSupabasePublicConfig,
+} from "@/lib/supabase/env";
 
 const GENERIC_SUCCESS =
   "If that email can receive mail, a sign-in link will arrive shortly. Check your inbox and spam folder.";
-
-const CONFIG_ERROR =
-  "Sign-in is not configured yet. Ask an administrator to set Supabase environment variables.";
 
 export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [email, setEmail] = useState("");
@@ -29,7 +30,13 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         startTransition(async () => {
           try {
             if (!hasSupabaseBrowserConfig()) {
-              setError(CONFIG_ERROR);
+              // Logs missing_url vs missing_public_key for operators.
+              try {
+                requireSupabasePublicConfig();
+              } catch {
+                /* already logged */
+              }
+              setError(SUPABASE_CONFIG_USER_MESSAGE);
               return;
             }
 
@@ -37,7 +44,8 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
             try {
               emailRedirectTo = getMagicLinkRedirectTo();
             } catch {
-              setError(CONFIG_ERROR);
+              // getAppOrigin already logged invalid_app_url.
+              setError(SUPABASE_CONFIG_USER_MESSAGE);
               return;
             }
 
