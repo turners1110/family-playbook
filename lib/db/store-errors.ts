@@ -46,7 +46,8 @@ export class RemoteStoreError extends Error {
     | "version_conflict"
     | "not_found"
     | "validation"
-    | "config";
+    | "config"
+    | "setup";
 
   constructor(
     code: RemoteStoreError["code"],
@@ -67,6 +68,8 @@ export const REMOTE_STORE_USER_MESSAGES = {
     "Remote family store is not set up yet. Ask an administrator to run the upload script.",
   validation: "Saved data failed validation. Download a backup and contact support.",
   config: "Remote storage is not configured. Ask an administrator for help.",
+  setup:
+    "Family storage is not set up yet. Ask an administrator to run family setup and upload the remote store.",
 } as const;
 
 export function publicRemoteStoreMessage(error: unknown): string {
@@ -79,10 +82,57 @@ export function publicRemoteStoreMessage(error: unknown): string {
   return REMOTE_STORE_USER_MESSAGES.unavailable;
 }
 
-export function logStoreError(scope: string, error: unknown) {
+/** Safe structured fields from Supabase/Postgrest-like errors (never secrets). */
+export function serializeStoreError(error: unknown): {
+  name: string;
+  message: string;
+  code?: string;
+  details?: string;
+  hint?: string;
+  status?: number | string;
+} {
+  if (error instanceof RemoteStoreError || error instanceof StoreValidationError) {
+    return {
+      name: error.name,
+      message: error.message,
+      code: error instanceof RemoteStoreError ? error.code : undefined,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    };
+  }
+
+  if (error && typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    return {
+      name: typeof record.name === "string" ? record.name : "PostgrestError",
+      message:
+        typeof record.message === "string"
+          ? record.message
+          : "Unknown store error",
+      code: typeof record.code === "string" ? record.code : undefined,
+      details: typeof record.details === "string" ? record.details : undefined,
+      hint: typeof record.hint === "string" ? record.hint : undefined,
+      status:
+        typeof record.status === "number" || typeof record.status === "string"
+          ? record.status
+          : undefined,
+    };
+  }
+
+  return {
+    name: "unknown",
+    message: String(error),
+  };
+}
+
+export function logStoreError(scope: string, error: unknown, extra?: Record<string, unknown>) {
   console.error(`[store] ${scope}`, {
-    name: error instanceof Error ? error.name : "unknown",
-    message: error instanceof Error ? error.message : String(error),
-    code: error instanceof RemoteStoreError ? error.code : undefined,
+    ...serializeStoreError(error),
+    ...extra,
   });
 }

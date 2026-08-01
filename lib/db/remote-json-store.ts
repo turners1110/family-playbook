@@ -5,14 +5,16 @@
 import type { AppStore } from "@/lib/types/models";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import {
+  getTurnerFamilyNameDiagnostics,
+  resolveTurnerFamilyName,
+} from "@/lib/db/family-name";
+import {
   assertValidAppStore,
   logStoreError,
   RemoteStoreError,
 } from "@/lib/db/store-errors";
 
 const MAX_UPDATE_RETRIES = 3;
-const FAMILY_NAME = () =>
-  (process.env.TURNER_FAMILY_NAME?.trim() || "Turner Family");
 
 type StoreRow = {
   family_id: string;
@@ -29,31 +31,74 @@ function asVersion(value: number | string): number {
   return n;
 }
 
-async function resolveTurnerFamilyId(): Promise<string> {
-  try {
-    const admin = createSupabaseAdminClient();
-    const { data, error } = await admin
-      .from("families")
-      .select("id,name")
-      .eq("name", FAMILY_NAME())
-      .maybeSingle();
+/**
+ * Exact-name lookup of the Turner Family row.
+ * Exported for unit tests with an injected admin client.
+ */
+export async function resolveTurnerFamilyId(
+  adminClient?: ReturnType<typeof createSupabaseAdminClient>,
+): Promise<string> {
+  const diagnostics = getTurnerFamilyNameDiagnostics();
+  const familyName = resolveTurnerFamilyName();
 
-    if (error) {
-      logStoreError("resolve_family", error);
-      throw new RemoteStoreError("unavailable", "Could not resolve family.");
-    }
-    if (!data?.id) {
-      throw new RemoteStoreError(
-        "not_found",
-        "Turner Family record not found. Run pnpm setup:family first.",
-      );
-    }
-    return data.id as string;
+  let admin;
+  try {
+    admin = adminClient ?? createSupabaseAdminClient();
   } catch (error) {
-    if (error instanceof RemoteStoreError) throw error;
-    logStoreError("resolve_family", error);
-    throw new RemoteStoreError("config", "Remote store admin client is not configured.");
+    logStoreError("resolve_family", error, diagnostics);
+    throw new RemoteStoreError(
+      "config",
+      "Remote store admin client is not configured.",
+    );
   }
+
+  const { data, error } = await admin
+    .from("families")
+    .select("id,name")
+    .eq("name", familyName)
+    .limit(1);
+
+  if (error) {
+    logStoreError("resolve_family", error, diagnostics);
+    throw new RemoteStoreError("unavailable", "Could not resolve family.");
+  }
+
+  const row = Array.isArray(data) ? data[0] : null;
+
+  if (!row?.id) {
+    let familyRowCount: number | null = null;
+    try {
+      const { count, error: countError } = await admin
+        .from("families")
+        .select("id", { count: "exact", head: true });
+      if (countError) {
+        logStoreError("family_count", countError, diagnostics);
+      } else {
+        familyRowCount = count ?? 0;
+      }
+    } catch (countError) {
+      logStoreError("family_count", countError, diagnostics);
+    }
+
+    logStoreError(
+      "family_not_found",
+      new RemoteStoreError(
+        "setup",
+        `No family row matched name "${familyName}". Run pnpm setup:family.`,
+      ),
+      {
+        ...diagnostics,
+        familyRowCount,
+      },
+    );
+
+    throw new RemoteStoreError(
+      "setup",
+      "Family storage is not set up yet. Run pnpm setup:family, then pnpm upload:remote-store.",
+    );
+  }
+
+  return row.id as string;
 }
 
 async function readRow(familyId: string): Promise<StoreRow> {
@@ -231,7 +276,7 @@ export type RemoteStoreHealth = {
 };
 
 export async function getRemoteStoreHealth(): Promise<RemoteStoreHealth> {
-  const familyName = FAMILY_NAME();
+  const familyName = resolveTurnerFamilyName();
   try {
     const familyId = await resolveTurnerFamilyId();
     const admin = createSupabaseAdminClient();

@@ -16,6 +16,7 @@ import { loadEnvConfig } from "@next/env";
 loadEnvConfig(process.cwd());
 
 import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabase/admin";
+import { resolveTurnerFamilyName } from "@/lib/db/family-name";
 
 async function findAuthUserByEmail(email: string) {
   const supabase = createSupabaseAdminClient();
@@ -59,7 +60,7 @@ async function main() {
 
   const samEmail = process.env.TURNER_SAM_EMAIL?.trim();
   const michelleEmail = process.env.TURNER_MICHELLE_EMAIL?.trim();
-  const familyName = process.env.TURNER_FAMILY_NAME?.trim() || "Turner Family";
+  const familyName = resolveTurnerFamilyName();
 
   if (!samEmail || !michelleEmail) {
     throw new Error("Set TURNER_SAM_EMAIL and TURNER_MICHELLE_EMAIL.");

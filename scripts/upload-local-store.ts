@@ -17,13 +17,14 @@ loadEnvConfig(process.cwd());
 
 import { createSupabaseAdminClient, hasSupabaseAdminConfig } from "@/lib/supabase/admin";
 import { assertValidAppStore } from "@/lib/db/store-errors";
+import { resolveTurnerFamilyName } from "@/lib/db/family-name";
 
 async function main() {
   if (!hasSupabaseAdminConfig()) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
   }
 
-  const familyName = process.env.TURNER_FAMILY_NAME?.trim() || "Turner Family";
+  const familyName = resolveTurnerFamilyName();
   const storePath = path.join(process.cwd(), "data", "local-store.json");
   const raw = await fs.readFile(storePath, "utf8");
   const parsed = JSON.parse(raw) as unknown;
