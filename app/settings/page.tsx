@@ -18,6 +18,9 @@ export default async function SettingsPage() {
       subtitle="Family preferences, privacy controls, and export."
       actions={
         <div className="flex flex-wrap gap-2">
+          <Link href="/settings/content-review" className="btn btn-ghost">
+            AI Content Review
+          </Link>
           <Link href="/settings/storage-health" className="btn btn-ghost">
             Storage health
           </Link>
@@ -58,6 +61,20 @@ export default async function SettingsPage() {
           <SettingsForm settings={store.settings} />
         </section>
       </div>
+
+      <section className="surface mt-5 p-5">
+        <h2 className="font-display text-xl text-ink">AI Content Review</h2>
+        <p className="mt-2 text-sm text-ink-muted">
+          Generate a package for ChatGPT or Claude to review questions, discussion
+          coverage, and the Before Baby checklist. Family answers are excluded by
+          default.
+        </p>
+        <div className="mt-4">
+          <Link href="/settings/content-review" className="btn btn-primary">
+            Open AI Content Review
+          </Link>
+        </div>
+      </section>
 
       <section className="surface mt-5 p-5">
         <h2 className="font-display text-xl text-ink">Backup</h2>
