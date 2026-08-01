@@ -11,6 +11,7 @@ import {
   buildQuestionStatusIndex,
   getQuestionAnswerStatus,
 } from "@/lib/services/question-status";
+import { helperForQuestion } from "@/lib/content/helper-templates";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,7 @@ export default async function BeforeBirthEssentialsPage() {
               {primary.map((q) => {
                 const status =
                   statusIndex.get(q.id) ?? getQuestionAnswerStatus(q.id, store);
+                const helpers = helperForQuestion(q);
                 return (
                   <li key={q.id}>
                     <Link
@@ -67,6 +69,9 @@ export default async function BeforeBirthEssentialsPage() {
                       className="block rounded-xl border border-border px-3 py-3 hover:border-accent"
                     >
                       <div className="font-medium text-ink">{q.short_title}</div>
+                      <p className="mt-1 text-sm text-ink-muted line-clamp-2">
+                        {helpers.why_it_matters}
+                      </p>
                       <div className="mt-1 text-xs text-ink-subtle">
                         {status.label}
                       </div>

@@ -21,6 +21,12 @@ export default async function SettingsPage() {
           <Link href="/before-birth" className="btn btn-ghost">
             Before Birth Essentials
           </Link>
+          <Link href="/after-birth" className="btn btn-ghost">
+            First Month
+          </Link>
+          <Link href="/before-baby/assign" className="btn btn-ghost">
+            Assign owners
+          </Link>
           <Link href="/settings/content-upgrade" className="btn btn-ghost">
             Content upgrade
           </Link>

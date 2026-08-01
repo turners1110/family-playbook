@@ -91,6 +91,22 @@ export function ContentUpgradePanel({
             <dt className="text-ink-subtle">Ownership suggestions</dt>
             <dd>{preview.summary.ownership_suggestions}</dd>
           </div>
+          <div>
+            <dt className="text-ink-subtle">Dependencies</dt>
+            <dd>{preview.summary.dependencies_added}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-subtle">Primary stages</dt>
+            <dd>{preview.summary.primary_stages_set}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-subtle">Helper updates</dt>
+            <dd>{preview.summary.helper_updates}</dd>
+          </div>
+          <div>
+            <dt className="text-ink-subtle">Timing windows</dt>
+            <dd>{preview.summary.timing_updates}</dd>
+          </div>
         </dl>
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" className="btn btn-secondary" disabled={pending} onClick={load}>
@@ -136,7 +152,9 @@ export function ContentUpgradePanel({
               />
               <span className="min-w-0 flex-1">
                 <span className="font-medium text-ink">
+                  {change.section ? `${change.section} · ` : ""}
                   {change.change_type} · {change.entity_type}
+                  {change.safe ? "" : " · needs approval"}
                 </span>
                 <span className="mt-1 block text-ink-muted">{change.reason}</span>
                 <span className="mt-2 block text-xs text-ink-subtle">
@@ -147,6 +165,7 @@ export function ContentUpgradePanel({
                 </span>
                 <span className="mt-1 block text-xs text-accent">
                   Preserved: {change.data_preserved.join(", ")}
+                  {change.user_data_exists ? " · user data present" : ""}
                 </span>
               </span>
             </label>

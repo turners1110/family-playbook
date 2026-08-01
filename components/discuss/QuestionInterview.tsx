@@ -13,6 +13,7 @@ import type { Answer, Question, FamilyMember } from "@/lib/types/models";
 import { DECISION_STATUSES, CONFIDENCE_LABELS, QUICK_DECISION_OPTIONS } from "@/lib/constants/enums";
 import { StatusBadge, PriorityBadge, ConfidenceBadge } from "@/components/shared/ui";
 import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
+import { helperForQuestion } from "@/lib/content/helper-templates";
 
 export function QuestionInterview({
   sessionId,
@@ -79,6 +80,7 @@ export function QuestionInterview({
     () => Math.round(((index + 1) / Math.max(total, 1)) * 100),
     [index, total],
   );
+  const helpers = useMemo(() => helperForQuestion(question), [question]);
 
   function newMutationId() {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -246,7 +248,7 @@ export function QuestionInterview({
         <h2 className="font-display text-2xl leading-snug text-ink sm:text-3xl">
           {question.text}
         </h2>
-        <p className="mt-3 text-ink-muted">{question.why_it_matters}</p>
+        <p className="mt-3 text-ink-muted">{helpers.why_it_matters}</p>
         <div className="mt-4 grid gap-2 text-sm text-ink-subtle sm:grid-cols-2">
           <div>
             Life stages:{" "}
@@ -258,17 +260,17 @@ export function QuestionInterview({
         </div>
       </div>
 
-      {(question.discussion_guidance ||
+      {(helpers.discussion_guidance ||
         question.evidence_summary ||
         question.practical_tip ||
-        question.follow_up_prompts.length > 0) && (
+        helpers.follow_up_prompts.length > 0) && (
         <div className="grid gap-3 md:grid-cols-2">
           <div className="surface p-4">
             <h3 className="font-display text-lg">Discussion guidance</h3>
-            <p className="mt-2 text-sm text-ink-muted">{question.discussion_guidance}</p>
-            {question.follow_up_prompts.length > 0 && (
+            <p className="mt-2 text-sm text-ink-muted">{helpers.discussion_guidance}</p>
+            {helpers.follow_up_prompts.length > 0 && (
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-muted">
-                {question.follow_up_prompts.map((p) => (
+                {helpers.follow_up_prompts.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
               </ul>

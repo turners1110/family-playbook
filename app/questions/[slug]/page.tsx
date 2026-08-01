@@ -19,6 +19,7 @@ import {
   RESEARCH_EVIDENCE_RATING_LABELS,
 } from "@/lib/research/types";
 import { requireFamilyContext } from "@/lib/auth/family-context";
+import { helperForQuestion } from "@/lib/content/helper-templates";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function QuestionDetailPage({
   const store = await readStore();
   const question = store.questions.find((q) => q.slug === slug);
   if (!question) notFound();
+  const helpers = helperForQuestion(question);
 
   const answers = store.answers.filter((a) => a.question_id === question.id);
   const status = getQuestionAnswerStatus(question.id, store);
@@ -123,19 +125,25 @@ export default async function QuestionDetailPage({
           )}
         </div>
         <h2 className="font-display text-3xl leading-snug">{question.text}</h2>
-        <p className="mt-3 text-ink-muted">{question.why_it_matters}</p>
+        <p className="mt-3 text-ink-muted">{helpers.why_it_matters}</p>
         <p className="mt-3 text-sm text-ink-muted">
           <span className="font-semibold">Discussion guidance:</span>{" "}
-          {question.discussion_guidance}
+          {helpers.discussion_guidance}
         </p>
-        {question.follow_up_prompts.length > 0 && (
+        {helpers.follow_up_prompts.length > 0 && (
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-muted">
-            {question.follow_up_prompts.map((p) => (
+            {helpers.follow_up_prompts.map((p) => (
               <li key={p}>{p}</li>
             ))}
           </ul>
         )}
         <div className="mt-4 grid gap-2 text-sm text-ink-subtle sm:grid-cols-2">
+          <div>
+            Primary stage:{" "}
+            {question.primary_discussion_stage
+              ? LIFE_STAGE_LABELS[question.primary_discussion_stage]
+              : "Not set"}
+          </div>
           <div>
             Life stages:{" "}
             {question.life_stages.map((s) => LIFE_STAGE_LABELS[s]).join(", ")}

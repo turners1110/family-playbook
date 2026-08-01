@@ -35,6 +35,7 @@ import {
 import { BEFORE_BABY_TASK_TIMING } from "@/lib/checklists/default-timing";
 import { BEFORE_BABY_TEMPLATE } from "@/lib/checklists/templates/before-baby";
 import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
+import { helperForQuestion } from "@/lib/content/helper-templates";
 
 function countBy<T>(items: T[], keyFn: (item: T) => string): Record<string, number> {
   const out: Record<string, number> = {};
@@ -111,13 +112,17 @@ function exportQuestion(
     mode.includes("open") ||
     opts.length === 0;
 
+  const helpers = helperForQuestion(q);
+
   return {
     id: q.id,
     slug: q.slug,
     title: q.short_title,
     full_question_text: q.text,
-    helper_text: q.why_it_matters,
-    discussion_guidance: q.discussion_guidance,
+    helper_text: helpers.why_it_matters,
+    discussion_guidance: helpers.discussion_guidance,
+    follow_up_prompts_resolved: helpers.follow_up_prompts,
+    helper_replaced: helpers.replaced,
     category: q.categories[0] ?? null,
     categories: q.categories,
     subcategory: q.subcategories[0] ?? null,
