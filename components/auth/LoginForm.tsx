@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { getMagicLinkRedirectTo } from "@/lib/auth/app-url";
+import { getMagicLinkRedirectTo, getAppOriginDiagnostics } from "@/lib/auth/app-url";
 import {
   createClient,
   getBrowserSupabasePublicEnvDiagnostics,
@@ -19,11 +19,13 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    // Temporary Preview diagnostic — booleans only, never values.
-    console.info(
-      "[auth] supabase public env diagnostic",
-      getBrowserSupabasePublicEnvDiagnostics(),
-    );
+    // Temporary Preview diagnostic — hosts only, never secrets.
+    console.info("[auth] supabase public env diagnostic", {
+      ...getBrowserSupabasePublicEnvDiagnostics(),
+      ...getAppOriginDiagnostics({
+        pageOrigin: window.location.origin,
+      }),
+    });
   }, []);
 
   return (
@@ -35,7 +37,11 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         setError(null);
         startTransition(async () => {
           try {
-            const diagnostics = getBrowserSupabasePublicEnvDiagnostics();
+            const pageOrigin = window.location.origin;
+            const diagnostics = {
+              ...getBrowserSupabasePublicEnvDiagnostics(),
+              ...getAppOriginDiagnostics({ pageOrigin }),
+            };
             console.info("[auth] supabase public env diagnostic", diagnostics);
 
             if (!hasSupabaseBrowserConfig()) {
@@ -49,7 +55,7 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
 
             let emailRedirectTo: string;
             try {
-              emailRedirectTo = getMagicLinkRedirectTo();
+              emailRedirectTo = getMagicLinkRedirectTo({ pageOrigin });
             } catch {
               console.error("[auth] sign-in blocked", {
                 gate: "invalid_app_url",
@@ -58,6 +64,14 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
               setError(SUPABASE_CONFIG_USER_MESSAGE);
               return;
             }
+
+            console.info("[auth] magic-link redirect host", {
+              pageHost: diagnostics.pageHost,
+              configuredAppUrlHost: diagnostics.configuredAppUrlHost,
+              redirectHost: diagnostics.redirectHost,
+              source: diagnostics.source,
+              mismatch: diagnostics.mismatch,
+            });
 
             const supabase = createClient();
             const normalizedEmail = email.trim().toLowerCase();

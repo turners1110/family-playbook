@@ -89,6 +89,36 @@ describe("magic link redirect URL", () => {
     );
   });
 
+  it("prefers the current page origin over a stale NEXT_PUBLIC_APP_URL", () => {
+    const redirect = getMagicLinkRedirectTo({
+      env: {
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL:
+          "https://family-playbook-git-supabase-auth-turners1110s-projects.vercel.app",
+      } as NodeJS.ProcessEnv,
+      pageOrigin:
+        "https://family-playbook-git-trip-online-mode-turners1110s-projects.vercel.app",
+    });
+
+    expect(redirect).toBe(
+      "https://family-playbook-git-trip-online-mode-turners1110s-projects.vercel.app/auth/callback",
+    );
+  });
+
+  it("falls back to NEXT_PUBLIC_VERCEL_URL when app URL is unset", () => {
+    expect(
+      getMagicLinkRedirectTo({
+        env: {
+          NODE_ENV: "production",
+          NEXT_PUBLIC_VERCEL_URL:
+            "family-playbook-git-trip-online-mode-turners1110s-projects.vercel.app",
+        } as NodeJS.ProcessEnv,
+      }),
+    ).toBe(
+      "https://family-playbook-git-trip-online-mode-turners1110s-projects.vercel.app/auth/callback",
+    );
+  });
+
   it("never generates localhost redirect URLs in production", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -143,6 +173,9 @@ describe("browser PKCE magic-link login", () => {
     expect(source).toMatch(/shouldCreateUser:\s*false/);
     expect(source).toMatch(/getMagicLinkRedirectTo/);
     expect(source).toMatch(/emailRedirectTo/);
+    expect(source).toMatch(/getAppOriginDiagnostics/);
+    expect(source).toMatch(/magic-link redirect host/);
+    expect(source).toMatch(/pageOrigin/);
     expect(source).toMatch(/pkce-instrumentation/);
     expect(source).toMatch(/collectBrowserPkceInstrumentation/);
     expect(source).toMatch(/before_signInWithOtp/);
@@ -165,13 +198,15 @@ describe("browser PKCE magic-link login", () => {
       path.join(process.cwd(), "components/auth/LoginForm.tsx"),
       "utf8",
     );
-    expect(login).not.toMatch(/magic-link/);
+    expect(login).not.toMatch(/\/auth\/magic-link/);
+    expect(login).not.toMatch(/app\/auth\/magic-link/);
 
     const proxy = await fs.readFile(
       path.join(process.cwd(), "lib/supabase/proxy.ts"),
       "utf8",
     );
-    expect(proxy).not.toMatch(/magic-link/);
+    expect(proxy).not.toMatch(/\/auth\/magic-link/);
+    expect(proxy).not.toMatch(/app\/auth\/magic-link/);
   });
 
   it("browser and server clients share public env and no custom PKCE options", async () => {
