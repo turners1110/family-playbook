@@ -10,6 +10,7 @@ import {
   ResearchDetailActions,
 } from "@/components/research/ResearchDetailActions";
 import { getResearchSource } from "@/lib/research/services";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 import { availabilityDisclosure } from "@/lib/research/validation";
 import {
   RESEARCH_EVIDENCE_RATING_LABELS,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/research/types";
 import { readStore } from "@/lib/db/store";
 import { LIFE_STAGE_LABELS, type LifeStage } from "@/lib/constants/enums";
+import { ResearchFileDownloadButton } from "@/components/research/ResearchFileDownloadButton";
 
 export const dynamic = "force-dynamic";
 
@@ -42,11 +44,12 @@ export default async function ResearchSourceDetailPage({
   params: Promise<{ sourceId: string }>;
   searchParams: Promise<{ tab?: string }>;
 }) {
+  const ctx = await requireFamilyContext();
   const { sourceId } = await params;
   const { tab: rawTab } = await searchParams;
   const tab = (DETAIL_TABS.includes(rawTab as never) ? rawTab : "overview") as
     | (typeof DETAIL_TABS)[number];
-  const detail = await getResearchSource(sourceId);
+  const detail = await getResearchSource(sourceId, ctx);
   if (!detail) notFound();
 
   const { source, files, summaries, notes, links } = detail;
@@ -309,10 +312,15 @@ export default async function ResearchSourceDetailPage({
             {files.length === 0 && <li className="text-ink-muted">No uploaded file.</li>}
             {files.map((file) => (
               <li key={file.id} className="rounded-xl border border-border px-3 py-2">
-                <div className="font-medium">{file.original_filename}</div>
-                <div className="text-ink-subtle">
-                  {(file.file_size / 1024).toFixed(1)} KB · {file.mime_type} · hash{" "}
-                  {file.file_hash.slice(0, 12)}… · extraction {file.extraction_status}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div className="font-medium">{file.original_filename}</div>
+                    <div className="text-ink-subtle">
+                      {(file.file_size / 1024).toFixed(1)} KB · {file.mime_type} · hash{" "}
+                      {file.file_hash.slice(0, 12)}… · extraction {file.extraction_status}
+                    </div>
+                  </div>
+                  <ResearchFileDownloadButton sourceId={sourceId} fileId={file.id} />
                 </div>
               </li>
             ))}

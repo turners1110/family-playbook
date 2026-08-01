@@ -4,80 +4,70 @@ Private evidence library for Turner Family Principles.
 
 Sources inform discussion. They do **not** overwrite Sam and Michelle’s answers or become family decisions.
 
-## Phase 1 (shipped)
+## Phase 1.5 (durable storage)
 
-- `/research` library with tabs, filters, list + bookshelf views
-- Add source (`/research/new`) — metadata, physical book, URL, excerpts, private upload
-- Availability labels: full text / partial text / notes only / metadata only
-- Detail page with overview, summaries, notes, links, file metadata
-- Manual summaries + Sam / Michelle / shared notes
-- Link sources to questions
-- Relevant Research near the top of question detail
-- Processing queue + coverage stubs
-- Local private metadata store + local file directory (not remote JSON)
+Production / Preview / Trip Mode use **Supabase**:
 
-## Migrations
+- Metadata: `research_sources` (+ notes, summaries, links, topics, life stages)
+- Files: private Storage bucket `research-sources`
+- Local JSON/files are **development-only** behind `USE_LOCAL_RESEARCH_STORE=true`
+- Never falls back to the Vercel filesystem
+
+UI status on `/research`:
+
+- `Research storage: Supabase`
+- or `Research storage unavailable. New research entries are disabled.`
+
+## Migrations to run
 
 Apply after remote-store migration:
 
 1. `supabase/migrations/0004_research_library.sql`
 2. `supabase/migrations/0005_research_storage_policies.sql`
 
-In Supabase Dashboard → SQL Editor, run both files, or use the Supabase CLI.
+### Bucket checks
 
-### Storage bucket setup
+In Supabase Dashboard → Storage → `research-sources`:
 
-Migration `0005` creates private bucket `research-sources` (50 MiB limit).
-
-Allowed MIME types: PDF, EPUB, TXT, DOCX.
-
-Confirm in Dashboard → Storage:
-
-- Bucket is **private** (`public = false`)
-- Policies restrict objects to the member’s family folder `{family_id}/...`
-- Service role is used only on the server (Trip Mode / admin paths)
-
-Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser.
+- Private (`public = false`)
+- File size limit 50 MiB
+- Allowed MIME: PDF, EPUB, TXT, DOCX
+- Policies scoped to family folder `{family_id}/...`
 
 ## Environment
 
-No new required env vars for Phase 1 local store.
-
-For Trip Mode + future Supabase-backed research:
-
 | Variable | Notes |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | existing |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | existing |
-| `SUPABASE_SERVICE_ROLE_KEY` | server only; signed uploads/downloads later |
+| `NEXT_PUBLIC_SUPABASE_URL` | required for Supabase research |
+| `SUPABASE_SERVICE_ROLE_KEY` | server only; signed upload/download |
 | `TURNER_FAMILY_NAME` | family UUID resolution for Trip Mode |
+| `USE_LOCAL_RESEARCH_STORE=true` | local-dev only; ignored when `VERCEL=1` |
 
-Optional later: `USE_SUPABASE_RESEARCH_STORE=true` when wiring the normalized tables as the primary backend.
+## Import local Phase 1 data
 
-## Local Phase 1 storage
+```bash
+pnpm upload:research-library
+```
 
-Until Supabase research backend is enabled:
+Loads `data/research-library.json`, resolves Turner Family, imports idempotently by title+author, uploads local files when present, prints counts only.
 
-- Metadata: `data/research-library.json` (gitignored)
-- Files: `data/research-files/` (gitignored)
-- **Not** written into `family_json_stores` / remote JSON
+## Uploads
 
-## File limits
+1. Create source metadata (server action)
+2. Request signed upload URL (server action)
+3. Browser PUTs file to Supabase (or local `/api/research/upload` in local mode)
+4. Finalize file row (server action)
 
-- Max size: **50 MiB**
-- Allowed: `.pdf`, `.epub`, `.txt`, `.docx`, `.doc`
-- Rejected: executables and scripts
+No base64 through server actions. No public URLs. Downloads use short-lived signed URLs.
 
-Uploading requires the rights checkbox.
+## Access
 
-## Trip Online Mode
-
-- Emergency users can **read** the research library
-- Only Sam or Michelle actors can **add / edit / archive**
-- Files and extracted text stay out of the remote JSON store
+- Supabase Auth members via `requireFamilyContext`
+- Trip Mode emergency actors resolve to Turner Family + Sam/Michelle
+- Writes: Sam or Michelle only
+- Browser never receives the service-role key
 
 ## Later phases
 
-**Phase 2:** Supabase table backend as primary, Storage signed URLs, extraction pipeline, AI summaries/findings with review workflow, processing jobs progress.
-
-**Phase 3:** Conflict detection, richer coverage, PDF viewer with citation jumps, playbook bibliography from approved findings only.
+**Phase 2:** extraction pipeline, AI summaries/findings  
+**Phase 3:** conflicts, PDF viewer, playbook bibliography

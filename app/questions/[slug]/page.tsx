@@ -18,6 +18,7 @@ import {
   RESEARCH_AVAILABILITY_LABELS,
   RESEARCH_EVIDENCE_RATING_LABELS,
 } from "@/lib/research/types";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,7 @@ export default async function QuestionDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const ctx = await requireFamilyContext();
   const { slug } = await params;
   const store = await readStore();
   const question = store.questions.find((q) => q.slug === slug);
@@ -44,7 +46,7 @@ export default async function QuestionDetailPage({
     k.related_question_ids.includes(question.id),
   );
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
-  const research = await getResearchForQuestion(question.id);
+  const research = await getResearchForQuestion(question.id, ctx);
 
   return (
     <AppShell

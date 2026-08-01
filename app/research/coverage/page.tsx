@@ -1,32 +1,43 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatCard } from "@/components/shared/ui";
-import { listResearchSources } from "@/lib/research/services";
+import {
+  getResearchSource,
+  getResearchStorageStatus,
+  listResearchSources,
+} from "@/lib/research/services";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 import { readStore } from "@/lib/db/store";
-import { readResearchLibrary } from "@/lib/research/local-store";
 
 export const dynamic = "force-dynamic";
 
 export default async function ResearchCoveragePage() {
+  const ctx = await requireFamilyContext();
   const store = await readStore();
-  const sources = await listResearchSources({});
-  const library = await readResearchLibrary();
+  const storage = getResearchStorageStatus();
+  const sources = await listResearchSources({}, ctx);
+  const details = await Promise.all(
+    sources.map((s) => getResearchSource(s.id, ctx)),
+  );
+  const links = details.flatMap((d) => d?.links ?? []);
   const linkedQuestionIds = new Set(
-    library.links.map((l) => l.question_id).filter(Boolean) as string[],
+    links.map((l) => l.question_id).filter(Boolean) as string[],
   );
   const activeQuestions = store.questions.filter((q) => q.active);
   const withNone = activeQuestions.filter((q) => !linkedQuestionIds.has(q.id));
   const withOne = activeQuestions.filter(
-    (q) => library.links.filter((l) => l.question_id === q.id).length === 1,
+    (q) => links.filter((l) => l.question_id === q.id).length === 1,
   );
   const withSeveral = activeQuestions.filter(
-    (q) => library.links.filter((l) => l.question_id === q.id).length > 1,
+    (q) => links.filter((l) => l.question_id === q.id).length > 1,
   );
   const principles = store.principles;
   const linkedPrincipleIds = new Set(
-    library.links.map((l) => l.principle_id).filter(Boolean) as string[],
+    links.map((l) => l.principle_id).filter(Boolean) as string[],
   );
-  const principlesUnsupported = principles.filter((p) => !linkedPrincipleIds.has(p.id));
+  const principlesUnsupported = principles.filter(
+    (p) => !linkedPrincipleIds.has(p.id),
+  );
   const highQuality = sources.filter(
     (s) => s.evidence_rating === "high" && s.evidence_rating_approved,
   );
@@ -41,6 +52,13 @@ export default async function ResearchCoveragePage() {
         </Link>
       }
     >
+      <p
+        className={`mb-4 text-sm ${
+          storage.mode === "unavailable" ? "text-warning" : "text-ink-subtle"
+        }`}
+      >
+        {storage.label}
+      </p>
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Questions with no sources" value={withNone.length} />
         <StatCard label="Questions with one source" value={withOne.length} />

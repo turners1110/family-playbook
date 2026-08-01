@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ResearchSourceCardView } from "@/components/research/ResearchSourceCard";
-import { listResearchSources } from "@/lib/research/services";
+import {
+  getResearchStorageStatus,
+  listResearchSources,
+} from "@/lib/research/services";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 import {
   RESEARCH_EVIDENCE_RATINGS,
   RESEARCH_PROCESSING_STATUSES,
@@ -30,22 +34,27 @@ export default async function ResearchLibraryPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const ctx = await requireFamilyContext();
   const params = await searchParams;
   const tab = params.tab ?? "library";
   const view = params.view === "shelf" ? "shelf" : "list";
-  const sources = await listResearchSources({
-    q: params.q,
-    sourceType: params.type,
-    processingStatus: params.status,
-    topic: params.topic,
-    lifeStage: params.life_stage,
-    evidenceRating: params.evidence,
-    linkedQuestions: params.linked_q === "1",
-    linkedPrinciples: params.linked_p === "1",
-    addedBy: params.added_by as "sam" | "michelle" | undefined,
-    sort: params.sort,
-    tab: tab === "library" || tab === "topics" ? undefined : tab,
-  });
+  const storage = getResearchStorageStatus();
+  const sources = await listResearchSources(
+    {
+      q: params.q,
+      sourceType: params.type,
+      processingStatus: params.status,
+      topic: params.topic,
+      lifeStage: params.life_stage,
+      evidenceRating: params.evidence,
+      linkedQuestions: params.linked_q === "1",
+      linkedPrinciples: params.linked_p === "1",
+      addedBy: params.added_by as "sam" | "michelle" | undefined,
+      sort: params.sort,
+      tab: tab === "library" || tab === "topics" ? undefined : tab,
+    },
+    ctx,
+  );
 
   function href(overrides: Record<string, string | undefined>) {
     const next = new URLSearchParams();
@@ -62,11 +71,21 @@ export default async function ResearchLibraryPage({
       title="Research & Books"
       subtitle="Private evidence library — sources inform discussion; they are not family decisions."
       actions={
-        <Link href="/research/new" className="btn btn-primary">
-          Add source
-        </Link>
+        storage.writesAllowed ? (
+          <Link href="/research/new" className="btn btn-primary">
+            Add source
+          </Link>
+        ) : null
       }
     >
+      <p
+        className={`mb-4 text-sm ${
+          storage.mode === "unavailable" ? "text-warning" : "text-ink-subtle"
+        }`}
+      >
+        {storage.label}
+      </p>
+
       <div className="mb-4 flex flex-wrap gap-2">
         {TABS.map((item) => (
           <Link

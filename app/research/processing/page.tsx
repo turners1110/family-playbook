@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { listResearchSources } from "@/lib/research/services";
+import {
+  getResearchStorageStatus,
+  listResearchSources,
+} from "@/lib/research/services";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 import { ResearchStatusBadge } from "@/components/research/ResearchSourceCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function ResearchProcessingPage() {
-  const queue = await listResearchSources({ tab: "queue" });
+  const ctx = await requireFamilyContext();
+  const storage = getResearchStorageStatus();
+  const queue = await listResearchSources({ tab: "queue" }, ctx);
 
   return (
     <AppShell
@@ -18,6 +24,13 @@ export default async function ResearchProcessingPage() {
         </Link>
       }
     >
+      <p
+        className={`mb-4 text-sm ${
+          storage.mode === "unavailable" ? "text-warning" : "text-ink-subtle"
+        }`}
+      >
+        {storage.label}
+      </p>
       <div className="surface mb-5 p-4 text-sm text-ink-muted">
         Pipeline stages (queue-ready): file uploaded → text extraction → structure → metadata →
         chapters → chunking → summary → findings → citation validation → topic tagging → question
@@ -28,13 +41,17 @@ export default async function ResearchProcessingPage() {
       ) : (
         <ul className="space-y-3">
           {queue.map((source) => (
-            <li key={source.id} className="surface flex flex-wrap items-center justify-between gap-3 p-4">
+            <li
+              key={source.id}
+              className="surface flex flex-wrap items-center justify-between gap-3 p-4"
+            >
               <div>
                 <Link href={`/research/${source.id}`} className="font-medium hover:text-accent">
                   {source.title}
                 </Link>
                 <div className="mt-1 text-sm text-ink-muted">
-                  Progress placeholder · started {source.updated_at.slice(0, 16).replace("T", " ")}
+                  Progress placeholder · started{" "}
+                  {source.updated_at.slice(0, 16).replace("T", " ")}
                 </div>
               </div>
               <ResearchStatusBadge status={source.processing_status} />

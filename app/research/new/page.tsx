@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { AddSourceForm } from "@/components/research/AddSourceForm";
+import { getResearchStorageStatus } from "@/lib/research/services";
 
 export const dynamic = "force-dynamic";
 
 export default function AddResearchSourcePage() {
+  const storage = getResearchStorageStatus();
+
   return (
     <AppShell
       title="Add source"
@@ -15,7 +18,14 @@ export default function AddResearchSourcePage() {
         </Link>
       }
     >
-      <AddSourceForm />
+      <p
+        className={`mb-4 text-sm ${
+          storage.mode === "unavailable" ? "text-warning" : "text-ink-subtle"
+        }`}
+      >
+        {storage.label}
+      </p>
+      <AddSourceForm writesAllowed={storage.writesAllowed} />
     </AppShell>
   );
 }

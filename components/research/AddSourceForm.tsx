@@ -2,7 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { actionCreateResearchSource } from "@/lib/research/actions";
+import {
+  actionCreateResearchSource,
+  actionFinalizeResearchUpload,
+  actionPrepareResearchUpload,
+} from "@/lib/research/actions";
 import {
   RESEARCH_EVIDENCE_BASES,
   RESEARCH_EVIDENCE_RATINGS,
@@ -16,7 +20,15 @@ import {
 import { LIFE_STAGE_LABELS, LIFE_STAGES } from "@/lib/constants/enums";
 import type { CreateResearchSourceInput } from "@/lib/research/validation";
 
-export function AddSourceForm() {
+async function sha256Hex(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export function AddSourceForm({ writesAllowed = true }: { writesAllowed?: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -36,6 +48,10 @@ export function AddSourceForm() {
       className="surface space-y-5 p-5"
       onSubmit={(e) => {
         e.preventDefault();
+        if (!writesAllowed) {
+          setError("Research storage unavailable. New research entries are disabled.");
+          return;
+        }
         setError("");
         const form = new FormData(e.currentTarget);
         const publicationYearRaw = String(form.get("publication_year") || "").trim();
@@ -71,36 +87,91 @@ export function AddSourceForm() {
         };
 
         startTransition(async () => {
-          let filePayload = null;
+          if (ingestion === "upload_file" && !file) {
+            setError("Choose a file to upload, or pick metadata-only.");
+            return;
+          }
           if (file) {
             if (file.size > RESEARCH_MAX_FILE_BYTES) {
-              setError(`File exceeds the ${RESEARCH_MAX_FILE_BYTES / (1024 * 1024)} MiB limit.`);
+              setError(
+                `File exceeds the ${RESEARCH_MAX_FILE_BYTES / (1024 * 1024)} MiB limit.`,
+              );
               return;
             }
             if (!rights) {
-              setError("Confirm you have the right to upload and privately process this file.");
+              setError(
+                "Confirm you have the right to upload and privately process this file.",
+              );
               return;
             }
-            const buffer = await file.arrayBuffer();
-            const bytes = new Uint8Array(buffer);
-            let binary = "";
-            for (let i = 0; i < bytes.length; i += 1) {
-              binary += String.fromCharCode(bytes[i]!);
-            }
-            filePayload = {
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              base64: btoa(binary),
-            };
           }
 
-          const result = await actionCreateResearchSource(input, filePayload);
-          if (!result.ok) {
-            setError(result.error);
+          const created = await actionCreateResearchSource(input);
+          if (!created.ok) {
+            setError(created.error);
             return;
           }
-          router.push(`/research/${result.sourceId}`);
+
+          if (file) {
+            const fileHash = await sha256Hex(file);
+            const prepared = await actionPrepareResearchUpload({
+              sourceId: created.sourceId,
+              filename: file.name,
+              size: file.size,
+              type: file.type,
+              fileHash,
+            });
+            if (!prepared.ok) {
+              setError(prepared.error);
+              router.push(`/research/${created.sourceId}`);
+              return;
+            }
+
+            if (prepared.prepared.signedUrl.startsWith("local://")) {
+              const body = new FormData();
+              body.set("sourceId", created.sourceId);
+              body.set("fileHash", fileHash);
+              body.set("file", file);
+              const response = await fetch("/api/research/upload", {
+                method: "POST",
+                body,
+              });
+              const json = (await response.json()) as { error?: string };
+              if (!response.ok) {
+                setError(json.error ?? "Local upload failed.");
+                router.push(`/research/${created.sourceId}`);
+                return;
+              }
+            } else {
+              const uploadResponse = await fetch(prepared.prepared.signedUrl, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": file.type || prepared.prepared.mimeType,
+                },
+                body: file,
+              });
+              if (!uploadResponse.ok) {
+                setError("Could not upload file to private storage.");
+                router.push(`/research/${created.sourceId}`);
+                return;
+              }
+              const finalized = await actionFinalizeResearchUpload({
+                sourceId: created.sourceId,
+                storagePath: prepared.prepared.storagePath,
+                originalFilename: prepared.prepared.originalFilename,
+                mimeType: prepared.prepared.mimeType,
+                fileSize: prepared.prepared.fileSize,
+                fileHash: prepared.prepared.fileHash,
+              });
+              if (!finalized.ok) {
+                setError(finalized.error);
+                router.push(`/research/${created.sourceId}`);
+                return;
+              }
+            }
+          }
+
+          router.push(`/research/${created.sourceId}`);
         });
       }}
     >
@@ -325,9 +396,18 @@ export function AddSourceForm() {
 
       {error && <p className="text-sm text-danger">{error}</p>}
 
-      <button type="submit" className="btn btn-primary" disabled={pending}>
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={pending || !writesAllowed}
+      >
         {pending ? "Saving…" : "Add source"}
       </button>
+      {!writesAllowed && (
+        <p className="text-sm text-warning">
+          Research storage unavailable. New research entries are disabled.
+        </p>
+      )}
     </form>
   );
 }

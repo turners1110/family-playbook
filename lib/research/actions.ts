@@ -3,13 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
+import { ResearchUnavailableError } from "@/lib/research/errors";
 import {
   addResearchNote,
   addResearchSummary,
   approveResearchSummary,
   archiveResearchSource,
   createResearchSource,
-  linkResearchSource,
+  createSignedResearchFileUrl,
+  finalizeResearchUpload,
+  getResearchStorageStatus,
+  linkResearchQuestion,
+  prepareResearchUpload,
 } from "@/lib/research/services";
 import type { CreateResearchSourceInput } from "@/lib/research/validation";
 
@@ -27,33 +32,75 @@ function revalidateResearch(sourceId?: string) {
   if (sourceId) revalidatePath(`/research/${sourceId}`);
 }
 
-export async function actionCreateResearchSource(
-  input: CreateResearchSourceInput,
-  filePayload?: {
-    name: string;
-    size: number;
-    type: string;
-    base64: string;
-  } | null,
-) {
+function toError(error: unknown) {
+  if (error instanceof ResearchUnavailableError) {
+    return { ok: false as const, error: error.message };
+  }
+  return {
+    ok: false as const,
+    error: error instanceof Error ? error.message : "Research action failed.",
+  };
+}
+
+export async function actionGetResearchStorageStatus() {
+  return getResearchStorageStatus();
+}
+
+export async function actionCreateResearchSource(input: CreateResearchSourceInput) {
   const ctx = await requireIdentity();
   try {
-    const file = filePayload
-      ? {
-          name: filePayload.name,
-          size: filePayload.size,
-          type: filePayload.type,
-          buffer: Buffer.from(filePayload.base64, "base64"),
-        }
-      : null;
-    const sourceId = await createResearchSource(ctx, input, file);
+    const sourceId = await createResearchSource(ctx, input);
     revalidateResearch(sourceId);
     return { ok: true as const, sourceId };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not create source.",
-    };
+    return toError(error);
+  }
+}
+
+export async function actionPrepareResearchUpload(input: {
+  sourceId: string;
+  filename: string;
+  size: number;
+  type?: string;
+  fileHash: string;
+}) {
+  const ctx = await requireIdentity();
+  try {
+    const prepared = await prepareResearchUpload(ctx, input);
+    return { ok: true as const, prepared };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionFinalizeResearchUpload(input: {
+  sourceId: string;
+  storagePath: string;
+  originalFilename: string;
+  mimeType: string;
+  fileSize: number;
+  fileHash: string;
+}) {
+  const ctx = await requireIdentity();
+  try {
+    const file = await finalizeResearchUpload(ctx, input);
+    revalidateResearch(input.sourceId);
+    return { ok: true as const, file };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionCreateSignedResearchFileUrl(
+  sourceId: string,
+  fileId: string,
+) {
+  const ctx = await requireIdentity();
+  try {
+    const url = await createSignedResearchFileUrl(ctx, sourceId, fileId);
+    return { ok: true as const, url };
+  } catch (error) {
+    return toError(error);
   }
 }
 
@@ -64,10 +111,7 @@ export async function actionAddResearchSummary(input: unknown) {
     revalidateResearch(summary.source_id);
     return { ok: true as const, summary };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not save summary.",
-    };
+    return toError(error);
   }
 }
 
@@ -78,24 +122,18 @@ export async function actionAddResearchNote(input: unknown) {
     revalidateResearch(note.source_id);
     return { ok: true as const, note };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not save note.",
-    };
+    return toError(error);
   }
 }
 
 export async function actionLinkResearchSource(input: unknown) {
   const ctx = await requireIdentity();
   try {
-    const link = await linkResearchSource(ctx, input);
+    const link = await linkResearchQuestion(ctx, input);
     revalidateResearch(link.source_id);
     return { ok: true as const, link };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not link source.",
-    };
+    return toError(error);
   }
 }
 
@@ -106,23 +144,20 @@ export async function actionArchiveResearchSource(sourceId: string) {
     revalidateResearch(sourceId);
     return { ok: true as const };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not archive source.",
-    };
+    return toError(error);
   }
 }
 
-export async function actionApproveResearchSummary(summaryId: string, sourceId: string) {
+export async function actionApproveResearchSummary(
+  summaryId: string,
+  sourceId: string,
+) {
   const ctx = await requireIdentity();
   try {
     await approveResearchSummary(ctx, summaryId);
     revalidateResearch(sourceId);
     return { ok: true as const };
   } catch (error) {
-    return {
-      ok: false as const,
-      error: error instanceof Error ? error.message : "Could not approve summary.",
-    };
+    return toError(error);
   }
 }
