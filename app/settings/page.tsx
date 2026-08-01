@@ -18,6 +18,12 @@ export default async function SettingsPage() {
       subtitle="Family preferences, privacy controls, and export."
       actions={
         <div className="flex flex-wrap gap-2">
+          <Link href="/before-birth" className="btn btn-ghost">
+            Before Birth Essentials
+          </Link>
+          <Link href="/settings/content-upgrade" className="btn btn-ghost">
+            Content upgrade
+          </Link>
           <Link href="/settings/content-review" className="btn btn-ghost">
             AI Content Review
           </Link>
@@ -61,6 +67,22 @@ export default async function SettingsPage() {
           <SettingsForm settings={store.settings} />
         </section>
       </div>
+
+      <section className="surface mt-5 p-5">
+        <h2 className="font-display text-xl text-ink">Content upgrade</h2>
+        <p className="mt-2 text-sm text-ink-muted">
+          Preview retitles, priority narrowing, and ownership suggestions before
+          applying. Answers and checklist completion stay intact.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/settings/content-upgrade" className="btn btn-primary">
+            Open content upgrade
+          </Link>
+          <Link href="/before-birth" className="btn btn-secondary">
+            Before Birth Essentials
+          </Link>
+        </div>
+      </section>
 
       <section className="surface mt-5 p-5">
         <h2 className="font-display text-xl text-ink">AI Content Review</h2>

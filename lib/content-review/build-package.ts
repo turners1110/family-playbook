@@ -6,7 +6,7 @@ import {
 import { validateContentReviewPackage } from "@/lib/content-review/schema";
 import {
   DISCUSSION_TOPICS,
-  matchTopics,
+  classifyTopics,
 } from "@/lib/content-review/topics";
 import {
   biasedWording,
@@ -122,7 +122,17 @@ function exportQuestion(
     categories: q.categories,
     subcategory: q.subcategories[0] ?? null,
     subcategories: q.subcategories,
-    topic: matchTopics(questionHaystack(q)),
+    ...(() => {
+      const classified = classifyTopics(questionHaystack(q));
+      return {
+        topic: [
+          ...(classified.primary_topic ? [classified.primary_topic] : []),
+          ...classified.secondary_topics,
+        ],
+        primary_topic: classified.primary_topic,
+        secondary_topics: classified.secondary_topics,
+      };
+    })(),
     life_stage: q.life_stages.map((s) => LIFE_STAGE_LABELS[s] ?? s),
     life_stages: q.life_stages,
     age_range: q.life_stages,

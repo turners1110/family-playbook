@@ -56,11 +56,11 @@ function q(
     childDependent?: boolean;
   },
 ): Draft {
-  const short = text.length > 60 ? text.slice(0, 57) + "…" : text;
+  // Never persist UI-truncated titles. Truncate only in CSS at render time.
   return {
     categoryBucket: opts.category,
     text,
-    short_title: short,
+    short_title: text,
     why_it_matters:
       opts.why ??
       "This choice shapes daily family life and the adult your child becomes. Discussing it early reduces stress when the moment arrives.",

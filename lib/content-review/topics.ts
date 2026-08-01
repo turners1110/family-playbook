@@ -23,7 +23,7 @@ export const DISCUSSION_TOPICS: DiscussionTopicDef[] = [
   { key: "visitors_and_boundaries", label: "Visitors and family boundaries", keywords: ["visitor", "boundary", "boundaries", "in-law", "guest"] },
   { key: "finances", label: "Finances", keywords: ["finance", "budget", "money", "cost", "expense"] },
   { key: "insurance", label: "Insurance", keywords: ["insurance", "beneficiary", "health plan"] },
-  { key: "wills_and_guardianship", label: "Wills and guardianship", keywords: ["will", "guardian", "estate", "trust"] },
+  { key: "wills_and_guardianship", label: "Wills and guardianship", keywords: ["last will", "guardian", "guardianship", "estate plan", "estate documents", "living trust"] },
   { key: "education", label: "Education", keywords: ["education", "school", "learning", "homework"] },
   { key: "discipline", label: "Discipline", keywords: ["discipline", "consequence", "punishment", "timeout", "behavior"] },
   { key: "emotional_development", label: "Emotional development", keywords: ["emotion", "feelings", "attachment", "mental health", "anxiety"] },
@@ -42,7 +42,7 @@ export const DISCUSSION_TOPICS: DiscussionTopicDef[] = [
   { key: "marriage_and_partnership", label: "Marriage and partnership", keywords: ["marriage", "partnership", "relationship", "date night", "spouse"] },
   { key: "conflict_repair", label: "Conflict repair", keywords: ["conflict", "repair", "apology", "argument", "fight"] },
   { key: "grandparents", label: "Grandparents", keywords: ["grandparent", "grandma", "grandpa", "grandmother", "grandfather"] },
-  { key: "pets", label: "Pets", keywords: ["pet", "dog", "cat", "lulu"] },
+  { key: "pets", label: "Pets", keywords: ["pet ", " pets", "dog", "cat", "lulu", "puppy", "our pet"] },
   { key: "travel", label: "Travel", keywords: ["travel", "trip", "vacation", "flight"] },
   { key: "emergencies", label: "Emergencies", keywords: ["emergency", "crisis", "911", "disaster"] },
   { key: "disability_and_special_needs", label: "Disability and special needs", keywords: ["disability", "special needs", "iep", "neurodiverg"] },
@@ -56,9 +56,46 @@ export const DISCUSSION_TOPICS: DiscussionTopicDef[] = [
   { key: "adulthood_transition", label: "Adulthood transition", keywords: ["adult child", "launch", "independence", "moving out"] },
 ];
 
+/**
+ * Safer topic matching: require word-boundary style matches for short/ambiguous
+ * keywords so "will", "care", "support", and "family" do not over-classify.
+ */
+const AMBIGUOUS = new Set([
+  "will",
+  "care",
+  "support",
+  "family",
+  "home",
+  "plan",
+  "work",
+]);
+
+function keywordMatches(text: string, keyword: string): boolean {
+  const kw = keyword.toLowerCase();
+  if (!text.includes(kw)) return false;
+  if (kw.includes(" ") || kw.length >= 6) return true;
+  if (AMBIGUOUS.has(kw)) {
+    const re = new RegExp(`(?:^|[^a-z])${kw}(?:[^a-z]|$)`);
+    return re.test(text);
+  }
+  return true;
+}
+
 export function matchTopics(haystack: string): string[] {
   const text = haystack.toLowerCase();
   return DISCUSSION_TOPICS.filter((topic) =>
-    topic.keywords.some((kw) => text.includes(kw.toLowerCase())),
+    topic.keywords.some((kw) => keywordMatches(text, kw)),
   ).map((t) => t.key);
+}
+
+/** Primary topic = first match; secondary capped at 3. */
+export function classifyTopics(haystack: string): {
+  primary_topic: string | null;
+  secondary_topics: string[];
+} {
+  const all = matchTopics(haystack);
+  return {
+    primary_topic: all[0] ?? null,
+    secondary_topics: all.slice(1, 4),
+  };
 }

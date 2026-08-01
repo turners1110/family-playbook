@@ -7,6 +7,7 @@ import {
   type ChecklistPriority,
 } from "@/lib/checklists";
 import { getDefaultTimingForTask } from "@/lib/checklists/default-timing";
+import { ownershipForSlug } from "@/lib/checklists/ownership";
 import {
   applyScheduleToTasks,
   ensureTaskTimingFields,
@@ -108,7 +109,10 @@ export function buildTasksFromTemplate(
         completed_at: null,
         due_date: null,
         priority: def.priority ?? "medium",
-        owner: def.owner ?? "both",
+        owner:
+          def.owner ??
+          ownershipForSlug(def.slug)?.primary_owner ??
+          "both",
         notes: null,
         is_custom: false,
         is_default: true,
