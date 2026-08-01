@@ -19,6 +19,10 @@ import {
 import type { ResearchRepository } from "@/lib/research/repository";
 import { createSupabaseResearchRepository } from "@/lib/research/supabase-repository";
 import {
+  clearRecommendedPrefsForTests,
+  setRecommendedPrefsModeForTests,
+} from "@/lib/research/recommended-prefs";
+import {
   addResearchNoteSchema,
   addResearchSummarySchema,
   createResearchSourceSchema,
@@ -36,6 +40,8 @@ export function setResearchRepositoryForTests(
 ) {
   overrideRepository = repo;
   overrideMode = mode;
+  setRecommendedPrefsModeForTests(mode);
+  if (!repo) clearRecommendedPrefsForTests();
 }
 
 export function getResearchStorageStatus(): {
@@ -85,11 +91,70 @@ export async function listResearchSources(
   try {
     const repo = getRepository();
     const familyId = await familyIdFor(ctx ?? null);
-    return repo.listSources(familyId, filters);
+    const familySources = await repo.listSources(familyId, {
+      ...filters,
+      // Fetch full family list; composeLibraryList applies tab filters.
+      tab: undefined,
+    });
+    const { loadRecommendedPrefs } = await import("@/lib/research/recommended-prefs");
+    const { composeLibraryList } = await import("@/lib/research/recommended");
+    const prefs = await loadRecommendedPrefs(familyId);
+    return composeLibraryList({
+      familyId,
+      familySources,
+      prefs,
+      filters,
+    });
   } catch (error) {
     if (error instanceof ResearchUnavailableError) return [];
     throw error;
   }
+}
+
+export async function addRecommendedToLibrary(ctx: FamilyContext, slug: string) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  const { getRecommendedBySlug } = await import("@/lib/research/recommended-seed");
+  const entry = getRecommendedBySlug(slug);
+  if (!entry) throw new Error("Recommendation not found.");
+
+  const familyId = await familyIdFor(ctx);
+  const {
+    loadRecommendedPrefs,
+    markRecommendedAdded,
+  } = await import("@/lib/research/recommended-prefs");
+  const prefs = await loadRecommendedPrefs(familyId);
+  if (prefs.added[slug]) return prefs.added[slug];
+
+  const sourceId = await createResearchSource(ctx, {
+    title: entry.title,
+    source_type: entry.source_type,
+    author_text: entry.author_text,
+    organization: entry.organization,
+    publication_year: entry.publication_year,
+    description: entry.description,
+    topics: entry.topics,
+    life_stages: entry.life_stages,
+    evidence_basis: entry.evidence_basis ?? undefined,
+    evidence_rating: entry.evidence_rating ?? undefined,
+    ownership_status: entry.ownership_status ?? undefined,
+    ingestion_path: "metadata_only",
+    rights_attested: false,
+    recommended_slug: entry.slug,
+  });
+  await markRecommendedAdded(familyId, slug, sourceId);
+  return sourceId;
+}
+
+export async function hideRecommendedLibraryItem(
+  ctx: FamilyContext,
+  slug: string,
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  const familyId = await familyIdFor(ctx);
+  const { hideRecommendedSource } = await import("@/lib/research/recommended-prefs");
+  await hideRecommendedSource(familyId, slug);
 }
 
 export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {

@@ -258,10 +258,43 @@ export type ResearchSource = {
   rights_attested: boolean;
   added_by_member_id: string | null;
   added_by_display_name: string | null;
+  /** Present when this family source was added from the built-in Recommended Library. */
+  recommended_slug: string | null;
   created_at: string;
   updated_at: string;
   processed_at: string | null;
   archived_at: string | null;
+};
+
+export type ResearchSourceCard = ResearchSource & {
+  finding_count: number;
+  linked_question_count: number;
+  linked_principle_count: number;
+  has_summary: boolean;
+  file_count: number;
+  /** Catalog vs family library card. */
+  library_origin?: "family" | "recommended";
+  /** Built-in catalog recommendation. */
+  built_in?: boolean;
+  /** Family already added this recommendation. */
+  in_my_library?: boolean;
+  /** Family source id when added from catalog. */
+  added_source_id?: string | null;
+};
+
+export type ResearchLibraryStore = {
+  sources: ResearchSource[];
+  files: ResearchSourceFile[];
+  summaries: ResearchSourceSummary[];
+  notes: ResearchSourceNote[];
+  links: ResearchSourceLink[];
+  recommended_prefs?: Record<
+    string,
+    {
+      hidden: string[];
+      added: Record<string, string>;
+    }
+  >;
 };
 
 export type ResearchSourceFile = {
@@ -319,20 +352,4 @@ export type ResearchSourceLink = {
   finding_id: string | null;
   relevance_note: string | null;
   created_at: string;
-};
-
-export type ResearchSourceCard = ResearchSource & {
-  finding_count: number;
-  linked_question_count: number;
-  linked_principle_count: number;
-  has_summary: boolean;
-  file_count: number;
-};
-
-export type ResearchLibraryStore = {
-  sources: ResearchSource[];
-  files: ResearchSourceFile[];
-  summaries: ResearchSourceSummary[];
-  notes: ResearchSourceNote[];
-  links: ResearchSourceLink[];
 };

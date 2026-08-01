@@ -70,6 +70,7 @@ type SourceRow = {
   rights_attested: boolean;
   added_by_member_id: string | null;
   added_by_display_name: string | null;
+  recommended_slug: string | null;
   created_at: string;
   updated_at: string;
   processed_at: string | null;
@@ -104,6 +105,7 @@ function mapSource(row: SourceRow): ResearchSource {
     rights_attested: row.rights_attested,
     added_by_member_id: row.added_by_member_id,
     added_by_display_name: row.added_by_display_name,
+    recommended_slug: row.recommended_slug ?? null,
     created_at: row.created_at,
     updated_at: row.updated_at,
     processed_at: row.processed_at,
@@ -323,6 +325,7 @@ export function createSupabaseResearchRepository(
           rights_attested: data.rights_attested === true,
           added_by_member_id: ctx.member.id,
           added_by_display_name: ctx.member.display_name,
+          recommended_slug: data.recommended_slug ?? null,
           created_at: timestamp,
           updated_at: timestamp,
         });

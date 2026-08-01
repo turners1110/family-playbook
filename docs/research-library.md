@@ -24,6 +24,14 @@ Apply after remote-store migration:
 
 1. `supabase/migrations/0004_research_library.sql`
 2. `supabase/migrations/0005_research_storage_policies.sql`
+3. `supabase/migrations/0007_seed_recommended_library.sql` (Recommended Library catalog + family prefs)
+
+### Recommended Library
+
+- Built-in metadata-only books and trusted organizations (no hosted copyrighted text).
+- Default `/research` tab shows **Recommended Library** with a **Built in** badge.
+- Users can **Add to My Library** (copies metadata into family `research_sources`) or **Hide recommendation**.
+- Filters: Added, Recommended, My Library, Books, Organizations.
 
 ### Bucket checks
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { ResearchSourceCardView } from "@/components/research/ResearchSourceCard";
+import { ResearchLibraryCard } from "@/components/research/ResearchLibraryCard";
 import {
   getResearchStorageStatus,
   listResearchSources,
@@ -19,8 +19,11 @@ import { LIFE_STAGE_LABELS, LIFE_STAGES } from "@/lib/constants/enums";
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "library", label: "Library", href: "/research" },
+  { key: "recommended", label: "Recommended Library", href: "/research" },
+  { key: "added", label: "Added", href: "/research?tab=added" },
+  { key: "my-library", label: "My Library", href: "/research?tab=my-library" },
   { key: "books", label: "Books", href: "/research?tab=books" },
+  { key: "organizations", label: "Organizations", href: "/research?tab=organizations" },
   { key: "papers", label: "Research Papers", href: "/research?tab=papers" },
   { key: "guidelines", label: "Guidelines", href: "/research?tab=guidelines" },
   { key: "articles", label: "Articles", href: "/research?tab=articles" },
@@ -36,7 +39,7 @@ export default async function ResearchLibraryPage({
 }) {
   const ctx = await requireFamilyContext();
   const params = await searchParams;
-  const tab = params.tab ?? "library";
+  const tab = params.tab ?? "recommended";
   const view = params.view === "shelf" ? "shelf" : "list";
   const storage = getResearchStorageStatus();
   const sources = await listResearchSources(
@@ -51,7 +54,7 @@ export default async function ResearchLibraryPage({
       linkedPrinciples: params.linked_p === "1",
       addedBy: params.added_by as "sam" | "michelle" | undefined,
       sort: params.sort,
-      tab: tab === "library" || tab === "topics" ? undefined : tab,
+      tab,
     },
     ctx,
   );
@@ -91,12 +94,28 @@ export default async function ResearchLibraryPage({
           <Link
             key={item.key}
             href={item.href}
-            className={`badge ${tab === item.key || (item.key === "library" && !params.tab) ? "badge-accent" : ""}`}
+            className={`badge ${
+              tab === item.key || (item.key === "recommended" && !params.tab)
+                ? "badge-accent"
+                : ""
+            }`}
           >
             {item.label}
           </Link>
         ))}
       </div>
+
+      {tab === "recommended" ? (
+        <div className="mb-5 flex flex-wrap items-center gap-2">
+          <h2 className="font-display text-2xl text-ink">Recommended Library</h2>
+          <span className="badge badge-accent">Built in</span>
+          <p className="basis-full text-sm text-ink-muted">
+            Metadata-only suggestions to get started. We do not host copyrighted book
+            text, summaries, findings, or citations until you add your own notes or
+            files.
+          </p>
+        </div>
+      ) : null}
 
       {tab === "topics" ? (
         <section className="surface p-5">
@@ -107,7 +126,7 @@ export default async function ResearchLibraryPage({
               return (
                 <Link
                   key={topic}
-                  href={href({ tab: "library", topic })}
+                  href={href({ tab: "recommended", topic })}
                   className="rounded-xl border border-border px-3 py-2 text-sm hover:border-accent"
                 >
                   {RESEARCH_TOPIC_LABELS[topic]}
@@ -167,14 +186,12 @@ export default async function ResearchLibraryPage({
                 </option>
               ))}
             </select>
-            <select name="sort" className="select" defaultValue={params.sort ?? "recent"}>
-              <option value="recent">Recently added</option>
-              <option value="processed">Recently processed</option>
+            <select name="sort" className="select" defaultValue={params.sort ?? "title"}>
+              <option value="title">Title</option>
               <option value="author">Author</option>
               <option value="year">Publication year</option>
-              <option value="linked">Most linked</option>
+              <option value="recent">Recently added</option>
               <option value="evidence">Highest evidence rating</option>
-              <option value="title">Title</option>
             </select>
             <input type="hidden" name="tab" value={tab} />
             <input type="hidden" name="view" value={view} />
@@ -196,37 +213,42 @@ export default async function ResearchLibraryPage({
             >
               Bookshelf
             </Link>
-            <Link href={href({ linked_q: "1" })} className="badge">
-              Linked to questions
-            </Link>
-            <Link href={href({ linked_p: "1" })} className="badge">
-              Linked to principles
-            </Link>
-            <Link href={href({ added_by: "sam" })} className="badge">
-              Added by Sam
-            </Link>
-            <Link href={href({ added_by: "michelle" })} className="badge">
-              Added by Michelle
-            </Link>
           </div>
 
           {sources.length === 0 ? (
             <div className="surface p-8 text-center">
-              <p className="text-ink-muted">No sources yet.</p>
-              <Link href="/research/new" className="btn btn-primary mt-4">
-                Add source
-              </Link>
+              <p className="text-ink-muted">
+                {tab === "my-library"
+                  ? "My Library is empty. Add a recommendation or create a source."
+                  : tab === "added"
+                    ? "No recommended sources added yet."
+                    : "No sources match these filters."}
+              </p>
+              {tab === "my-library" ? (
+                <Link href="/research" className="btn btn-primary mt-4">
+                  Browse Recommended Library
+                </Link>
+              ) : null}
             </div>
           ) : view === "shelf" ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {sources.map((source) => (
-                <ResearchSourceCardView key={source.id} source={source} layout="shelf" />
+                <ResearchLibraryCard
+                  key={source.id}
+                  source={source}
+                  layout="shelf"
+                  writesAllowed={storage.writesAllowed}
+                />
               ))}
             </div>
           ) : (
             <div className="space-y-3">
               {sources.map((source) => (
-                <ResearchSourceCardView key={source.id} source={source} />
+                <ResearchLibraryCard
+                  key={source.id}
+                  source={source}
+                  writesAllowed={storage.writesAllowed}
+                />
               ))}
             </div>
           )}

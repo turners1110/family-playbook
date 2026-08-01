@@ -40,6 +40,7 @@ function enrich(
   const links = store.links.filter((l) => l.source_id === source.id);
   return {
     ...source,
+    recommended_slug: source.recommended_slug ?? null,
     finding_count: 0,
     linked_question_count: links.filter((l) => l.question_id).length,
     linked_principle_count: links.filter((l) => l.principle_id).length,
@@ -152,6 +153,7 @@ export function createMemoryResearchRepository(
         rights_attested: data.rights_attested === true,
         added_by_member_id: ctx.member.id,
         added_by_display_name: ctx.member.display_name,
+        recommended_slug: data.recommended_slug ?? null,
         created_at: timestamp,
         updated_at: timestamp,
         processed_at: null,

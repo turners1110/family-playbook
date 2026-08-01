@@ -7,12 +7,14 @@ import { ResearchUnavailableError } from "@/lib/research/errors";
 import {
   addResearchNote,
   addResearchSummary,
+  addRecommendedToLibrary,
   approveResearchSummary,
   archiveResearchSource,
   createResearchSource,
   createSignedResearchFileUrl,
   finalizeResearchUpload,
   getResearchStorageStatus,
+  hideRecommendedLibraryItem,
   linkResearchQuestion,
   prepareResearchUpload,
 } from "@/lib/research/services";
@@ -156,6 +158,28 @@ export async function actionApproveResearchSummary(
   try {
     await approveResearchSummary(ctx, summaryId);
     revalidateResearch(sourceId);
+    return { ok: true as const };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionAddRecommendedToLibrary(slug: string) {
+  const ctx = await requireIdentity();
+  try {
+    const sourceId = await addRecommendedToLibrary(ctx, slug);
+    revalidateResearch(sourceId);
+    return { ok: true as const, sourceId };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionHideRecommended(slug: string) {
+  const ctx = await requireIdentity();
+  try {
+    await hideRecommendedLibraryItem(ctx, slug);
+    revalidateResearch();
     return { ok: true as const };
   } catch (error) {
     return toError(error);

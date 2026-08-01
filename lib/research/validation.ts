@@ -52,6 +52,7 @@ export const createResearchSourceSchema = z.object({
     "paste_excerpts",
     "owned_physical",
   ]),
+  recommended_slug: z.string().trim().min(1).max(200).nullable().optional(),
 });
 
 export type CreateResearchSourceInput = z.input<typeof createResearchSourceSchema>;
