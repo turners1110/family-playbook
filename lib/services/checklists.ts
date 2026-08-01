@@ -132,7 +132,7 @@ export async function importBeforeBabyTemplate(): Promise<{
     added = fresh.length;
     store.checklist_tasks.push(...fresh);
     return store;
-  });
+  }, { operation: "ensureBeforeBabyChecklist" });
 
   return { checklistId, added, totalDefaults };
 }
@@ -184,7 +184,7 @@ export async function addCustomChecklistTask(input: {
     store.checklist_tasks.push(created);
     instance.updated_at = ts;
     return store;
-  });
+  }, { operation: "addCustomChecklistTask" });
   return created;
 }
 
@@ -203,7 +203,7 @@ export async function setChecklistTaskCompleted(
     task.updated_at = ts;
     updated = { ...task };
     return store;
-  });
+  }, { operation: "setChecklistTaskCompleted" });
   return updated;
 }
 
@@ -225,7 +225,7 @@ export async function bulkCompleteChecklistTasks(
       count += 1;
     }
     return store;
-  });
+  }, { operation: "bulkCompleteChecklistTasks" });
   return count;
 }
 
@@ -256,7 +256,7 @@ export async function updateChecklistTask(
     task.updated_at = nowIso();
     updated = { ...task };
     return store;
-  });
+  }, { operation: "updateChecklistTask" });
   return updated;
 }
 
@@ -268,7 +268,7 @@ export async function archiveChecklistTask(taskId: string): Promise<void> {
     task.archived = true;
     task.updated_at = nowIso();
     return store;
-  });
+  }, { operation: "archiveChecklistTask" });
 }
 
 export type ChecklistDashboard = {

@@ -71,7 +71,7 @@ export const REMOTE_STORE_USER_MESSAGES = {
   unavailable:
     "Remote storage is temporarily unavailable. Do not enter new answers until storage is restored. Download a backup if you have recent changes.",
   version_conflict:
-    "Someone else saved at the same time. Refresh the page and try again.",
+    "Another update was saved at the same time. Please retry.",
   not_found:
     "Remote family store is not set up yet. Ask an administrator to run the upload script.",
   validation: "Saved data failed validation. Download a backup and contact support.",

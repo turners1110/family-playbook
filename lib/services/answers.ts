@@ -17,8 +17,10 @@ export async function getAnswerHistory(answerId: string) {
 export async function saveAnswer(input: SaveAnswerInput, actorId?: string) {
   const data = saveAnswerSchema.parse(input);
   const timestamp = nowIso();
+  const mutationId = data.mutation_id ?? id("mut");
 
-  return updateStore((store) => {
+  return updateStore(
+    (store) => {
     const changedBy = actorId ?? store.current_user_id;
     const existing = store.answers.find((a) => {
       if (a.question_id !== data.question_id) return false;
@@ -102,7 +104,9 @@ export async function saveAnswer(input: SaveAnswerInput, actorId?: string) {
       created_at: timestamp,
     });
     return store;
-  });
+  },
+    { operation: "saveAnswer", mutationId },
+  );
 }
 
 export function canRevealPartnerAnswers(

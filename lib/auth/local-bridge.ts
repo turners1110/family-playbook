@@ -12,7 +12,8 @@ export async function syncLocalIdentityFromAuth(email: string, displayName: stri
     .trim()
     .toLowerCase();
 
-  await updateStore((store) => {
+  await updateStore(
+    (store) => {
     let targetUser: UserProfile | undefined;
 
     if (normalized === samEmail) {
@@ -40,7 +41,9 @@ export async function syncLocalIdentityFromAuth(email: string, displayName: stri
     }
 
     return store;
-  });
+  },
+    { operation: "syncLocalIdentityFromAuth" },
+  );
 }
 
 export async function getLocalMemberForAuthEmail(email: string): Promise<FamilyMember | null> {

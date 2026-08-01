@@ -13,8 +13,15 @@ import {
   logStoreError,
   RemoteStoreError,
 } from "@/lib/db/store-errors";
+import {
+  asStoreVersion,
+  runOptimisticStoreUpdate,
+  type UpdateStoreOptions,
+} from "@/lib/db/optimistic-store-update";
+import { id } from "@/lib/db/local-json-store";
 
-const MAX_UPDATE_RETRIES = 3;
+export { MAX_UPDATE_RETRIES } from "@/lib/db/optimistic-store-update";
+export type { UpdateStoreOptions } from "@/lib/db/optimistic-store-update";
 
 type StoreRow = {
   family_id: string;
@@ -22,14 +29,6 @@ type StoreRow = {
   version: number | string;
   updated_at: string;
 };
-
-function asVersion(value: number | string): number {
-  const n = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(n)) {
-    throw new RemoteStoreError("validation", "Invalid store version.");
-  }
-  return n;
-}
 
 /**
  * Exact-name lookup of the Turner Family row.
@@ -122,6 +121,56 @@ async function readRow(familyId: string): Promise<StoreRow> {
   return data as StoreRow;
 }
 
+async function replaceOnce(args: {
+  familyId: string;
+  expectedVersion: number;
+  store: AppStore;
+  createdBy: string;
+  mutationId: string;
+}): Promise<{ version: number; idempotentReplay?: boolean }> {
+  const admin = createSupabaseAdminClient();
+  const { data, error } = await admin.rpc("replace_family_json_store", {
+    p_family_id: args.familyId,
+    p_expected_version: args.expectedVersion,
+    p_new_data: args.store,
+    p_created_by: args.createdBy,
+    p_mutation_id: args.mutationId,
+  });
+
+  if (error) {
+    const message = error.message ?? "";
+    if (message.includes("family_json_store_version_conflict")) {
+      throw new RemoteStoreError(
+        "version_conflict",
+        "Remote store version conflict.",
+      );
+    }
+    logStoreError("replace_rpc", error, {
+      mutationId: args.mutationId,
+      operation: args.createdBy,
+      expectedVersion: args.expectedVersion,
+    });
+    throw new RemoteStoreError("unavailable", "Could not update remote store.");
+  }
+
+  const payload =
+    data && typeof data === "object"
+      ? (data as { version?: number | string; idempotent_replay?: boolean })
+      : null;
+  if (!payload || payload.version == null) {
+    logStoreError("replace_rpc_payload", new Error("Invalid RPC payload"), {
+      mutationId: args.mutationId,
+      operation: args.createdBy,
+    });
+    throw new RemoteStoreError("unavailable", "Could not update remote store.");
+  }
+
+  return {
+    version: asStoreVersion(payload.version),
+    idempotentReplay: Boolean(payload.idempotent_replay),
+  };
+}
+
 export async function readStore(): Promise<AppStore> {
   const familyId = await resolveTurnerFamilyId();
   const row = await readRow(familyId);
@@ -172,96 +221,38 @@ export async function writeStore(store: AppStore): Promise<void> {
     return;
   }
 
-  const expected = asVersion(existing.data.version as number | string);
-  await replaceWithRetry(familyId, expected, store, "writeStore");
+  // Full replace: reread + rewrite on conflict so we never stamp an old expected
+  // version onto a stale payload while skipping concurrent product mutations.
+  // writeStore is intentionally a full overwrite of the document.
+  const mutationId = id("mut");
+  await runOptimisticStoreUpdate(
+    familyId,
+    () => store,
+    { operation: "writeStore", mutationId },
+    {
+      readRow,
+      replace: replaceOnce,
+    },
+  );
 }
 
 export async function updateStore(
   updater: (store: AppStore) => AppStore | void,
+  options?: UpdateStoreOptions,
 ): Promise<AppStore> {
   const familyId = await resolveTurnerFamilyId();
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= MAX_UPDATE_RETRIES; attempt += 1) {
-    try {
-      const row = await readRow(familyId);
-      assertValidAppStore(row.store_data);
-      const draft = structuredClone(row.store_data);
-      const result = updater(draft) ?? draft;
-      assertValidAppStore(result);
-      await replaceWithRetry(
-        familyId,
-        asVersion(row.version),
-        result,
-        "updateStore",
-        1,
-      );
-      return structuredClone(result);
-    } catch (error) {
-      lastError = error;
-      if (
-        error instanceof RemoteStoreError &&
-        error.code === "version_conflict" &&
-        attempt < MAX_UPDATE_RETRIES
-      ) {
-        continue;
-      }
-      break;
-    }
-  }
-
-  if (lastError instanceof RemoteStoreError) throw lastError;
-  logStoreError("updateStore", lastError);
-  throw new RemoteStoreError(
-    "version_conflict",
-    "Could not save after repeated version conflicts.",
-  );
-}
-
-async function replaceWithRetry(
-  familyId: string,
-  expectedVersion: number,
-  store: AppStore,
-  createdBy: string,
-  attempts: number = MAX_UPDATE_RETRIES,
-): Promise<number> {
-  const admin = createSupabaseAdminClient();
-  let expected = expectedVersion;
-  let lastError: unknown;
-
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    const { data, error } = await admin.rpc("replace_family_json_store", {
-      p_family_id: familyId,
-      p_expected_version: expected,
-      p_new_data: store,
-      p_created_by: createdBy,
-    });
-
-    if (!error) {
-      return asVersion(data as number | string);
-    }
-
-    const message = error.message ?? "";
-    if (message.includes("family_json_store_version_conflict")) {
-      lastError = new RemoteStoreError(
-        "version_conflict",
-        "Remote store version conflict.",
-      );
-      if (attempt < attempts) {
-        const row = await readRow(familyId);
-        expected = asVersion(row.version);
-        continue;
-      }
-      throw lastError;
-    }
-
-    logStoreError("replace_rpc", error);
-    throw new RemoteStoreError("unavailable", "Could not update remote store.");
-  }
-
-  throw (
-    lastError ??
-    new RemoteStoreError("version_conflict", "Could not update remote store.")
+  const mutationId = options?.mutationId ?? id("mut");
+  return runOptimisticStoreUpdate(
+    familyId,
+    updater,
+    {
+      operation: options?.operation ?? "updateStore",
+      mutationId,
+    },
+    {
+      readRow,
+      replace: replaceOnce,
+    },
   );
 }
 
@@ -315,7 +306,7 @@ export async function getRemoteStoreHealth(): Promise<RemoteStoreHealth> {
       connected: Boolean(row),
       familyName,
       familyId,
-      version: row ? asVersion(row.version as number | string) : null,
+      version: row ? asStoreVersion(row.version as number | string) : null,
       updatedAt: (row?.updated_at as string | undefined) ?? null,
       backupCount: list.length,
       lastBackupAt: (list[0]?.created_at as string | undefined) ?? null,

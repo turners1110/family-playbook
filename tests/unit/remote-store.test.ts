@@ -162,7 +162,8 @@ describe("remote store adapter source contracts", () => {
     );
     expect(source).toMatch(/createSupabaseAdminClient/);
     expect(source).toMatch(/replace_family_json_store/);
-    expect(source).toMatch(/MAX_UPDATE_RETRIES/);
+    expect(source).toMatch(/runOptimisticStoreUpdate/);
+    expect(source).toMatch(/p_mutation_id/);
   });
 
   it("migration revokes browser access", async () => {

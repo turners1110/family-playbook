@@ -5,6 +5,9 @@
 import type { AppStore } from "@/lib/types/models";
 import * as local from "@/lib/db/local-json-store";
 import * as remote from "@/lib/db/remote-json-store";
+import type { UpdateStoreOptions } from "@/lib/db/optimistic-store-update";
+
+export type { UpdateStoreOptions } from "@/lib/db/optimistic-store-update";
 
 export function usesRemoteJsonStore() {
   return process.env.USE_REMOTE_JSON_STORE === "true";
@@ -24,9 +27,10 @@ export async function writeStore(store: AppStore): Promise<void> {
 
 export async function updateStore(
   updater: (store: AppStore) => AppStore | void,
+  options?: UpdateStoreOptions,
 ): Promise<AppStore> {
   return usesRemoteJsonStore()
-    ? remote.updateStore(updater)
+    ? remote.updateStore(updater, options)
     : local.updateStore(updater);
 }
 

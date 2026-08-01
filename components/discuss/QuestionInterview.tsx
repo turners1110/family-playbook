@@ -43,6 +43,8 @@ export function QuestionInterview({
     question.separate_answers_recommended ? "separate" : "shared",
   );
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [retryAction, setRetryAction] = useState<(() => Promise<void>) | null>(null);
   const [sharedText, setSharedText] = useState(
     answers.find((a) => a.is_shared)?.payload.text ?? "",
   );
@@ -78,77 +80,114 @@ export function QuestionInterview({
     [index, total],
   );
 
-  function run(task: () => Promise<void>) {
+  function newMutationId() {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return `mut_${crypto.randomUUID()}`;
+    }
+    return `mut_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function run(task: () => Promise<void>, options?: { allowRetry?: boolean }) {
     setSaveStatus("saving");
+    setSaveError(null);
+    if (options?.allowRetry) {
+      setRetryAction(() => task);
+    }
     startTransition(async () => {
       try {
         await task();
         setSaveStatus("saved");
+        setRetryAction(null);
         router.refresh();
-      } catch {
+      } catch (error) {
         setSaveStatus("error");
+        setSaveError(
+          error instanceof Error
+            ? error.message
+            : "Another update was saved at the same time. Please retry.",
+        );
       }
     });
   }
 
+  async function assertSaveOk(
+    result: { ok: true } | { ok: false; error: string; code?: string } | void,
+  ) {
+    if (result && "ok" in result && result.ok === false) {
+      throw new Error(result.error);
+    }
+  }
+
   async function saveSharedAndContinue() {
     run(async () => {
-      await actionSaveAnswer({
-        question_id: question.id,
-        is_shared: true,
-        payload: {
-          text: sharedText || undefined,
-          notes: sharedNotes || undefined,
-          quick: (quick || undefined) as never,
-          scale: question.question_type === "scale" ? scale : undefined,
-        },
-        status: status as never,
-        confidence,
-      });
+      await assertSaveOk(
+        await actionSaveAnswer({
+          question_id: question.id,
+          is_shared: true,
+          mutation_id: newMutationId(),
+          payload: {
+            text: sharedText || undefined,
+            notes: sharedNotes || undefined,
+            quick: (quick || undefined) as never,
+            scale: question.question_type === "scale" ? scale : undefined,
+          },
+          status: status as never,
+          confidence,
+        }),
+      );
       await actionAdvanceSession(sessionId, "answered");
       if (index >= total - 1) {
         router.push(`/discuss/${sessionId}/summary`);
       }
-    });
+    }, { allowRetry: true });
   }
 
   async function saveSeparate(who: "sam" | "michelle" | "shared") {
     run(async () => {
       if (who === "sam" && sam) {
-        await actionSaveAnswer({
-          question_id: question.id,
-          is_shared: false,
-          member_id: sam.id,
-          payload: { text: samText },
-          status: "in_discussion",
-          confidence: null,
-        });
+        await assertSaveOk(
+          await actionSaveAnswer({
+            question_id: question.id,
+            is_shared: false,
+            member_id: sam.id,
+            mutation_id: newMutationId(),
+            payload: { text: samText },
+            status: "in_discussion",
+            confidence: null,
+          }),
+        );
       } else if (who === "michelle" && michelle) {
-        await actionSaveAnswer({
-          question_id: question.id,
-          is_shared: false,
-          member_id: michelle.id,
-          payload: { text: michelleText },
-          status: "in_discussion",
-          confidence: null,
-        });
+        await assertSaveOk(
+          await actionSaveAnswer({
+            question_id: question.id,
+            is_shared: false,
+            member_id: michelle.id,
+            mutation_id: newMutationId(),
+            payload: { text: michelleText },
+            status: "in_discussion",
+            confidence: null,
+          }),
+        );
       } else {
-        await actionSaveAnswer({
-          question_id: question.id,
-          is_shared: true,
-          payload: {
-            text: sharedText,
-            agreement_notes: agreement || undefined,
-            disagreement_notes: disagreement || undefined,
-            notes: sharedNotes || undefined,
-          },
-          status: status as never,
-          confidence,
-        });
+        await assertSaveOk(
+          await actionSaveAnswer({
+            question_id: question.id,
+            is_shared: true,
+            mutation_id: newMutationId(),
+            payload: {
+              text: sharedText,
+              agreement_notes: agreement || undefined,
+              disagreement_notes: disagreement || undefined,
+              notes: sharedNotes || undefined,
+            },
+            status: status as never,
+            confidence,
+          }),
+        );
         await actionAdvanceSession(sessionId, "answered");
         if (index >= total - 1) router.push(`/discuss/${sessionId}/summary`);
       }
-    });
+    }, { allowRetry: true });
   }
 
   return (
@@ -169,6 +208,24 @@ export function QuestionInterview({
                   : "Error"}
           </span>
         </div>
+        {saveError ? (
+          <div
+            className="mb-4 rounded-lg border border-border bg-accent-soft px-3 py-3 text-sm text-ink"
+            role="alert"
+          >
+            <p>{saveError}</p>
+            {retryAction ? (
+              <button
+                type="button"
+                className="btn btn-secondary mt-2"
+                disabled={pending}
+                onClick={() => run(retryAction, { allowRetry: true })}
+              >
+                Retry
+              </button>
+            ) : null}
+          </div>
+        ) : null}
         <div className="progress-track mb-4">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
@@ -482,16 +539,22 @@ export function QuestionInterview({
             disabled={pending}
             onClick={() =>
               run(async () => {
-                await actionSaveAnswer({
-                  question_id: question.id,
-                  is_shared: true,
-                  payload: { text: sharedText || undefined, notes: sharedNotes || undefined },
-                  status: "needs_research",
-                  confidence,
-                  needs_research: true,
-                });
+                await assertSaveOk(
+                  await actionSaveAnswer({
+                    question_id: question.id,
+                    is_shared: true,
+                    mutation_id: newMutationId(),
+                    payload: {
+                      text: sharedText || undefined,
+                      notes: sharedNotes || undefined,
+                    },
+                    status: "needs_research",
+                    confidence,
+                    needs_research: true,
+                  }),
+                );
                 setMessage("Marked for research.");
-              })
+              }, { allowRetry: true })
             }
           >
             Mark for research

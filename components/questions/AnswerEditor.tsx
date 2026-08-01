@@ -10,6 +10,14 @@ import {
 } from "@/lib/actions";
 import type { Answer, FamilyMember } from "@/lib/types/models";
 import { DECISION_STATUSES, CONFIDENCE_LABELS } from "@/lib/constants/enums";
+import type { SaveAnswerInput } from "@/lib/validation/schemas";
+
+function newMutationId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return `mut_${crypto.randomUUID()}`;
+  }
+  return `mut_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
 
 export function AnswerEditor({
   questionId,
@@ -39,14 +47,36 @@ export function AnswerEditor({
   const [status, setStatus] = useState(shared?.status ?? "in_discussion");
   const [confidence, setConfidence] = useState<1 | 2 | 3 | 4 | 5 | null>(shared?.confidence ?? 3);
   const [notes, setNotes] = useState(shared?.payload.notes ?? "");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [retryPayload, setRetryPayload] = useState<SaveAnswerInput | null>(null);
   const bothSaved = Boolean(
     answers.find((a) => a.member_id === sam?.id) &&
       answers.find((a) => a.member_id === michelle?.id),
   );
   const reveal = !hideUntilBoth || bothSaved;
 
-  function save(task: () => Promise<void>) {
+  function runSaveAnswer(input: SaveAnswerInput) {
+    const payload: SaveAnswerInput = {
+      ...input,
+      mutation_id: input.mutation_id ?? newMutationId(),
+    };
+    setRetryPayload(payload);
     startTransition(async () => {
+      setSaveError(null);
+      const result = await actionSaveAnswer(payload);
+      if (result && "ok" in result && result.ok === false) {
+        setSaveError(result.error);
+        // Keep form values and retry payload; do not refresh or redirect.
+        return;
+      }
+      setRetryPayload(null);
+      router.refresh();
+    });
+  }
+
+  function saveOther(task: () => Promise<void>) {
+    startTransition(async () => {
+      setSaveError(null);
       await task();
       router.refresh();
     });
@@ -54,6 +84,29 @@ export function AnswerEditor({
 
   return (
     <div className="mt-4 space-y-4">
+      {saveError ? (
+        <div
+          className="rounded-lg border border-border bg-accent-soft px-3 py-3 text-sm text-ink"
+          role="alert"
+        >
+          <p>{saveError}</p>
+          {retryPayload ? (
+            <button
+              type="button"
+              className="btn btn-secondary mt-2"
+              disabled={pending}
+              onClick={() =>
+                runSaveAnswer({
+                  ...retryPayload,
+                  mutation_id: newMutationId(),
+                })
+              }
+            >
+              Retry
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="field">
           <label htmlFor="sam">Sam’s answer</label>
@@ -68,15 +121,13 @@ export function AnswerEditor({
             className="btn btn-secondary"
             disabled={pending || !sam}
             onClick={() =>
-              save(async () => {
-                await actionSaveAnswer({
-                  question_id: questionId,
-                  is_shared: false,
-                  member_id: sam!.id,
-                  payload: { text: samText },
-                  status: "in_discussion",
-                  confidence: null,
-                });
+              runSaveAnswer({
+                question_id: questionId,
+                is_shared: false,
+                member_id: sam!.id,
+                payload: { text: samText },
+                status: "in_discussion",
+                confidence: null,
               })
             }
           >
@@ -101,15 +152,13 @@ export function AnswerEditor({
             className="btn btn-secondary"
             disabled={pending || !michelle}
             onClick={() =>
-              save(async () => {
-                await actionSaveAnswer({
-                  question_id: questionId,
-                  is_shared: false,
-                  member_id: michelle!.id,
-                  payload: { text: michelleText },
-                  status: "in_discussion",
-                  confidence: null,
-                });
+              runSaveAnswer({
+                question_id: questionId,
+                is_shared: false,
+                member_id: michelle!.id,
+                payload: { text: michelleText },
+                status: "in_discussion",
+                confidence: null,
               })
             }
           >
@@ -181,15 +230,15 @@ export function AnswerEditor({
           className="btn btn-primary"
           disabled={pending}
           onClick={() =>
-            save(async () => {
-              await actionSaveAnswer({
-                question_id: questionId,
-                is_shared: true,
-                payload: { text, notes: notes || undefined },
-                status: status as never,
-                confidence,
-                change_reason: shared ? "Updated from question detail" : "Created from question detail",
-              });
+            runSaveAnswer({
+              question_id: questionId,
+              is_shared: true,
+              payload: { text, notes: notes || undefined },
+              status: status as never,
+              confidence,
+              change_reason: shared
+                ? "Updated from question detail"
+                : "Created from question detail",
             })
           }
         >
@@ -200,15 +249,13 @@ export function AnswerEditor({
           className="btn btn-secondary"
           disabled={pending}
           onClick={() =>
-            save(async () => {
-              await actionSaveAnswer({
-                question_id: questionId,
-                is_shared: true,
-                payload: { text, notes: notes || undefined },
-                status: "needs_research",
-                confidence,
-                needs_research: true,
-              });
+            runSaveAnswer({
+              question_id: questionId,
+              is_shared: true,
+              payload: { text, notes: notes || undefined },
+              status: "needs_research",
+              confidence,
+              needs_research: true,
             })
           }
         >
@@ -219,7 +266,7 @@ export function AnswerEditor({
           className="btn btn-secondary"
           disabled={pending}
           onClick={() =>
-            save(async () => {
+            saveOther(async () => {
               await actionStartCoolingOff({
                 question_id: questionId,
                 wait_days: 7,
@@ -235,11 +282,13 @@ export function AnswerEditor({
           className="btn btn-secondary"
           disabled={pending}
           onClick={() =>
-            save(async () => {
+            saveOther(async () => {
               await actionScheduleReview({
                 entity_type: "question",
                 entity_id: questionId,
-                review_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+                review_date: new Date(Date.now() + 30 * 86400000)
+                  .toISOString()
+                  .slice(0, 10),
               });
             })
           }
@@ -251,7 +300,7 @@ export function AnswerEditor({
           className="btn btn-ghost"
           disabled={pending}
           onClick={() =>
-            save(async () => {
+            saveOther(async () => {
               await actionToggleBookmark(questionId, currentMemberId);
             })
           }

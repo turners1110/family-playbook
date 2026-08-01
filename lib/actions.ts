@@ -16,7 +16,7 @@ import { aiService } from "@/lib/services/ai";
 import { updateStore, id, nowIso } from "@/lib/db/store";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
-import { publicRemoteStoreMessage, logStoreError } from "@/lib/db/store-errors";
+import { publicRemoteStoreMessage, logStoreError, RemoteStoreError } from "@/lib/db/store-errors";
 
 async function requireIdentity() {
   const ctx = await requireFamilyContext();
@@ -26,9 +26,19 @@ async function requireIdentity() {
   return ctx;
 }
 
-function toActionError(error: unknown): { ok: false; error: string } {
+function toActionError(error: unknown): {
+  ok: false;
+  error: string;
+  code?: string;
+} {
   logStoreError("action", error);
-  return { ok: false, error: publicRemoteStoreMessage(error) };
+  const code =
+    error instanceof RemoteStoreError ? error.code : undefined;
+  return {
+    ok: false,
+    error: publicRemoteStoreMessage(error),
+    code,
+  };
 }
 
 export async function actionSaveAnswer(input: SaveAnswerInput) {

@@ -6,14 +6,15 @@ Magic-link auth at `/login` stays available for parallel testing.
 ## Enable
 
 1. Apply `supabase/migrations/0003_remote_json_store.sql` in the Supabase SQL editor.
-2. Confirm Turner Family exists (`pnpm setup:family`).
-3. Upload local data:
+2. Apply `supabase/migrations/0006_remote_store_mutations.sql` (mutation IDs + jsonb RPC result).
+3. Confirm Turner Family exists (`pnpm setup:family`).
+4. Upload local data:
 
 ```bash
 pnpm upload:remote-store
 ```
 
-4. Set **server-only** Vercel env vars (Production + Preview as needed):
+5. Set **server-only** Vercel env vars (Production + Preview as needed):
 
 | Variable | Example |
 |---|---|
@@ -26,7 +27,7 @@ pnpm upload:remote-store
 
 Never prefix these with `NEXT_PUBLIC_`. Never log or commit real values.
 
-5. Redeploy Vercel so server env is applied.
+6. Redeploy Vercel so server env is applied.
 
 ## Phone test
 

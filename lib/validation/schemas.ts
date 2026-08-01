@@ -45,6 +45,7 @@ export const saveAnswerSchema = z.object({
   needs_research: z.boolean().optional(),
   review_date: z.string().nullable().optional(),
   bookmarked: z.boolean().optional(),
+  mutation_id: z.string().min(8).max(128).optional(),
 });
 
 export const createSessionSchema = z.object({
