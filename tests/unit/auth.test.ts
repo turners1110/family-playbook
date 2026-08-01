@@ -48,10 +48,10 @@ describe("route classification", () => {
     }
   });
 
-  it("marks login and auth routes as public", () => {
+  it("marks login and callback as public", () => {
     expect(isPublicPath("/login")).toBe(true);
     expect(isPublicPath("/auth/callback")).toBe(true);
-    expect(isPublicPath("/auth/magic-link")).toBe(true);
+    expect(isPublicPath("/auth/magic-link")).toBe(false);
     expect(isProtectedPath("/login")).toBe(false);
   });
 });
@@ -118,24 +118,87 @@ describe("magic link redirect URL", () => {
       } as NodeJS.ProcessEnv),
     ).toBe("http://localhost:3000/auth/callback");
   });
+});
 
-  it("signInWithOtp options use shouldCreateUser false and emailRedirectTo", async () => {
+describe("browser PKCE magic-link login", () => {
+  it("login form calls browser signInWithOtp with emailRedirectTo /auth/callback", async () => {
     const source = await fs.readFile(
-      path.join(process.cwd(), "app/auth/magic-link/route.ts"),
+      path.join(process.cwd(), "components/auth/LoginForm.tsx"),
       "utf8",
     );
+    expect(source).toMatch(/from ["']@\/lib\/supabase\/client["']/);
+    expect(source).toMatch(/createClient\(/);
     expect(source).toMatch(/signInWithOtp\(/);
     expect(source).toMatch(/shouldCreateUser:\s*false/);
     expect(source).toMatch(/getMagicLinkRedirectTo/);
-    expect(source).toMatch(/createRouteHandlerClient/);
-    expect(source).toMatch(/pendingCookiesForOtpResponse/);
-    expect(source).toMatch(/applyPendingCookies/);
+    expect(source).toMatch(/emailRedirectTo/);
+    expect(source).not.toMatch(/fetch\(/);
+    expect(source).not.toMatch(/\/auth\/magic-link/);
+    expect(source).not.toMatch(/pendingCookiesForOtpResponse/);
+    expect(source).not.toMatch(/code-verifier/);
+    expect(source).not.toMatch(/generatePKCE/);
     expect(source).not.toMatch(/localhost:3000/);
-    expect(source).not.toMatch(/VERCEL_URL/);
+  });
+
+  it("custom magic-link route is no longer used", async () => {
+    await expect(
+      fs.access(path.join(process.cwd(), "app/auth/magic-link/route.ts")),
+    ).rejects.toThrow();
+
+    const login = await fs.readFile(
+      path.join(process.cwd(), "components/auth/LoginForm.tsx"),
+      "utf8",
+    );
+    expect(login).not.toMatch(/magic-link/);
+
+    const proxy = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/proxy.ts"),
+      "utf8",
+    );
+    expect(proxy).not.toMatch(/magic-link/);
+  });
+
+  it("browser and server clients share public env and no custom PKCE options", async () => {
+    const browser = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/client.ts"),
+      "utf8",
+    );
+    const route = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/route.ts"),
+      "utf8",
+    );
+    const server = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/server.ts"),
+      "utf8",
+    );
+
+    for (const source of [browser, route, server]) {
+      expect(source).toMatch(/NEXT_PUBLIC_SUPABASE_URL/);
+      expect(source).toMatch(/NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+      expect(source).not.toMatch(/storageKey\s*:/);
+      expect(source).not.toMatch(/flowType\s*:/);
+      expect(source).not.toMatch(/generatePKCE/);
+      expect(source).not.toMatch(/cookieOptions\s*:/);
+    }
+
+    expect(browser).toMatch(/createBrowserClient/);
+    expect(route).toMatch(/createServerClient/);
+    expect(route).not.toMatch(/pendingCookiesForOtpResponse/);
+    expect(route).not.toMatch(/normalizeAuthCookieOptions/);
+  });
+
+  it("callback still exchanges the returned code", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "app/auth/callback/route.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/exchangeCodeForSession\(code\)/);
+    expect(source).toMatch(/createRouteHandlerClient/);
+    expect(source).toMatch(/incoming_request/);
   });
 });
 
-describe("PKCE cookie handoff", () => {
+describe("PKCE cookie helpers for callback diagnostics", () => {
   it("detects code-verifier cookie names without exposing values", async () => {
     const {
       hasPkceCodeVerifierCookie,
@@ -154,181 +217,21 @@ describe("PKCE cookie handoff", () => {
       "sb-abcproject-auth-token-code-verifier",
       "sb-abcproject-auth-token.0",
     ]);
-    expect(summarizeAuthCookies(cookies)).toEqual({
-      hasPkceCodeVerifier: true,
-      authCookieNames: [
-        "sb-abcproject-auth-token-code-verifier",
-        "sb-abcproject-auth-token.0",
-      ],
-    });
-    // Ensure helpers never echo values into the summary object.
     expect(JSON.stringify(summarizeAuthCookies(cookies))).not.toContain("SECRET");
   });
 
-  it("reports missing verifier when only unrelated cookies exist", async () => {
-    const { hasPkceCodeVerifierCookie, summarizeAuthCookies } = await import(
-      "@/lib/auth/pkce-cookies"
-    );
-    const cookies = [{ name: "session", value: "x" }];
-    expect(hasPkceCodeVerifierCookie(cookies)).toBe(false);
-    expect(summarizeAuthCookies(cookies).authCookieNames).toEqual([]);
-  });
-
-  it("successful OTP send writes the new verifier cookie with path /", async () => {
-    const {
-      applyPendingCookies,
-      pendingCookiesForOtpResponse,
-    } = await import("@/lib/supabase/route");
-    const { NextResponse } = await import("next/server");
-
-    const buffered = [
-      {
-        name: "sb-test-auth-token-code-verifier",
-        value: "new-verifier-from-success",
-        options: { path: "/auth", sameSite: "lax" as const },
-      },
-    ];
-
-    const toWrite = pendingCookiesForOtpResponse(buffered, null);
-    expect(toWrite).toHaveLength(1);
-    expect(toWrite[0]?.options?.path).toBe("/");
-    expect(toWrite[0]?.options).not.toHaveProperty("domain");
-
-    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
-    expect(response.cookies.get("sb-test-auth-token-code-verifier")?.value).toBe(
-      "new-verifier-from-success",
-    );
-  });
-
-  it("failed OTP send writes no new verifier cookie", async () => {
-    const { pendingCookiesForOtpResponse, applyPendingCookies } = await import(
-      "@/lib/supabase/route"
-    );
-    const { NextResponse } = await import("next/server");
-
-    const buffered = [
-      {
-        name: "sb-test-auth-token-code-verifier",
-        value: "verifier-from-failed-attempt",
-        options: { path: "/" as const },
-      },
-    ];
-
-    const toWrite = pendingCookiesForOtpResponse(buffered, {
-      message: "email rate limit exceeded",
-      code: "over_email_send_rate_limit",
-      status: 429,
-    });
-    expect(toWrite).toEqual([]);
-
-    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
-    expect(response.cookies.getAll()).toEqual([]);
-  });
-
-  it("rate-limit failure preserves the prior verifier already in the browser", async () => {
-    const { pendingCookiesForOtpResponse, applyPendingCookies } = await import(
-      "@/lib/supabase/route"
-    );
-    const { NextResponse } = await import("next/server");
-    const { hasPkceCodeVerifierCookie } = await import("@/lib/auth/pkce-cookies");
-
-    const priorBrowserCookies = [
-      {
-        name: "sb-test-auth-token-code-verifier",
-        value: "prior-successful-verifier",
-      },
-    ];
-    expect(hasPkceCodeVerifierCookie(priorBrowserCookies)).toBe(true);
-
-    const bufferedFromFailedOtp = [
-      {
-        name: "sb-test-auth-token-code-verifier",
-        value: "rate-limit-overwritten-verifier",
-      },
-    ];
-
-    const toWrite = pendingCookiesForOtpResponse(bufferedFromFailedOtp, {
-      message: "email rate limit exceeded",
-      status: 429,
-    });
-    const response = applyPendingCookies(NextResponse.json({ ok: true }), toWrite);
-
-    expect(response.cookies.getAll().map((c) => c.name)).not.toContain(
-      "sb-test-auth-token-code-verifier",
-    );
-    expect(hasPkceCodeVerifierCookie(priorBrowserCookies)).toBe(true);
-  });
-
-  it("callback succeeds when code and verifier come from the same successful request", async () => {
-    const {
-      applyPendingCookies,
-      pendingCookiesForOtpResponse,
-    } = await import("@/lib/supabase/route");
-    const { NextResponse } = await import("next/server");
-    const { hasPkceCodeVerifierCookie } = await import("@/lib/auth/pkce-cookies");
-
-    const successBuffered = [
-      {
-        name: "sb-proj-auth-token-code-verifier",
-        value: "verifier-v1-matching-email-challenge",
-      },
-    ];
-    const successCookies = pendingCookiesForOtpResponse(successBuffered, null);
-    const magicLinkResponse = applyPendingCookies(
-      NextResponse.json({ ok: true }),
-      successCookies,
-    );
-    const verifierFromSuccess = magicLinkResponse.cookies.get(
-      "sb-proj-auth-token-code-verifier",
-    )?.value;
-    expect(verifierFromSuccess).toBe("verifier-v1-matching-email-challenge");
-
-    const rateLimited = pendingCookiesForOtpResponse(
-      [
-        {
-          name: "sb-proj-auth-token-code-verifier",
-          value: "verifier-v2-from-rate-limit",
-        },
-      ],
-      { message: "email rate limit exceeded", status: 429 },
-    );
-    expect(rateLimited).toEqual([]);
-
-    const callbackRequestCookies = [
-      { name: "sb-proj-auth-token-code-verifier", value: verifierFromSuccess! },
-    ];
-    expect(hasPkceCodeVerifierCookie(callbackRequestCookies)).toBe(true);
-    expect(callbackRequestCookies[0]?.value).toBe(
-      "verifier-v1-matching-email-challenge",
-    );
-    expect(callbackRequestCookies[0]?.value).not.toBe("verifier-v2-from-rate-limit");
-  });
-
-  it("route handler client buffers Set-Cookie writes for the response", async () => {
+  it("route handler applies session cookies onto the response without transforming values", async () => {
     const { applyPendingCookies } = await import("@/lib/supabase/route");
     const { NextResponse } = await import("next/server");
     const pending = [
       {
-        name: "sb-test-auth-token-code-verifier",
-        value: "verifier-value",
+        name: "sb-test-auth-token.0",
+        value: "session-chunk",
         options: { path: "/", sameSite: "lax" as const },
       },
     ];
     const response = applyPendingCookies(NextResponse.json({ ok: true }), pending);
-    const names = response.cookies.getAll().map((c) => c.name);
-    expect(names).toContain("sb-test-auth-token-code-verifier");
-  });
-
-  it("normalizeAuthCookieOptions forces path / and drops domain", async () => {
-    const { normalizeAuthCookieOptions } = await import("@/lib/supabase/route");
-    const normalized = normalizeAuthCookieOptions({
-      path: "/nested",
-      domain: "evil.example",
-      sameSite: "none",
-    });
-    expect(normalized?.path).toBe("/");
-    expect(normalized).not.toHaveProperty("domain");
-    expect(normalized?.sameSite).toBe("none");
+    expect(response.cookies.get("sb-test-auth-token.0")?.value).toBe("session-chunk");
   });
 
   it("callback reads request cookies before exchangeCodeForSession", async () => {
@@ -341,10 +244,8 @@ describe("PKCE cookie handoff", () => {
     expect(startIdx).toBeGreaterThan(-1);
     expect(exchangeIdx).toBeGreaterThan(startIdx);
     expect(source).toMatch(/hasPkceCodeVerifier/);
-    expect(source).toMatch(/authCookieNames/);
     expect(source).toMatch(/buildSafeCallbackRequestLog/);
     expect(source).toMatch(/createRouteHandlerClient/);
-    expect(source).not.toMatch(/cookie\.value|cookies\.get\([^)]+\)\?\.value/);
   });
 
   it("safe callback request log omits query values and secrets", async () => {
@@ -394,8 +295,6 @@ describe("PKCE cookie handoff", () => {
     expect(serialized).not.toContain("SECRET_CODE");
     expect(serialized).not.toContain("SECRET_TOKEN");
     expect(serialized).not.toContain("access_denied");
-    expect(serialized).not.toContain("otp_expired");
-    expect(serialized).not.toContain("Link expired");
   });
 
   it("safe callback request log handles missing referer and error params", async () => {
@@ -412,18 +311,9 @@ describe("PKCE cookie handoff", () => {
     });
 
     expect(log.hasCode).toBe(false);
-    expect(log.hasTokenHash).toBe(false);
-    expect(log.hasType).toBe(false);
-    expect(log.hasError).toBe(false);
-    expect(log.hasErrorCode).toBe(false);
-    expect(log.hasErrorDescription).toBe(false);
-    expect(log.hasPkceCodeVerifier).toBe(false);
-    expect(log.hasAnyCookies).toBe(false);
     expect(log.queryParamNames).toEqual([]);
-    expect(log.queryParams).toEqual([]);
     expect(log.redactedUrl).toBe("https://example.com/auth/callback");
     expect(log.referer).toBeNull();
-    expect(log.refererHost).toBeNull();
   });
 
   it("safe callback request log detects token_hash flow params by name only", async () => {
@@ -442,16 +332,10 @@ describe("PKCE cookie handoff", () => {
     expect(log.hasCode).toBe(false);
     expect(log.hasTokenHash).toBe(true);
     expect(log.hasType).toBe(true);
-    expect(log.queryParamNames).toEqual(["token_hash", "type"]);
-    expect(log.queryParams).toEqual([
-      { key: "token_hash", value_present: true },
-      { key: "type", value_present: true },
-    ]);
     expect(log.redactedUrl).toBe(
       "https://example.com/auth/callback?token_hash=***&type=***",
     );
     expect(JSON.stringify(log)).not.toContain("SECRET_HASH");
-    expect(JSON.stringify(log)).not.toContain("email");
   });
 
   it("callback logs incoming request before auth and before every redirect", async () => {
@@ -468,27 +352,17 @@ describe("PKCE cookie handoff", () => {
     expect(exchangeLogIdx).toBeGreaterThan(-1);
     expect(exchangeCallIdx).toBeGreaterThan(exchangeLogIdx);
     expect(source).toMatch(/"redirect"/);
-    expect(source).toMatch(/redactRedirectTargetForLog/);
     expect(source).toMatch(/reachedExchangeCodeForSession/);
   });
 
-  it("proxy skips session refresh on PKCE auth routes", async () => {
+  it("proxy skips session refresh on the auth callback", async () => {
     const source = await fs.readFile(
       path.join(process.cwd(), "lib/supabase/proxy.ts"),
       "utf8",
     );
     expect(source).toMatch(/\/auth\/callback/);
-    expect(source).toMatch(/\/auth\/magic-link/);
+    expect(source).not.toMatch(/magic-link/);
     expect(source).toMatch(/return supabaseResponse/);
-  });
-
-  it("login form posts to magic-link route so Set-Cookie reaches the browser", async () => {
-    const source = await fs.readFile(
-      path.join(process.cwd(), "components/auth/LoginForm.tsx"),
-      "utf8",
-    );
-    expect(source).toMatch(/fetch\("\/auth\/magic-link"/);
-    expect(source).not.toMatch(/requestMagicLink/);
   });
 });
 

@@ -1,6 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { isSupabaseAuthCookieName } from "@/lib/auth/pkce-cookies";
 
 export type PendingCookie = {
   name: string;
@@ -9,9 +8,10 @@ export type PendingCookie = {
 };
 
 /**
- * Supabase client for Route Handlers.
- * Reads from the incoming request; buffers Set-Cookie writes so they can be
- * applied to whichever NextResponse is ultimately returned (redirect/JSON).
+ * Supabase client for Route Handlers (auth callback).
+ * Uses the same NEXT_PUBLIC_SUPABASE_URL / ANON_KEY as createBrowserClient.
+ * Relies on @supabase/ssr PKCE defaults (no custom auth storage or flow overrides).
+ * Buffers Set-Cookie writes onto the response after exchangeCodeForSession.
  */
 export function createRouteHandlerClient(
   request: NextRequest,
@@ -32,8 +32,6 @@ export function createRouteHandlerClient(
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          // Keep request jar in sync for same-request reads (e.g. callback).
-          // Magic-link must still decide whether to flush these to the response.
           request.cookies.set(name, value);
           pendingCookies.push({ name, value, options });
         });
@@ -42,63 +40,12 @@ export function createRouteHandlerClient(
   });
 }
 
-/** Force a single app-origin cookie scope so duplicate path/domain variants do not accumulate. */
-export function normalizeAuthCookieOptions(
-  options?: PendingCookie["options"],
-): PendingCookie["options"] {
-  if (!options) {
-    return { path: "/", sameSite: "lax" };
-  }
-  const normalized: PendingCookie["options"] = {
-    ...options,
-    path: "/",
-    sameSite: options.sameSite ?? "lax",
-  };
-  delete normalized.domain;
-  return normalized;
-}
-
-export function isPkceVerifierCookieName(name: string): boolean {
-  return name.includes("-code-verifier");
-}
-
-/**
- * Cookies that may be written after signInWithOtp.
- * On any OTP error (including rate limit), return [] so a prior browser
- * verifier cookie is left untouched.
- */
-export function pendingCookiesForOtpResponse(
-  pendingCookies: readonly PendingCookie[],
-  otpError: { message?: string; code?: string; status?: number } | null,
-): PendingCookie[] {
-  if (otpError) {
-    return [];
-  }
-
-  return pendingCookies
-    .filter(
-      (cookie) =>
-        isPkceVerifierCookieName(cookie.name) ||
-        isSupabaseAuthCookieName(cookie.name),
-    )
-    .map((cookie) => ({
-      name: cookie.name,
-      value: cookie.value,
-      options: normalizeAuthCookieOptions(cookie.options),
-    }));
-}
-
 export function applyPendingCookies(
   response: NextResponse,
   pendingCookies: PendingCookie[],
 ) {
   pendingCookies.forEach(({ name, value, options }) => {
-    response.cookies.set(name, value, normalizeAuthCookieOptions(options));
+    response.cookies.set(name, value, options);
   });
   return response;
-}
-
-/** Cookie names only — never values. */
-export function pendingCookieNames(pendingCookies: readonly PendingCookie[]): string[] {
-  return [...new Set(pendingCookies.map((c) => c.name))].sort();
 }

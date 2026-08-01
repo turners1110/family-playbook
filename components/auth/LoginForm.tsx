@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { MagicLinkResult } from "@/lib/auth/magic-link-types";
+import { getMagicLinkRedirectTo } from "@/lib/auth/app-url";
+import {
+  createClient,
+  hasSupabaseBrowserConfig,
+} from "@/lib/supabase/client";
+
+const GENERIC_SUCCESS =
+  "If that email can receive mail, a sign-in link will arrive shortly. Check your inbox and spam folder.";
+
+const CONFIG_ERROR =
+  "Sign-in is not configured yet. Ask an administrator to set Supabase environment variables.";
 
 export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [email, setEmail] = useState("");
@@ -18,17 +28,38 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         setError(null);
         startTransition(async () => {
           try {
-            const res = await fetch("/auth/magic-link", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email }),
-            });
-            const result = (await res.json()) as MagicLinkResult;
-            if (result.ok) {
-              setMessage(result.message);
-            } else {
-              setError(result.message);
+            if (!hasSupabaseBrowserConfig()) {
+              setError(CONFIG_ERROR);
+              return;
             }
+
+            let emailRedirectTo: string;
+            try {
+              emailRedirectTo = getMagicLinkRedirectTo();
+            } catch {
+              setError(CONFIG_ERROR);
+              return;
+            }
+
+            const supabase = createClient();
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+              email: email.trim().toLowerCase(),
+              options: {
+                shouldCreateUser: false,
+                emailRedirectTo,
+              },
+            });
+
+            // Intentionally do not reveal whether the email exists or rate limits.
+            if (otpError) {
+              console.error("[auth] browser magic link request failed", {
+                message: otpError.message,
+                status: otpError.status,
+                code: otpError.code,
+              });
+            }
+
+            setMessage(GENERIC_SUCCESS);
           } catch {
             setError("Something went wrong. Please try again.");
           }
@@ -56,12 +87,18 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
       </button>
 
       {message && (
-        <p className="rounded-xl border border-border bg-accent-soft/50 px-3 py-2 text-sm text-accent-strong" role="status">
+        <p
+          className="rounded-xl border border-border bg-accent-soft/50 px-3 py-2 text-sm text-accent-strong"
+          role="status"
+        >
           {message}
         </p>
       )}
       {error && (
-        <p className="rounded-xl border border-border bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
+        <p
+          className="rounded-xl border border-border bg-danger-soft px-3 py-2 text-sm text-danger"
+          role="alert"
+        >
           {error}
         </p>
       )}

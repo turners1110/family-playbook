@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback", "/auth/magic-link"];
+const PUBLIC_PATHS = ["/login", "/auth/callback"];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
@@ -33,14 +33,9 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Auth routes manage their own cookies (PKCE verifier + code exchange).
+  // Auth callback manages its own cookies (PKCE exchange).
   // Do not run getUser()/setAll here — it can drop or rewrite auth cookies.
-  if (
-    pathname === "/auth/callback" ||
-    pathname.startsWith("/auth/callback/") ||
-    pathname === "/auth/magic-link" ||
-    pathname.startsWith("/auth/magic-link/")
-  ) {
+  if (pathname === "/auth/callback" || pathname.startsWith("/auth/callback/")) {
     return supabaseResponse;
   }
 
