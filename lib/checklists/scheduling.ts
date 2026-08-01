@@ -118,23 +118,47 @@ function snapToPreferredDay(
   preferredDays: number[],
   weekendHeavy: boolean,
   avoid: Set<string>,
+  options?: { latestAllowed?: string | null; preferEarlier?: boolean },
 ): string {
   const preferred = weekendHeavy
     ? [...new Set([0, 6, ...preferredDays])]
     : preferredDays.length
       ? preferredDays
       : [1, 2, 3, 4, 5];
+  const latest = options?.latestAllowed ?? null;
+  const preferEarlier = Boolean(options?.preferEarlier);
+
+  const withinLatest = (candidate: string) =>
+    !latest || candidate <= latest;
+
+  // Prefer earlier days when scheduling pre-birth work near the due date.
+  if (preferEarlier) {
+    for (let i = 0; i < 14; i += 1) {
+      const candidate = addDays(dateOnly, i === 0 ? 0 : -i);
+      if (!withinLatest(candidate)) continue;
+      if (avoid.has(candidate)) continue;
+      if (preferred.includes(dayOfWeek(candidate))) return candidate;
+    }
+    for (let i = 0; i < 21; i += 1) {
+      const candidate = addDays(dateOnly, -i);
+      if (!withinLatest(candidate)) continue;
+      if (!avoid.has(candidate)) return candidate;
+    }
+  }
 
   for (let i = 0; i < 14; i += 1) {
     const candidate = addDays(dateOnly, i === 0 ? 0 : i);
+    if (!withinLatest(candidate)) continue;
     if (avoid.has(candidate)) continue;
     if (preferred.includes(dayOfWeek(candidate))) return candidate;
   }
-  // Fall back: first non-travel day
+  // Fall back: first non-travel day at or before latestAllowed
   for (let i = 0; i < 21; i += 1) {
-    const candidate = addDays(dateOnly, i);
+    const candidate = addDays(dateOnly, preferEarlier ? -i : i);
+    if (!withinLatest(candidate)) continue;
     if (!avoid.has(candidate)) return candidate;
   }
+  if (latest && dateOnly > latest) return latest;
   return dateOnly;
 }
 
@@ -216,15 +240,29 @@ export function calculateTaskDates(
   let calcStart =
     startOffset != null ? addDays(dueDate, startOffset) : null;
 
+  // Enforce hard deadline (never schedule after hard deadline).
+  if (timed.hard_deadline_offset_days != null) {
+    const hard = addDays(dueDate, timed.hard_deadline_offset_days);
+    if (calcDue > hard) calcDue = hard;
+  }
+
+  // Pre-birth tasks must never land after the expected due date.
+  if (timed.timing_type === "before_birth" && calcDue > dueDate) {
+    calcDue = dueDate;
+  }
+
   const avoid = new Set(prefs?.avoidDates ?? []);
   const preferredDays =
     prefs?.preferredDays ?? DEFAULT_SCHEDULING_SETTINGS.before_baby_preferred_task_days;
   if (flex !== "fixed") {
+    const latestAllowed =
+      timed.timing_type === "before_birth" ? dueDate : null;
     calcDue = snapToPreferredDay(
       calcDue,
       preferredDays,
       Boolean(prefs?.weekendHeavy),
       avoid,
+      { latestAllowed, preferEarlier: timed.timing_type === "before_birth" },
     );
     if (calcStart) {
       calcStart = snapToPreferredDay(
@@ -232,9 +270,16 @@ export function calculateTaskDates(
         preferredDays,
         Boolean(prefs?.weekendHeavy),
         avoid,
+        { latestAllowed: calcDue, preferEarlier: true },
       );
       if (calcStart > calcDue) calcStart = calcDue;
     }
+  }
+
+  // Final clamp after snapping.
+  if (timed.timing_type === "before_birth" && calcDue > dueDate) {
+    calcDue = dueDate;
+    if (calcStart && calcStart > calcDue) calcStart = calcDue;
   }
 
   return {
@@ -247,66 +292,126 @@ export function calculateTaskDates(
 
 /**
  * Spread flexible tasks so weeks respect max_tasks_per_week.
- * Mutates calculated due dates for flexible calculated tasks only.
+ * Moves overflow EARLIER first. Never pushes pre-birth tasks past due date.
  */
 export function applyMaxTasksPerWeek(
   tasks: ChecklistTask[],
   maxPerWeek: number | null,
+  dueDate: string | null = null,
 ): ChecklistTask[] {
   if (!maxPerWeek || maxPerWeek < 1) return tasks;
-
-  const byWeek = new Map<string, ChecklistTask[]>();
-  for (const task of tasks) {
-    if (
-      task.completed ||
-      task.date_source === "manual" ||
-      task.timing_flexibility === "fixed" ||
-      !task.calculated_due_date
-    ) {
-      continue;
-    }
-    const week = startOfWeekMonday(task.calculated_due_date);
-    if (!byWeek.has(week)) byWeek.set(week, []);
-    byWeek.get(week)!.push(task);
-  }
 
   const result = tasks.map((t) => ({ ...t }));
   const byId = new Map(result.map((t) => [t.id, t]));
 
-  const weeks = [...byWeek.keys()].sort();
+  const weekCount = (weekKey: string) =>
+    result.filter(
+      (t) =>
+        t.calculated_due_date &&
+        t.date_source === "calculated" &&
+        startOfWeekMonday(t.calculated_due_date) === weekKey,
+    ).length;
+
+  const movable = result.filter(
+    (task) =>
+      !task.completed &&
+      task.date_source === "calculated" &&
+      task.timing_flexibility !== "fixed" &&
+      Boolean(task.calculated_due_date),
+  );
+
+  const byWeek = new Map<string, ChecklistTask[]>();
+  for (const task of movable) {
+    const week = startOfWeekMonday(task.calculated_due_date!);
+    if (!byWeek.has(week)) byWeek.set(week, []);
+    byWeek.get(week)!.push(task);
+  }
+
+  // Process overloaded weeks from latest → earliest so earlier moves free later capacity.
+  const weeks = [...byWeek.keys()].sort().reverse();
   for (const week of weeks) {
-    const bucket = byWeek.get(week)!;
+    const bucket = (byWeek.get(week) ?? [])
+      .map((t) => byId.get(t.id)!)
+      .filter(Boolean);
     if (bucket.length <= maxPerWeek) continue;
-    // Keep highest priority / earliest; push overflow to following weeks.
+
+    // Keep highest priority in place; move lowest-priority overflow earlier.
     bucket.sort(
       (a, b) =>
         priorityRank(a) - priorityRank(b) ||
         (a.calculated_due_date ?? "").localeCompare(b.calculated_due_date ?? ""),
     );
-    const overflow = bucket.slice(maxPerWeek);
-    let cursor = addDays(week, 7);
+    const overflow = bucket.slice(maxPerWeek).reverse(); // move optional/low first
     for (const task of overflow) {
       const live = byId.get(task.id);
-      if (!live) continue;
-      // Find a week with capacity
-      for (let guard = 0; guard < 26; guard += 1) {
-        const key = startOfWeekMonday(cursor);
-        const existing = result.filter(
-          (t) =>
-            t.calculated_due_date &&
-            startOfWeekMonday(t.calculated_due_date) === key &&
-            t.date_source === "calculated",
-        );
-        if (existing.length < maxPerWeek) {
-          live.calculated_due_date = cursor;
-          live.due_date = cursor;
-          if (live.calculated_start_date && live.calculated_start_date > cursor) {
-            live.calculated_start_date = cursor;
+      if (!live?.calculated_due_date) continue;
+
+      const latestAllowed =
+        live.timing_type === "before_birth" && dueDate && isDateOnly(dueDate)
+          ? dueDate
+          : null;
+      const hard =
+        dueDate &&
+        isDateOnly(dueDate) &&
+        live.hard_deadline_offset_days != null
+          ? addDays(dueDate, live.hard_deadline_offset_days)
+          : null;
+
+      let placed = false;
+      // Search earlier weeks first (up to ~40 weeks).
+      for (let back = 1; back <= 40 && !placed; back += 1) {
+        const candidateWeek = addDays(week, -7 * back);
+        if (weekCount(candidateWeek) >= maxPerWeek) continue;
+
+        let candidateDate = candidateWeek;
+        // Stay on/after a reasonable floor: don't move more than 120 days earlier than original.
+        const original = task.calculated_due_date!;
+        const floor = addDays(original, -120);
+        if (candidateDate < floor) continue;
+        if (latestAllowed && candidateDate > latestAllowed) {
+          candidateDate = latestAllowed;
+        }
+        if (hard && candidateDate > hard) candidateDate = hard;
+
+        // Prefer a day inside the candidate week that still has capacity.
+        for (let d = 0; d < 7; d += 1) {
+          const day = addDays(candidateWeek, d);
+          if (latestAllowed && day > latestAllowed) continue;
+          if (hard && day > hard) continue;
+          if (startOfWeekMonday(day) !== candidateWeek) continue;
+          if (weekCount(startOfWeekMonday(day)) >= maxPerWeek) continue;
+          live.calculated_due_date = day;
+          live.due_date = day;
+          if (live.calculated_start_date && live.calculated_start_date > day) {
+            live.calculated_start_date = day;
           }
-          cursor = addDays(cursor, 1);
+          placed = true;
           break;
         }
-        cursor = addDays(key, 7);
+      }
+
+      // If we cannot move earlier, leave in place — never push pre-birth past due date.
+      if (!placed && latestAllowed && live.calculated_due_date > latestAllowed) {
+        live.calculated_due_date = latestAllowed;
+        live.due_date = latestAllowed;
+      }
+    }
+  }
+
+  // Final safety clamp for all pre-birth calculated tasks.
+  if (dueDate && isDateOnly(dueDate)) {
+    for (const live of result) {
+      if (
+        live.timing_type === "before_birth" &&
+        live.date_source === "calculated" &&
+        live.calculated_due_date &&
+        live.calculated_due_date > dueDate
+      ) {
+        live.calculated_due_date = dueDate;
+        live.due_date = dueDate;
+        if (live.calculated_start_date && live.calculated_start_date > dueDate) {
+          live.calculated_start_date = dueDate;
+        }
       }
     }
   }
@@ -343,7 +448,11 @@ export function applyScheduleToTasks(
     };
   });
 
-  next = applyMaxTasksPerWeek(next, prefs.before_baby_max_tasks_per_week);
+  next = applyMaxTasksPerWeek(
+    next,
+    prefs.before_baby_max_tasks_per_week,
+    dueDate,
+  );
   return next;
 }
 
@@ -424,8 +533,8 @@ const GROUP_ORDER: ChecklistTimelineGroup[] = [
   "due_this_week",
   "due_next_week",
   "due_next_2_weeks",
-  "final_month",
   "final_week",
+  "final_month",
   "later",
   "after_birth",
   "no_date",
