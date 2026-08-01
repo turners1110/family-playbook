@@ -15,7 +15,9 @@
     "typecheck": "tsc --noEmit",
     "setup:family": "tsx scripts/setup-family.ts",
     "upload:remote-store": "tsx scripts/upload-local-store.ts",
-    "upload:research-library": "tsx scripts/upload-research-library.ts"
+    "upload:research-library": "tsx scripts/upload-research-library.ts",
+    "verify:live-content": "tsx scripts/verify-live-content.ts",
+    "preview:content-upgrade": "tsx scripts/preview-content-upgrade.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",
