@@ -7,6 +7,7 @@ import {
   AuthIdentityError,
   publicAuthMessage,
 } from "@/lib/auth/errors";
+import { getAppOrigin, getMagicLinkRedirectTo } from "@/lib/auth/app-url";
 import { isProtectedPath, isPublicPath } from "@/lib/supabase/proxy";
 
 describe("auth error messages", () => {
@@ -64,6 +65,69 @@ describe("magic link email validation", () => {
   it("rejects invalid emails", () => {
     expect(emailSchema.safeParse("not-an-email").success).toBe(false);
     expect(emailSchema.safeParse("").success).toBe(false);
+  });
+});
+
+describe("magic link redirect URL", () => {
+  it("builds emailRedirectTo from NEXT_PUBLIC_APP_URL", () => {
+    const env = {
+      NODE_ENV: "production",
+      NEXT_PUBLIC_APP_URL: "https://preview-app.vercel.app/",
+    } as NodeJS.ProcessEnv;
+
+    expect(getAppOrigin(env)).toBe("https://preview-app.vercel.app");
+    expect(getMagicLinkRedirectTo(env)).toBe(
+      "https://preview-app.vercel.app/auth/callback",
+    );
+  });
+
+  it("never generates localhost redirect URLs in production", () => {
+    expect(() =>
+      getMagicLinkRedirectTo({
+        NODE_ENV: "production",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/NEXT_PUBLIC_APP_URL is required/);
+
+    expect(() =>
+      getMagicLinkRedirectTo({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/must not point to localhost/);
+
+    expect(() =>
+      getMagicLinkRedirectTo({
+        NODE_ENV: "production",
+        NEXT_PUBLIC_APP_URL: "http://127.0.0.1:3000",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/must not point to localhost/);
+  });
+
+  it("still works with localhost in development", () => {
+    expect(
+      getMagicLinkRedirectTo({
+        NODE_ENV: "development",
+      } as NodeJS.ProcessEnv),
+    ).toBe("http://localhost:3000/auth/callback");
+
+    expect(
+      getMagicLinkRedirectTo({
+        NODE_ENV: "development",
+        NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+      } as NodeJS.ProcessEnv),
+    ).toBe("http://localhost:3000/auth/callback");
+  });
+
+  it("signInWithOtp options use shouldCreateUser false and emailRedirectTo", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/auth/actions.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/signInWithOtp\(/);
+    expect(source).toMatch(/shouldCreateUser:\s*false/);
+    expect(source).toMatch(/getMagicLinkRedirectTo/);
+    expect(source).not.toMatch(/localhost:3000/);
+    expect(source).not.toMatch(/VERCEL_URL/);
   });
 });
 

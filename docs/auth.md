@@ -12,7 +12,7 @@ reads/writes `data/local-store.json` until later migration phases.
 | `NEXT_PUBLIC_SUPABASE_URL` | Browser + server | Public |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser + server | Public anon key; RLS enforced |
 | `SUPABASE_SERVICE_ROLE_KEY` | `pnpm setup:family` only | Never ship to browser or ordinary app request paths |
-| `NEXT_PUBLIC_APP_URL` | Magic-link redirect | e.g. `http://localhost:3000` |
+| `NEXT_PUBLIC_APP_URL` | Magic-link `emailRedirectTo` origin | Required on Vercel Preview/Production (deployed URL). Local only: `http://localhost:3000`. Never set localhost in Preview/Production. |
 | `TURNER_SAM_EMAIL` | setup script | Not committed with real values |
 | `TURNER_MICHELLE_EMAIL` | setup script | Not committed with real values |
 | `TURNER_FAMILY_NAME` | setup script | Optional, default `Turner Family` |

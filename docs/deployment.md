@@ -12,10 +12,13 @@
    - `supabase/migrations/0001_init.sql`
    - `supabase/migrations/0002_auth_and_identity.sql`
 3. Configure Auth URL settings:
-   - Site URL = production app URL
-   - Redirect allow list includes `https://<domain>/auth/callback`
+   - Site URL = production app URL (not localhost)
+   - Redirect allow list includes:
+     - `https://<production-domain>/auth/callback`
+     - `https://*-<team>.vercel.app/auth/callback` (Preview deployments)
 4. Create Auth users for Sam and Michelle (Dashboard or invite)
 5. Set Vercel / host env vars from `.env.example`
+   - Set `NEXT_PUBLIC_APP_URL` per environment to the deployed origin (Preview: that deployment’s `https://…vercel.app` URL; Production: your canonical domain). Never use `http://localhost:3000` on Vercel.
 6. Run locally once (or in CI with secrets): `pnpm setup:family`
 7. Deploy the Next.js app
 8. Verify:

@@ -3,16 +3,10 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { getMagicLinkRedirectTo } from "@/lib/auth/app-url";
 import { AuthIdentityError } from "@/lib/auth/errors";
 
 const emailSchema = z.string().trim().email();
-
-function appOrigin() {
-  const raw =
-    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-  return raw.replace(/\/$/, "");
-}
 
 export type MagicLinkResult =
   | { ok: true; message: string }
@@ -32,6 +26,21 @@ export async function requestMagicLink(emailInput: string): Promise<MagicLinkRes
     };
   }
 
+  let emailRedirectTo: string;
+  try {
+    emailRedirectTo = getMagicLinkRedirectTo();
+  } catch (error) {
+    console.error("[auth] NEXT_PUBLIC_APP_URL configuration error", {
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return {
+      ok: false,
+      code: "config",
+      message:
+        "Sign-in is not configured yet. Ask an administrator to set Supabase environment variables.",
+    };
+  }
+
   let supabase;
   try {
     supabase = await createClient();
@@ -48,26 +57,19 @@ export async function requestMagicLink(emailInput: string): Promise<MagicLinkRes
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${appOrigin()}/auth/callback`,
       shouldCreateUser: false,
+      emailRedirectTo,
     },
   });
 
   // Intentionally do not reveal whether the email exists.
   if (error) {
-    // Temporary diagnostic logging for production debugging.
-    // Do not return these details to the browser.
+    // Detailed diagnostics stay on the server; never return these to the browser.
     console.error("[auth] magic link request failed", {
       message: error.message,
       status: error.status,
       code: error.code,
-      name: error.name,
-      details: {
-        ...error,
-        message: error.message,
-        status: error.status,
-        code: error.code,
-      },
+      details: error,
     });
   }
 

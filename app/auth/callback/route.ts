@@ -1,6 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+function logAuthCallbackError(
+  stage: string,
+  error: { message?: string; status?: number | string; code?: string } | null | undefined,
+  extra?: Record<string, unknown>,
+) {
+  console.error("[auth] callback failed", {
+    stage,
+    message: error?.message,
+    status: error?.status,
+    code: error?.code,
+    details: error,
+    ...extra,
+  });
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -9,6 +24,7 @@ export async function GET(request: Request) {
     next && next.startsWith("/") && !next.startsWith("//") ? next : "/home";
 
   if (!code) {
+    logAuthCallbackError("missing_code", { message: "No auth code in callback URL" });
     return NextResponse.redirect(`${origin}/login?error=callback_failed`);
   }
 
@@ -17,6 +33,10 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error || !data.session || !data.user) {
+      logAuthCallbackError("exchangeCodeForSession", error, {
+        hasSession: Boolean(data.session),
+        hasUser: Boolean(data.user),
+      });
       return NextResponse.redirect(`${origin}/login?error=callback_failed`);
     }
 
@@ -26,6 +46,7 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
+      logAuthCallbackError("getUser", userError);
       return NextResponse.redirect(`${origin}/login?error=callback_failed`);
     }
 
@@ -36,6 +57,7 @@ export async function GET(request: Request) {
       .maybeSingle();
 
     if (profileError) {
+      logAuthCallbackError("profile_lookup", profileError);
       return NextResponse.redirect(`${origin}/login?error=callback_failed`);
     }
 
@@ -59,12 +81,16 @@ export async function GET(request: Request) {
       // profiles_insert_deny may block this for authenticated role — that's OK;
       // redirect with a clear no_profile message so setup can be fixed.
       if (upsertError) {
+        logAuthCallbackError("profile_upsert", upsertError);
         return NextResponse.redirect(`${origin}/login?error=no_profile`);
       }
     }
 
     return NextResponse.redirect(`${origin}${safeNext}`);
-  } catch {
+  } catch (error) {
+    logAuthCallbackError("unhandled", {
+      message: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.redirect(`${origin}/login?error=callback_failed`);
   }
 }
