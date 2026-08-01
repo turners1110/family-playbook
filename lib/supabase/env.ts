@@ -1,28 +1,26 @@
 /**
- * Shared resolution of public Supabase env for user-scoped clients.
- * Prefer the newer publishable key; fall back to the legacy anon key.
+ * Server-side Supabase public env resolution.
+ *
+ * Accepts an optional ProcessEnv for unit tests. Production server/edge code
+ * should call without args so values come from the live process environment.
+ *
+ * Browser / client components must use `@/lib/supabase/browser-env` instead —
+ * injectable `env.NEXT_PUBLIC_*` access is not inlined into client bundles.
  */
 
+import {
+  SupabaseConfigError,
+  logSupabaseConfigError,
+} from "@/lib/supabase/config-errors";
+
+export type { SupabaseConfigReason } from "@/lib/supabase/config-errors";
+export {
+  SupabaseConfigError,
+  SUPABASE_CONFIG_USER_MESSAGE,
+  logSupabaseConfigError,
+} from "@/lib/supabase/config-errors";
+
 export type SupabasePublicKeySource = "publishable" | "anon";
-
-export type SupabaseConfigReason =
-  | "missing_url"
-  | "missing_public_key"
-  | "invalid_app_url";
-
-export class SupabaseConfigError extends Error {
-  reason: SupabaseConfigReason;
-
-  constructor(reason: SupabaseConfigReason, message: string) {
-    super(message);
-    this.name = "SupabaseConfigError";
-    this.reason = reason;
-  }
-}
-
-/** Generic copy safe to show in the browser. */
-export const SUPABASE_CONFIG_USER_MESSAGE =
-  "Sign-in is not configured yet. Ask an administrator to set Supabase environment variables.";
 
 export function resolveSupabaseUrl(
   env: NodeJS.ProcessEnv = process.env,
@@ -32,7 +30,7 @@ export function resolveSupabaseUrl(
 }
 
 /**
- * Public API key for browser/server user clients.
+ * Public API key for server user clients.
  * Order: PUBLISHABLE_KEY, then ANON_KEY.
  */
 export function resolveSupabasePublicKey(
@@ -57,13 +55,6 @@ export function hasSupabasePublicConfig(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   return Boolean(resolveSupabaseUrl(env) && resolveSupabasePublicKey(env));
-}
-
-/** @alias hasSupabasePublicConfig — used by browser client module. */
-export function hasSupabaseBrowserConfig(
-  env: NodeJS.ProcessEnv = process.env,
-): boolean {
-  return hasSupabasePublicConfig(env);
 }
 
 export type ResolvedSupabasePublicConfig = {
@@ -101,18 +92,4 @@ export function requireSupabasePublicConfig(
   }
 
   return { url, key, keySource };
-}
-
-export function logSupabaseConfigError(error: unknown) {
-  if (error instanceof SupabaseConfigError) {
-    console.error("[supabase] config error", {
-      reason: error.reason,
-      message: error.message,
-    });
-    return;
-  }
-  console.error("[supabase] config error", {
-    reason: "unknown",
-    message: error instanceof Error ? error.message : String(error),
-  });
 }

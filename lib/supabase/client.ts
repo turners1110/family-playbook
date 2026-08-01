@@ -1,9 +1,13 @@
 import { createBrowserClient } from "@supabase/ssr";
-import { requireSupabasePublicConfig } from "@/lib/supabase/env";
+import { requireBrowserSupabaseConfig } from "@/lib/supabase/browser-env";
 
-export { hasSupabaseBrowserConfig, hasSupabasePublicConfig } from "@/lib/supabase/env";
+export {
+  getBrowserSupabasePublicEnvDiagnostics,
+  hasSupabaseBrowserConfig,
+  requireBrowserSupabaseConfig,
+} from "@/lib/supabase/browser-env";
 
 export function createClient() {
-  const { url, key } = requireSupabasePublicConfig();
+  const { url, key } = requireBrowserSupabaseConfig();
   return createBrowserClient(url, key);
 }

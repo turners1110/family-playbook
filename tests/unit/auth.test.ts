@@ -180,7 +180,16 @@ describe("browser PKCE magic-link login", () => {
       "utf8",
     );
 
-    for (const source of [browser, route, server]) {
+    expect(browser).toMatch(/requireBrowserSupabaseConfig/);
+    expect(browser).toMatch(/@\/lib\/supabase\/browser-env/);
+    expect(browser).not.toMatch(/@\/lib\/supabase\/env["']/);
+    expect(browser).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
+    expect(browser).not.toMatch(/storageKey\s*:/);
+    expect(browser).not.toMatch(/flowType\s*:/);
+    expect(browser).not.toMatch(/generatePKCE/);
+    expect(browser).not.toMatch(/cookieOptions\s*:/);
+
+    for (const source of [route, server]) {
       expect(source).toMatch(/requireSupabasePublicConfig/);
       expect(source).toMatch(/@\/lib\/supabase\/env/);
       expect(source).not.toMatch(/storageKey\s*:/);
@@ -190,13 +199,13 @@ describe("browser PKCE magic-link login", () => {
       expect(source).not.toMatch(/SUPABASE_SERVICE_ROLE_KEY/);
     }
 
-    const envHelper = await fs.readFile(
-      path.join(process.cwd(), "lib/supabase/env.ts"),
+    const browserEnv = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/browser-env.ts"),
       "utf8",
     );
-    expect(envHelper).toMatch(/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
-    expect(envHelper).toMatch(/NEXT_PUBLIC_SUPABASE_ANON_KEY/);
-    expect(envHelper).toMatch(/resolveSupabasePublicKey/);
+    expect(browserEnv).toMatch(/process\.env\.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+    expect(browserEnv).toMatch(/process\.env\.NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+    expect(browserEnv).toMatch(/resolveBrowserSupabasePublicKey/);
 
     expect(browser).toMatch(/createBrowserClient/);
     expect(route).toMatch(/createServerClient/);

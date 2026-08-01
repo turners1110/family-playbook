@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { requireSupabasePublicConfig } from "@/lib/supabase/env";
 
-export { hasSupabasePublicConfig, hasSupabaseBrowserConfig } from "@/lib/supabase/env";
+export { hasSupabasePublicConfig } from "@/lib/supabase/env";
 
 export async function createClient() {
   const { url, key } = requireSupabasePublicConfig();

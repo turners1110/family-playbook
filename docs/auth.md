@@ -18,10 +18,12 @@ reads/writes `data/local-store.json` until later migration phases.
 | `TURNER_MICHELLE_EMAIL` | setup script | Not committed with real values |
 | `TURNER_FAMILY_NAME` | setup script | Optional, default `Turner Family` |
 
-Public key resolution order (see `lib/supabase/env.ts`):
+Public key resolution order:
 
 1. `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 2. `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+Browser code (`lib/supabase/browser-env.ts`, `lib/supabase/client.ts`) reads these via **static** `process.env.NEXT_PUBLIC_*` property access so Next.js can inline them into the client bundle. Server code uses `lib/supabase/env.ts`. Do not share an injectable `env` helper with client components.
 
 Server logs distinguish missing URL, missing public key, and invalid `NEXT_PUBLIC_APP_URL`. The browser always shows a generic configuration message.
 
@@ -37,7 +39,8 @@ Server logs distinguish missing URL, missing public key, and invalid `NEXT_PUBLI
 | `proxy.ts` | Session refresh + coarse route redirects |
 | `lib/auth/family-context.ts` | `requireFamilyContext()` — authoritative identity |
 | `lib/auth/actions.ts` | Logout + authenticated action helper |
-| `lib/supabase/env.ts` | Shared public key/URL resolution (publishable → anon) |
+| `lib/supabase/browser-env.ts` | Browser public key/URL (static `process.env` reads) |
+| `lib/supabase/env.ts` | Server public key/URL resolution (publishable → anon) |
 | `lib/auth/local-bridge.ts` | Maps auth email → local store actor for Phase 1 product data |
 | `scripts/setup-family.ts` | Idempotent family linking (admin) |
 

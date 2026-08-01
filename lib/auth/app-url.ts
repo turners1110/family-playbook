@@ -1,18 +1,22 @@
 import {
   SupabaseConfigError,
   logSupabaseConfigError,
-} from "@/lib/supabase/env";
+} from "@/lib/supabase/config-errors";
 
 /**
  * Resolves the public app origin used for auth redirects.
  *
- * - Prefers NEXT_PUBLIC_APP_URL (required outside local development).
- * - Allows a localhost default only when NODE_ENV === "development".
- * - Rejects localhost origins on deployed / production builds.
+ * When called without `env` (browser / production), reads
+ * `process.env.NEXT_PUBLIC_APP_URL` and `process.env.NODE_ENV` via static
+ * property access so Next.js can inline them into the client bundle.
+ * An explicit `env` argument is for unit tests only.
  */
-export function getAppOrigin(env: NodeJS.ProcessEnv = process.env): string {
-  const configured = env.NEXT_PUBLIC_APP_URL?.trim();
-  const isDevelopment = env.NODE_ENV === "development";
+export function getAppOrigin(env?: NodeJS.ProcessEnv): string {
+  const configured = (
+    env ? env.NEXT_PUBLIC_APP_URL : process.env.NEXT_PUBLIC_APP_URL
+  )?.trim();
+  const isDevelopment =
+    (env ? env.NODE_ENV : process.env.NODE_ENV) === "development";
 
   if (configured) {
     let origin: string;
@@ -51,9 +55,7 @@ export function getAppOrigin(env: NodeJS.ProcessEnv = process.env): string {
 }
 
 /** Magic-link landing path: ${NEXT_PUBLIC_APP_URL}/auth/callback */
-export function getMagicLinkRedirectTo(
-  env: NodeJS.ProcessEnv = process.env,
-): string {
+export function getMagicLinkRedirectTo(env?: NodeJS.ProcessEnv): string {
   return `${getAppOrigin(env)}/auth/callback`;
 }
 

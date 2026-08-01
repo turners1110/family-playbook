@@ -1,15 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { getMagicLinkRedirectTo } from "@/lib/auth/app-url";
 import {
   createClient,
+  getBrowserSupabasePublicEnvDiagnostics,
   hasSupabaseBrowserConfig,
 } from "@/lib/supabase/client";
-import {
-  SUPABASE_CONFIG_USER_MESSAGE,
-  requireSupabasePublicConfig,
-} from "@/lib/supabase/env";
+import { SUPABASE_CONFIG_USER_MESSAGE } from "@/lib/supabase/config-errors";
 
 const GENERIC_SUCCESS =
   "If that email can receive mail, a sign-in link will arrive shortly. Check your inbox and spam folder.";
@@ -20,6 +18,14 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [error, setError] = useState<string | null>(initialError ?? null);
   const [pending, startTransition] = useTransition();
 
+  useEffect(() => {
+    // Temporary Preview diagnostic — booleans only, never values.
+    console.info(
+      "[auth] supabase public env diagnostic",
+      getBrowserSupabasePublicEnvDiagnostics(),
+    );
+  }, []);
+
   return (
     <form
       className="mt-6 space-y-4"
@@ -29,13 +35,14 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         setError(null);
         startTransition(async () => {
           try {
+            const diagnostics = getBrowserSupabasePublicEnvDiagnostics();
+            console.info("[auth] supabase public env diagnostic", diagnostics);
+
             if (!hasSupabaseBrowserConfig()) {
-              // Logs missing_url vs missing_public_key for operators.
-              try {
-                requireSupabasePublicConfig();
-              } catch {
-                /* already logged */
-              }
+              console.error("[auth] sign-in blocked", {
+                gate: "missing_supabase_browser_config",
+                diagnostics,
+              });
               setError(SUPABASE_CONFIG_USER_MESSAGE);
               return;
             }
@@ -44,7 +51,10 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
             try {
               emailRedirectTo = getMagicLinkRedirectTo();
             } catch {
-              // getAppOrigin already logged invalid_app_url.
+              console.error("[auth] sign-in blocked", {
+                gate: "invalid_app_url",
+                diagnostics,
+              });
               setError(SUPABASE_CONFIG_USER_MESSAGE);
               return;
             }

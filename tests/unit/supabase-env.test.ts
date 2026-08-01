@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { promises as fs } from "fs";
+import path from "path";
 import {
   SupabaseConfigError,
-  hasSupabaseBrowserConfig,
+  hasSupabasePublicConfig,
   requireSupabasePublicConfig,
   resolveSupabasePublicKey,
   resolveSupabasePublicKeySource,
@@ -12,7 +14,7 @@ function env(vars: Record<string, string | undefined>): NodeJS.ProcessEnv {
   return vars as unknown as NodeJS.ProcessEnv;
 }
 
-describe("resolveSupabasePublicKey", () => {
+describe("server resolveSupabasePublicKey", () => {
   it("uses publishable key when only that is set", () => {
     const testEnv = env({
       NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
@@ -21,7 +23,7 @@ describe("resolveSupabasePublicKey", () => {
 
     expect(resolveSupabasePublicKey(testEnv)).toBe("pk-test");
     expect(resolveSupabasePublicKeySource(testEnv)).toBe("publishable");
-    expect(hasSupabaseBrowserConfig(testEnv)).toBe(true);
+    expect(hasSupabasePublicConfig(testEnv)).toBe(true);
     expect(requireSupabasePublicConfig(testEnv)).toEqual({
       url: "https://example.supabase.co",
       key: "pk-test",
@@ -37,7 +39,7 @@ describe("resolveSupabasePublicKey", () => {
 
     expect(resolveSupabasePublicKey(testEnv)).toBe("anon-test");
     expect(resolveSupabasePublicKeySource(testEnv)).toBe("anon");
-    expect(hasSupabaseBrowserConfig(testEnv)).toBe(true);
+    expect(hasSupabasePublicConfig(testEnv)).toBe(true);
     expect(requireSupabasePublicConfig(testEnv)).toEqual({
       url: "https://example.supabase.co",
       key: "anon-test",
@@ -64,7 +66,7 @@ describe("resolveSupabasePublicKey", () => {
 
     expect(resolveSupabasePublicKey(testEnv)).toBeNull();
     expect(resolveSupabasePublicKeySource(testEnv)).toBeNull();
-    expect(hasSupabaseBrowserConfig(testEnv)).toBe(false);
+    expect(hasSupabasePublicConfig(testEnv)).toBe(false);
 
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
@@ -104,6 +106,158 @@ describe("resolveSupabasePublicKey", () => {
         "[supabase] config error",
         expect.objectContaining({ reason: "missing_url" }),
       );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
+describe("browser-compatible static env path", () => {
+  const keys = [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_APP_URL",
+  ] as const;
+
+  const original: Record<string, string | undefined> = {};
+
+  afterEach(() => {
+    for (const key of keys) {
+      if (original[key] === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = original[key];
+      }
+    }
+    vi.resetModules();
+    vi.restoreAllMocks();
+  });
+
+  function stashEnv() {
+    for (const key of keys) {
+      original[key] = process.env[key];
+    }
+  }
+
+  function clearPublicEnv() {
+    for (const key of keys) {
+      delete process.env[key];
+    }
+  }
+
+  it("source uses static process.env property access (Next.js inlining)", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/browser-env.ts"),
+      "utf8",
+    );
+
+    expect(source).toMatch(/process\.env\.NEXT_PUBLIC_SUPABASE_URL/);
+    expect(source).toMatch(/process\.env\.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
+    expect(source).toMatch(/process\.env\.NEXT_PUBLIC_SUPABASE_ANON_KEY/);
+    expect(source).toMatch(/process\.env\.NEXT_PUBLIC_APP_URL/);
+    expect(source).not.toMatch(/process\.env\[/);
+    expect(source).not.toMatch(/Object\.keys\(process\.env\)/);
+    expect(source).not.toMatch(/env:\s*NodeJS\.ProcessEnv/);
+    expect(source).not.toMatch(/SERVICE_ROLE/);
+    expect(source).not.toMatch(/next\/headers/);
+  });
+
+  it("client module imports browser-env only (not server env helper)", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/client.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/@\/lib\/supabase\/browser-env/);
+    expect(source).toMatch(/requireBrowserSupabaseConfig/);
+    expect(source).not.toMatch(/@\/lib\/supabase\/env["']/);
+    expect(source).not.toMatch(/SERVICE_ROLE/);
+    expect(source).not.toMatch(/next\/headers/);
+  });
+
+  it("uses publishable key only via static process.env", async () => {
+    stashEnv();
+    clearPublicEnv();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "pk-test";
+    vi.resetModules();
+
+    const mod = await import("@/lib/supabase/browser-env");
+    expect(mod.resolveBrowserSupabasePublicKey()).toBe("pk-test");
+    expect(mod.resolveBrowserSupabasePublicKeySource()).toBe("publishable");
+    expect(mod.hasSupabaseBrowserConfig()).toBe(true);
+    expect(mod.requireBrowserSupabaseConfig()).toEqual({
+      url: "https://example.supabase.co",
+      key: "pk-test",
+      keySource: "publishable",
+    });
+    expect(mod.getBrowserSupabasePublicEnvDiagnostics()).toEqual({
+      hasUrl: true,
+      hasPublishableKey: true,
+      hasAnonKey: false,
+      hasAppUrl: false,
+    });
+  });
+
+  it("uses anon key only via static process.env", async () => {
+    stashEnv();
+    clearPublicEnv();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-test";
+    vi.resetModules();
+
+    const mod = await import("@/lib/supabase/browser-env");
+    expect(mod.resolveBrowserSupabasePublicKey()).toBe("anon-test");
+    expect(mod.resolveBrowserSupabasePublicKeySource()).toBe("anon");
+    expect(mod.hasSupabaseBrowserConfig()).toBe(true);
+    expect(mod.getBrowserSupabasePublicEnvDiagnostics()).toEqual({
+      hasUrl: true,
+      hasPublishableKey: false,
+      hasAnonKey: true,
+      hasAppUrl: false,
+    });
+  });
+
+  it("prefers publishable key when both exist", async () => {
+    stashEnv();
+    clearPublicEnv();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "pk-preferred";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-fallback";
+    vi.resetModules();
+
+    const mod = await import("@/lib/supabase/browser-env");
+    expect(mod.resolveBrowserSupabasePublicKey()).toBe("pk-preferred");
+    expect(mod.resolveBrowserSupabasePublicKeySource()).toBe("publishable");
+  });
+
+  it("reports neither key present", async () => {
+    stashEnv();
+    clearPublicEnv();
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    vi.resetModules();
+
+    const mod = await import("@/lib/supabase/browser-env");
+    expect(mod.resolveBrowserSupabasePublicKey()).toBeNull();
+    expect(mod.hasSupabaseBrowserConfig()).toBe(false);
+    expect(mod.getBrowserSupabasePublicEnvDiagnostics()).toEqual({
+      hasUrl: true,
+      hasPublishableKey: false,
+      hasAnonKey: false,
+      hasAppUrl: false,
+    });
+
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      let thrown: unknown;
+      try {
+        mod.requireBrowserSupabaseConfig();
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(Error);
+      expect((thrown as Error).name).toBe("SupabaseConfigError");
+      expect((thrown as { reason?: string }).reason).toBe("missing_public_key");
     } finally {
       spy.mockRestore();
     }
@@ -163,5 +317,14 @@ describe("invalid NEXT_PUBLIC_APP_URL", () => {
     } finally {
       spy.mockRestore();
     }
+  });
+
+  it("app-url uses static process.env when called without override", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/auth/app-url.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/process\.env\.NEXT_PUBLIC_APP_URL/);
+    expect(source).toMatch(/process\.env\.NODE_ENV/);
   });
 });
