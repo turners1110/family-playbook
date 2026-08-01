@@ -1,4 +1,4 @@
-import { readStore, updateStore, nowIso, id } from "@/lib/db/local-store";
+import { readStore, updateStore, nowIso, id } from "@/lib/db/store";
 import type { Question, Session, SessionFilters, SessionQuestion } from "@/lib/types/models";
 import {
   createSessionSchema,
@@ -6,6 +6,10 @@ import {
   type CreateSessionInput,
 } from "@/lib/validation/schemas";
 import { BABYMOON_WEIGHT_CATEGORIES } from "@/lib/constants/enums";
+import {
+  buildQuestionStatusIndex,
+  type QuestionAnswerStatus,
+} from "@/lib/services/question-status";
 
 const PRACTICAL_TYPES = new Set([
   "practical_planning",
@@ -29,6 +33,7 @@ export function filterQuestions(
   unresolvedIds: Set<string>,
   filters: SessionFilters,
   recentCategoryCounts: Map<string, number> = new Map(),
+  statusIndex?: Map<string, QuestionAnswerStatus>,
 ): Question[] {
   let list = questions.filter((q) => q.active);
 
@@ -45,9 +50,30 @@ export function filterQuestions(
   if (filters.outcome) {
     list = list.filter((q) => q.outcomes.includes(filters.outcome!));
   }
-  if (filters.only_unanswered) {
-    list = list.filter((q) => !answeredIds.has(q.id));
+
+  const reviewMode =
+    Boolean(filters.review_changed) ||
+    Boolean(filters.review_undecided) ||
+    Boolean(filters.review_due);
+
+  if (reviewMode && statusIndex) {
+    list = list.filter((q) => {
+      const status = statusIndex.get(q.id);
+      if (!status) return false;
+      if (filters.review_changed && status.answerChanged) return true;
+      if (filters.review_undecided && status.undecided) return true;
+      if (filters.review_due && status.reviewDue) return true;
+      return false;
+    });
+  } else if (!filters.include_answered) {
+    // Interview default: skip fully answered questions that do not need attention.
+    if (statusIndex) {
+      list = list.filter((q) => !statusIndex.get(q.id)?.skipByDefault);
+    } else if (filters.only_unanswered !== false) {
+      list = list.filter((q) => !answeredIds.has(q.id));
+    }
   }
+
   if (filters.include_unresolved) {
     list = list.filter((q) => unresolvedIds.has(q.id) || !answeredIds.has(q.id));
   }
@@ -81,7 +107,10 @@ export function filterQuestions(
   }
 
   if (filters.preset === "not_considered") {
-    list = list.filter((q) => !answeredIds.has(q.id));
+    list = list.filter((q) => {
+      if (statusIndex) return !statusIndex.get(q.id)?.fullyAnswered;
+      return !answeredIds.has(q.id);
+    });
     list.sort((a, b) => {
       const ac = Math.min(...a.categories.map((c) => recentCategoryCounts.get(c) ?? 0));
       const bc = Math.min(...b.categories.map((c) => recentCategoryCounts.get(c) ?? 0));
@@ -92,7 +121,12 @@ export function filterQuestions(
 
   if (filters.preset === "fifteen_minutes") {
     list = list
-      .filter((q) => !answeredIds.has(q.id) && q.estimated_minutes <= 8)
+      .filter((q) => {
+        const unanswered = statusIndex
+          ? !statusIndex.get(q.id)?.fullyAnswered
+          : !answeredIds.has(q.id);
+        return unanswered && q.estimated_minutes <= 8;
+      })
       .sort((a, b) => {
         const ap = priorityScore(a);
         const bp = priorityScore(b);
@@ -143,15 +177,23 @@ function diversify(questions: Question[]) {
 export async function createSession(input: CreateSessionInput) {
   const data = createSessionSchema.parse(input);
   const store = await readStore();
+  const statusIndex = buildQuestionStatusIndex(store);
   const answeredIds = new Set(
-    store.answers.filter((a) => a.is_shared || a.status !== "not_started").map((a) => a.question_id),
+    [...statusIndex.entries()]
+      .filter(([, status]) => status.skipByDefault)
+      .map(([questionId]) => questionId),
   );
   const unresolvedIds = new Set(
-    store.answers
-      .filter((a) =>
-        ["undecided", "needs_research", "cooling_off", "in_discussion"].includes(a.status),
+    [...statusIndex.entries()]
+      .filter(
+        ([, status]) =>
+          status.undecided ||
+          status.coolingOff ||
+          status.reviewDue ||
+          status.answerChanged ||
+          status.partiallyAnswered,
       )
-      .map((a) => a.question_id),
+      .map(([questionId]) => questionId),
   );
 
   const recentCategoryCounts = new Map<string, number>();
@@ -168,6 +210,7 @@ export async function createSession(input: CreateSessionInput) {
     unresolvedIds,
     data.filters,
     recentCategoryCounts,
+    statusIndex,
   );
 
   const count = data.question_ids?.length

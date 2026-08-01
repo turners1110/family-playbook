@@ -1,19 +1,21 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProgressBar } from "@/components/shared/ui";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDashboardStats } from "@/lib/services/stats";
-import { readStore } from "@/lib/db/local-store";
+import { readStore } from "@/lib/db/store";
 import { SessionSetupForm } from "@/components/discuss/SessionSetupForm";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
 export default async function BabymoonPage() {
   const stats = await getDashboardStats();
   const store = await readStore();
-  const answered = new Set(store.answers.map((a) => a.question_id));
+  const statusIndex = buildQuestionStatusIndex(store);
   const essential = store.questions
     .filter((q) => q.required_before_birth || q.priority === "essential_before_birth")
-    .filter((q) => !answered.has(q.id))
+    .filter((q) => !statusIndex.get(q.id)?.fullyAnswered)
     .slice(0, 15);
 
   return (
@@ -54,9 +56,12 @@ export default async function BabymoonPage() {
         <ul className="mt-3 space-y-2">
           {essential.map((q) => (
             <li key={q.id} className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm">
-              <Link href={`/questions/${q.slug}`} className="hover:text-accent">
-                {q.short_title}
-              </Link>
+              <span className="flex flex-wrap items-center gap-2">
+                <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
+                <Link href={`/questions/${q.slug}`} className="hover:text-accent">
+                  {q.short_title}
+                </Link>
+              </span>
               <span className="text-ink-subtle">~{q.estimated_minutes}m</span>
             </li>
           ))}

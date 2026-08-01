@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { StatusBadge, PriorityBadge, ConfidenceBadge } from "@/components/shared/ui";
-import { readStore } from "@/lib/db/local-store";
+import { PriorityBadge } from "@/components/shared/ui";
+import {
+  AnswerStatusBadge,
+  AnswerStatusHeader,
+} from "@/components/questions/AnswerStatusBadge";
+import { readStore } from "@/lib/db/store";
 import { AnswerEditor } from "@/components/questions/AnswerEditor";
 import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
+import {
+  buildQuestionStatusIndex,
+  getQuestionAnswerStatus,
+} from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +27,8 @@ export default async function QuestionDetailPage({
   if (!question) notFound();
 
   const answers = store.answers.filter((a) => a.question_id === question.id);
+  const status = getQuestionAnswerStatus(question.id, store);
+  const statusIndex = buildQuestionStatusIndex(store);
   const versions = store.answer_versions
     .filter((v) => answers.some((a) => a.id === v.answer_id))
     .sort((a, b) => b.created_at.localeCompare(a.created_at));
@@ -40,8 +50,13 @@ export default async function QuestionDetailPage({
         </Link>
       }
     >
+      <section className="mb-5">
+        <AnswerStatusHeader status={status} />
+      </section>
+
       <section className="surface p-5">
         <div className="mb-3 flex flex-wrap gap-2">
+          <AnswerStatusBadge status={status} />
           <PriorityBadge priority={question.priority} />
           {question.babymoon_priority && <span className="badge badge-accent">Babymoon</span>}
           {question.required_before_birth && (
@@ -102,8 +117,6 @@ export default async function QuestionDetailPage({
               <div key={a.id} className="rounded-xl border border-border p-3 text-sm">
                 <div className="mb-2 flex flex-wrap gap-2">
                   <span className="badge">{a.is_shared ? "Shared" : "Individual"}</span>
-                  <StatusBadge status={a.status} />
-                  <ConfidenceBadge confidence={a.confidence} />
                 </div>
                 <p>{a.payload.text || a.payload.quick || "—"}</p>
                 {a.payload.disagreement_notes && (
@@ -138,7 +151,8 @@ export default async function QuestionDetailPage({
           <ul className="mt-3 space-y-2 text-sm">
             {related.map((q) =>
               q ? (
-                <li key={q.id}>
+                <li key={q.id} className="flex flex-wrap items-center gap-2">
+                  <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                   <Link href={`/questions/${q.slug}`} className="hover:text-accent">
                     {q.short_title}
                   </Link>

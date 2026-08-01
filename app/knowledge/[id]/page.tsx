@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { readStore } from "@/lib/db/local-store";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
+import { readStore } from "@/lib/db/store";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,7 @@ export default async function KnowledgeDetailPage({
   const store = await readStore();
   const item = store.knowledge_items.find((k) => k.id === id);
   if (!item) notFound();
-
+  const statusIndex = buildQuestionStatusIndex(store);
   return (
     <AppShell title={item.title} subtitle={`${item.item_type.replaceAll("_", " ")} · ${item.evidence_quality}`}>
       <article className="surface p-5">
@@ -41,7 +43,8 @@ export default async function KnowledgeDetailPage({
             {item.related_question_ids.map((qid) => {
               const q = store.questions.find((itemQ) => itemQ.id === qid);
               return q ? (
-                <li key={qid}>
+                <li key={qid} className="flex flex-wrap items-center gap-2">
+                  <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                   <Link href={`/questions/${q.slug}`} className="hover:text-accent">{q.short_title}</Link>
                 </li>
               ) : null;

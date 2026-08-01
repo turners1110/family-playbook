@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatusBadge, ConfidenceBadge } from "@/components/shared/ui";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDecision } from "@/lib/services/decisions";
-import { readStore } from "@/lib/db/local-store";
+import { readStore } from "@/lib/db/store";
 import { DecisionForm } from "@/components/decisions/DecisionForm";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +20,12 @@ export default async function DecisionDetailPage({
   if (!result) notFound();
   const { decision, versions } = result;
   const store = await readStore();
+  const statusIndex = buildQuestionStatusIndex(store);
   const outcomes = store.outcomes.filter((o) => decision.outcome_ids.includes(o.id));
   const principles = store.principles.filter((p) => decision.principle_ids.includes(p.id));
   const sourceQuestions = store.questions.filter((q) =>
     decision.source_question_ids.includes(q.id),
   );
-
   return (
     <AppShell
       title={decision.title}
@@ -100,7 +102,8 @@ export default async function DecisionDetailPage({
           <h3 className="font-display text-lg">Source questions</h3>
           <ul className="mt-2 space-y-1 text-sm">
             {sourceQuestions.map((q) => (
-              <li key={q.id}>
+              <li key={q.id} className="flex flex-wrap items-center gap-2">
+                <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                 <Link href={`/questions/${q.slug}`} className="hover:text-accent">{q.short_title}</Link>
               </li>
             ))}

@@ -32,6 +32,10 @@ export function SessionSetupForm({
   );
   const [filters, setFilters] = useState({
     only_unanswered: true,
+    include_answered: false,
+    review_changed: false,
+    review_undecided: false,
+    review_due: false,
     include_unresolved: false,
     include_research: false,
     include_separate: false,
@@ -164,11 +168,39 @@ export function SessionSetupForm({
       </div>
 
       <fieldset>
+        <legend className="mb-2 text-sm font-semibold text-ink-muted">
+          Interview status
+        </legend>
+        <p className="mb-2 text-xs text-ink-subtle">
+          Fully answered questions are skipped by default.
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {(
+            [
+              ["include_answered", "Include answered questions"],
+              ["review_changed", "Review changed answers"],
+              ["review_undecided", "Review undecided questions"],
+              ["review_due", "Review due questions"],
+            ] as const
+          ).map(([key, label]) => (
+            <label key={key} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={filters[key]}
+                onChange={() => toggle(key)}
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend className="mb-2 text-sm font-semibold text-ink-muted">Filters</legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {(
             [
-              ["only_unanswered", "Only unanswered"],
+              ["only_unanswered", "Prefer unanswered"],
               ["include_unresolved", "Include unresolved"],
               ["include_research", "Needing research"],
               ["include_separate", "Separate-answer questions"],

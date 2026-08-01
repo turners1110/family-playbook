@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { readStore } from "@/lib/db/local-store";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
+import { readStore } from "@/lib/db/store";
 import { ProgressBar } from "@/components/shared/ui";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
@@ -16,14 +18,13 @@ export default async function OutcomeDetailPage({
   const outcome = store.outcomes.find((o) => o.slug === slug);
   if (!outcome) notFound();
 
+  const statusIndex = buildQuestionStatusIndex(store);
   const questions = store.questions.filter((q) => q.outcomes.includes(outcome.slug));
   const decisions = store.decisions.filter((d) => d.outcome_ids.includes(outcome.id));
   const maps = store.development_maps.filter((m) => m.outcome_id === outcome.id);
-  const answered = new Set(store.answers.map((a) => a.question_id));
-  const covered = questions.filter((q) => answered.has(q.id)).length;
+  const covered = questions.filter((q) => statusIndex.get(q.id)?.fullyAnswered).length;
   const pct = questions.length ? Math.round((covered / questions.length) * 100) : 0;
   const conflicting = decisions.filter((d) => d.has_disagreement);
-
   return (
     <AppShell title={outcome.label} subtitle={outcome.definition}>
       <div className="surface mb-5 p-5">
@@ -43,7 +44,8 @@ export default async function OutcomeDetailPage({
           <h2 className="font-display text-xl">Related questions</h2>
           <ul className="mt-3 space-y-2 text-sm">
             {questions.slice(0, 20).map((q) => (
-              <li key={q.id}>
+              <li key={q.id} className="flex flex-wrap items-center gap-2">
+                <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                 <Link href={`/questions/${q.slug}`} className="hover:text-accent">
                   {q.short_title}
                 </Link>

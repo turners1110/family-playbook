@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProgressBar, StatCard } from "@/components/shared/ui";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDashboardStats } from "@/lib/services/stats";
-import { readStore } from "@/lib/db/local-store";
+import { readStore } from "@/lib/db/store";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const store = await readStore();
   const stats = await getDashboardStats();
+  const statusIndex = buildQuestionStatusIndex(store);
 
   return (
     <AppShell
@@ -74,7 +77,8 @@ export default async function HomePage() {
           </p>
           <ul className="mt-4 space-y-2 text-sm">
             {stats.essentialRemaining.slice(0, 5).map((q) => (
-              <li key={q.id} className="rounded-xl border border-border px-3 py-2">
+              <li key={q.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-border px-3 py-2">
+                <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                 <Link href={`/questions/${q.slug}`} className="hover:text-accent">
                   {q.short_title}
                 </Link>

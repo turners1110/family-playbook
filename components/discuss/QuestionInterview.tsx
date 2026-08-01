@@ -24,6 +24,7 @@ export function QuestionInterview({
   revealSeparate,
   bookmarked,
   currentMemberId,
+  answerStatusLabel,
 }: {
   sessionId: string;
   question: Question;
@@ -34,6 +35,7 @@ export function QuestionInterview({
   revealSeparate: boolean;
   bookmarked: boolean;
   currentMemberId: string;
+  answerStatusLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -170,6 +172,11 @@ export function QuestionInterview({
         <div className="progress-track mb-4">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
+        {answerStatusLabel && (
+          <p className="mb-3 text-sm text-ink-muted" aria-live="polite">
+            Status: <span className="font-medium text-ink">{answerStatusLabel}</span>
+          </p>
+        )}
         <div className="mb-3 flex flex-wrap gap-2">
           <PriorityBadge priority={question.priority} />
           {question.babymoon_priority && <span className="badge badge-accent">Babymoon</span>}

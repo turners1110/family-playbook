@@ -250,6 +250,10 @@ export interface SessionFilters {
   category?: string;
   outcome?: string;
   only_unanswered?: boolean;
+  include_answered?: boolean;
+  review_changed?: boolean;
+  review_undecided?: boolean;
+  review_due?: boolean;
   include_unresolved?: boolean;
   include_research?: boolean;
   include_separate?: boolean;

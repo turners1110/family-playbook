@@ -1,5 +1,8 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { searchAll } from "@/lib/services/stats";
+import { readStore } from "@/lib/db/store";
+import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +15,8 @@ export default async function SearchPage({
   const params = await searchParams;
   const q = params.q ?? "";
   const results = q ? await searchAll(q) : null;
+  const store = await readStore();
+  const statusIndex = buildQuestionStatusIndex(store);
 
   return (
     <AppShell title="Search" subtitle="Search questions, answers, decisions, outcomes, principles, knowledge, and notes.">
@@ -37,7 +42,10 @@ export default async function SearchPage({
           {(
             [
               ["Questions", results.questions.map((item) => (
-                <li key={item.id}><Link href={`/questions/${item.slug}`}>{item.short_title}</Link></li>
+                <li key={item.id} className="flex flex-wrap items-center gap-2">
+                  <AnswerStatusBadge status={statusIndex.get(item.id)!} compact />
+                  <Link href={`/questions/${item.slug}`}>{item.short_title}</Link>
+                </li>
               ))],
               ["Decisions", results.decisions.map((item) => (
                 <li key={item.id}><Link href={`/decisions/${item.id}`}>{item.title}</Link></li>
@@ -52,10 +60,20 @@ export default async function SearchPage({
                 <li key={item.id}><Link href={`/knowledge/${item.id}`}>{item.title}</Link></li>
               ))],
               ["Answers", results.answers.map((item) => (
-                <li key={item.id}>
+                <li key={item.id} className="flex flex-wrap items-center gap-2">
                   {item.question ? (
-                    <Link href={`/questions/${item.question.slug}`}>{item.question.short_title}</Link>
-                  ) : item.id}
+                    <>
+                      <AnswerStatusBadge
+                        status={statusIndex.get(item.question.id)!}
+                        compact
+                      />
+                      <Link href={`/questions/${item.question.slug}`}>
+                        {item.question.short_title}
+                      </Link>
+                    </>
+                  ) : (
+                    item.id
+                  )}
                 </li>
               ))],
               ["Notes", results.notes.map((item) => (

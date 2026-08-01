@@ -2,9 +2,15 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { QuestionInterview } from "@/components/discuss/QuestionInterview";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getSession } from "@/lib/services/sessions";
 import { getSeparateAnswerState } from "@/lib/services/answers";
-import { readStore } from "@/lib/db/local-store";
+import { readStore } from "@/lib/db/store";
+import {
+  buildQuestionStatusIndex,
+  getQuestionAnswerStatus,
+  personStateLabel,
+} from "@/lib/services/question-status";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +35,8 @@ export default async function DiscussionSessionPage({
   const store = await readStore();
   const answers = store.answers.filter((a) => a.question_id === current.question_id);
   const separate = await getSeparateAnswerState(current.question_id);
+  const status = getQuestionAnswerStatus(current.question_id, store);
+  const statusIndex = buildQuestionStatusIndex(store);
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
   const bookmarked = store.bookmarks.some(
     (b) => b.question_id === current.question_id && b.member_id === member.id,
@@ -51,6 +59,16 @@ export default async function DiscussionSessionPage({
         </Link>
       }
     >
+      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-bg-muted/40 px-4 py-3 text-sm">
+        <span className="text-ink-muted">Before you answer:</span>
+        <AnswerStatusBadge status={status} />
+        <span className="text-ink-muted">
+          Sam {personStateLabel(status.sam)} · Michelle{" "}
+          {personStateLabel(status.michelle)} · Shared{" "}
+          {personStateLabel(status.shared)}
+        </span>
+      </div>
+
       <QuestionInterview
         sessionId={sessionId}
         question={current.question}
@@ -61,6 +79,7 @@ export default async function DiscussionSessionPage({
         revealSeparate={separate.reveal}
         bookmarked={bookmarked}
         currentMemberId={member.id}
+        answerStatusLabel={status.label}
       />
 
       {current.question.related_questions.length > 0 && (
@@ -71,7 +90,8 @@ export default async function DiscussionSessionPage({
               const q = store.questions.find((item) => item.id === id);
               if (!q) return null;
               return (
-                <li key={id}>
+                <li key={id} className="flex flex-wrap items-center gap-2">
+                  <AnswerStatusBadge status={statusIndex.get(q.id)!} compact />
                   <Link href={`/questions/${q.slug}`} className="text-accent hover:underline">
                     {q.short_title}
                   </Link>
