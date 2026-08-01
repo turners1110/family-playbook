@@ -45,6 +45,7 @@ yarn-error.log*
 /data/research-library.json
 /data/research-library.json.tmp
 /data/research-files/
+/data/research-recommended-prefs.json
 
 # vercel
 .vercel
