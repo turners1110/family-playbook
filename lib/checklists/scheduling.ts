@@ -26,6 +26,7 @@ import type {
 
 export type NormalizedSchedulingSettings = {
   expected_due_date: string | null;
+  actual_birth_date: string | null;
   before_baby_scheduling_mode: BeforeBabySchedulingMode;
   before_baby_preferred_task_days: number[];
   before_baby_max_tasks_per_week: number | null;
@@ -37,6 +38,7 @@ export type NormalizedSchedulingSettings = {
 
 export const DEFAULT_SCHEDULING_SETTINGS: NormalizedSchedulingSettings = {
   expected_due_date: null,
+  actual_birth_date: null,
   before_baby_scheduling_mode: "recommended",
   before_baby_preferred_task_days: [1, 2, 3, 4, 5],
   before_baby_max_tasks_per_week: 8,
@@ -51,6 +53,7 @@ export function normalizeSchedulingSettings(
 ): NormalizedSchedulingSettings {
   return {
     expected_due_date: settings?.expected_due_date ?? null,
+    actual_birth_date: settings?.actual_birth_date ?? null,
     before_baby_scheduling_mode:
       settings?.before_baby_scheduling_mode ?? "recommended",
     before_baby_preferred_task_days:
@@ -68,26 +71,53 @@ export function normalizeSchedulingSettings(
   };
 }
 
+/** Anchor date for a task: birth date for post-birth when known, else due date. */
+export function schedulingAnchorForTask(
+  task: ChecklistTask,
+  settings: Partial<FamilySettings>,
+): { anchor: string | null; estimated: boolean } {
+  const expected = settings.expected_due_date ?? null;
+  const birth = settings.actual_birth_date ?? null;
+  if (task.timing_type === "after_birth") {
+    if (birth && isDateOnly(birth)) {
+      return { anchor: birth, estimated: false };
+    }
+    return { anchor: expected, estimated: Boolean(expected) };
+  }
+  return { anchor: expected, estimated: false };
+}
+
 export function ensureTaskTimingFields(task: ChecklistTask): ChecklistTask {
   const defaults = getDefaultTimingForTask(
     task.template_task_slug,
     task.category,
   );
+  const dueOffset =
+    task.recommended_due_offset_days ?? defaults.recommended_due_offset_days;
   return {
     ...task,
     recommended_start_offset_days:
       task.recommended_start_offset_days ?? defaults.recommended_start_offset_days,
-    recommended_due_offset_days:
-      task.recommended_due_offset_days ?? defaults.recommended_due_offset_days,
+    recommended_due_offset_days: dueOffset,
+    recommended_target_offset_days:
+      task.recommended_target_offset_days ?? dueOffset,
     hard_deadline_offset_days:
       task.hard_deadline_offset_days ?? defaults.hard_deadline_offset_days,
     timing_reason: task.timing_reason ?? defaults.timing_reason,
     timing_flexibility: task.timing_flexibility ?? defaults.timing_flexibility,
     timing_type: task.timing_type ?? defaults.timing_type,
+    timing_window_label:
+      task.timing_window_label ?? defaults.timing_window_label ?? null,
+    provider_confirmation_needed:
+      task.provider_confirmation_needed ??
+      Boolean(defaults.confirm_with_provider),
+    task_tags: task.task_tags ?? defaults.task_tags ?? [],
     manual_due_date: task.manual_due_date ?? null,
     calculated_due_date: task.calculated_due_date ?? null,
     calculated_start_date: task.calculated_start_date ?? null,
     date_source: task.date_source ?? (task.due_date ? "manual" : "none"),
+    depends_on_task_ids: task.depends_on_task_ids ?? [],
+    depends_on_template_slugs: task.depends_on_template_slugs ?? [],
   };
 }
 
@@ -167,19 +197,25 @@ export type CalculatedTaskDates = {
   calculated_due_date: string | null;
   due_date: string | null;
   date_source: ChecklistDateSource;
+  date_estimated?: boolean;
 };
 
 /**
  * Calculate dates for one task. Manual dates are never overwritten.
+ * `anchorDate` is expected due date for pre-birth, or birth/due for post-birth.
  */
 export function calculateTaskDates(
   task: ChecklistTask,
-  dueDate: string | null,
+  anchorDate: string | null,
   mode: BeforeBabySchedulingMode,
   prefs?: {
     preferredDays?: number[];
     weekendHeavy?: boolean;
     avoidDates?: string[];
+    /** When true, post-birth dates are estimates from due date. */
+    estimated?: boolean;
+    /** Expected due date used to clamp pre-birth tasks. */
+    expectedDueDate?: string | null;
   },
 ): CalculatedTaskDates {
   const timed = ensureTaskTimingFields(task);
@@ -191,15 +227,17 @@ export function calculateTaskDates(
       calculated_due_date: timed.calculated_due_date ?? null,
       due_date: manual,
       date_source: "manual",
+      date_estimated: false,
     };
   }
 
-  if (mode === "manual_only" || !dueDate || !isDateOnly(dueDate)) {
+  if (mode === "manual_only" || !anchorDate || !isDateOnly(anchorDate)) {
     return {
       calculated_start_date: null,
       calculated_due_date: null,
       due_date: timed.due_date,
       date_source: timed.due_date ? timed.date_source ?? "none" : "none",
+      date_estimated: false,
     };
   }
 
@@ -212,6 +250,7 @@ export function calculateTaskDates(
       calculated_due_date: null,
       due_date: null,
       date_source: "none",
+      date_estimated: false,
     };
   }
 
@@ -233,22 +272,29 @@ export function calculateTaskDates(
       calculated_due_date: null,
       due_date: null,
       date_source: "none",
+      date_estimated: false,
     };
   }
 
-  let calcDue = addDays(dueDate, dueOffset);
+  let calcDue = addDays(anchorDate, dueOffset);
   let calcStart =
-    startOffset != null ? addDays(dueDate, startOffset) : null;
+    startOffset != null ? addDays(anchorDate, startOffset) : null;
 
-  // Enforce hard deadline (never schedule after hard deadline).
+  const expectedDue = prefs?.expectedDueDate ?? anchorDate;
+
+  // Enforce hard deadline relative to the same anchor.
   if (timed.hard_deadline_offset_days != null) {
-    const hard = addDays(dueDate, timed.hard_deadline_offset_days);
+    const hard = addDays(anchorDate, timed.hard_deadline_offset_days);
     if (calcDue > hard) calcDue = hard;
   }
 
   // Pre-birth tasks must never land after the expected due date.
-  if (timed.timing_type === "before_birth" && calcDue > dueDate) {
-    calcDue = dueDate;
+  if (
+    timed.timing_type === "before_birth" &&
+    expectedDue &&
+    calcDue > expectedDue
+  ) {
+    calcDue = expectedDue;
   }
 
   const avoid = new Set(prefs?.avoidDates ?? []);
@@ -256,7 +302,7 @@ export function calculateTaskDates(
     prefs?.preferredDays ?? DEFAULT_SCHEDULING_SETTINGS.before_baby_preferred_task_days;
   if (flex !== "fixed") {
     const latestAllowed =
-      timed.timing_type === "before_birth" ? dueDate : null;
+      timed.timing_type === "before_birth" ? expectedDue : null;
     calcDue = snapToPreferredDay(
       calcDue,
       preferredDays,
@@ -277,8 +323,12 @@ export function calculateTaskDates(
   }
 
   // Final clamp after snapping.
-  if (timed.timing_type === "before_birth" && calcDue > dueDate) {
-    calcDue = dueDate;
+  if (
+    timed.timing_type === "before_birth" &&
+    expectedDue &&
+    calcDue > expectedDue
+  ) {
+    calcDue = expectedDue;
     if (calcStart && calcStart > calcDue) calcStart = calcDue;
   }
 
@@ -287,6 +337,9 @@ export function calculateTaskDates(
     calculated_due_date: calcDue,
     due_date: calcDue,
     date_source: "calculated",
+    date_estimated: Boolean(
+      prefs?.estimated && timed.timing_type === "after_birth",
+    ),
   };
 }
 
@@ -432,14 +485,25 @@ export function applyScheduleToTasks(
 
   let next: ChecklistTask[] = tasks.map((task) => {
     const timed = ensureTaskTimingFields(task);
+    // Completed tasks keep their existing dates (still may refresh metadata).
+    if (timed.completed && timed.due_date) {
+      return {
+        ...timed,
+        date_source: timed.date_source ?? "calculated",
+        date_estimated: false,
+      };
+    }
+    const { anchor, estimated } = schedulingAnchorForTask(timed, prefs);
     const calc = calculateTaskDates(
       timed,
-      dueDate,
+      anchor,
       prefs.before_baby_scheduling_mode,
       {
         preferredDays: prefs.before_baby_preferred_task_days,
         weekendHeavy: prefs.before_baby_weekend_heavy,
         avoidDates: prefs.before_baby_avoid_travel_dates,
+        estimated,
+        expectedDueDate: dueDate,
       },
     );
     return {
@@ -454,6 +518,79 @@ export function applyScheduleToTasks(
     dueDate,
   );
   return next;
+}
+
+export type BirthDateChangePreview = {
+  proposed_birth_date: string;
+  dates_moving: number;
+  manual_unchanged: number;
+  completed_unchanged: number;
+  pre_birth_untouched: number;
+  sample_moves: Array<{
+    task_id: string;
+    title: string;
+    from: string | null;
+    to: string | null;
+  }>;
+};
+
+/** Preview post-birth recalculation when setting actual_birth_date. */
+export function previewActualBirthDateChange(
+  tasks: ChecklistTask[],
+  settings: Partial<FamilySettings>,
+  proposedBirthDate: string,
+): BirthDateChangePreview {
+  const hypothetical = {
+    ...settings,
+    actual_birth_date: proposedBirthDate,
+  };
+  const before = tasks.map((t) => ensureTaskTimingFields(t));
+  const after = applyScheduleToTasks(before, hypothetical);
+
+  let dates_moving = 0;
+  let manual_unchanged = 0;
+  let completed_unchanged = 0;
+  let pre_birth_untouched = 0;
+  const sample_moves: BirthDateChangePreview["sample_moves"] = [];
+
+  for (let i = 0; i < before.length; i++) {
+    const b = before[i]!;
+    const a = after[i]!;
+    if (b.timing_type !== "after_birth") {
+      pre_birth_untouched += 1;
+      continue;
+    }
+    if (b.completed) {
+      completed_unchanged += 1;
+      continue;
+    }
+    if (b.date_source === "manual" || b.manual_due_date) {
+      manual_unchanged += 1;
+      continue;
+    }
+    const from = effectiveDueDate(b);
+    const to = effectiveDueDate(a);
+    if (from !== to) {
+      dates_moving += 1;
+      if (sample_moves.length < 8) {
+        sample_moves.push({
+          task_id: b.id,
+          title: b.title,
+          from,
+          to,
+        });
+      }
+    }
+  }
+
+  return {
+    proposed_birth_date: proposedBirthDate,
+    dates_moving,
+    manual_unchanged,
+    completed_unchanged,
+    pre_birth_untouched,
+    sample_moves,
+  };
 }
 
 export function effectiveDueDate(task: ChecklistTask): string | null {

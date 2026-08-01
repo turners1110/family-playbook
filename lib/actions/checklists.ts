@@ -6,16 +6,22 @@ import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
 import {
   addCustomChecklistTask,
   archiveChecklistTask,
+  assignChecklistTaskOwner,
+  bulkAssignChecklistOwners,
   bulkCompleteChecklistTasks,
   generateBeforeBabySchedule,
+  importAfterBirthTemplate,
   importBeforeBabyTemplate,
+  previewActualBirthDate,
   previewBeforeBabyDueDateChange,
+  setActualBirthDate,
   setChecklistTaskCompleted,
+  setTaskDependencyOverride,
   updateBeforeBabySchedulingSettings,
   updateChecklistTask,
 } from "@/lib/services/checklists";
 import type { ChecklistOwner, ChecklistPriority } from "@/lib/checklists";
-import type { FamilySettings } from "@/lib/types/models";
+import type { ChecklistOwnershipSource, FamilySettings } from "@/lib/types/models";
 import { logStoreError, publicRemoteStoreMessage } from "@/lib/db/store-errors";
 import { canWriteResearch } from "@/lib/research/access";
 
@@ -37,7 +43,10 @@ function assertCanEdit(ctx: Awaited<ReturnType<typeof requireIdentity>>) {
 function revalidateChecklist() {
   revalidatePath("/before-baby");
   revalidatePath("/before-baby/plan");
+  revalidatePath("/before-baby/assign");
+  revalidatePath("/after-birth");
   revalidatePath("/settings");
+  revalidatePath("/settings/content-upgrade");
   revalidatePath("/home");
 }
 
@@ -202,6 +211,96 @@ export async function actionGenerateBeforeBabySchedule(force = false) {
     return { ok: true as const, tasksUpdated: result.tasksUpdated };
   } catch (error) {
     logStoreError("generate_before_baby_schedule", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionImportAfterBirth() {
+  await requireIdentity();
+  try {
+    const result = await importAfterBirthTemplate();
+    revalidateChecklist();
+    return { ok: true as const, ...result };
+  } catch (error) {
+    logStoreError("import_after_birth", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionAssignChecklistOwner(
+  taskId: string,
+  owner: ChecklistOwner | "decide_later",
+  source: ChecklistOwnershipSource = "explicit",
+) {
+  const ctx = await requireIdentity();
+  try {
+    assertCanEdit(ctx);
+    await assignChecklistTaskOwner(taskId, owner, { source });
+    revalidateChecklist();
+    return { ok: true as const };
+  } catch (error) {
+    logStoreError("assign_checklist_owner", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionBulkAssignOwners(input: {
+  taskIds?: string[];
+  category?: string;
+  owner: ChecklistOwner;
+  onlyUnassigned?: boolean;
+  applySuggestions?: boolean;
+}) {
+  const ctx = await requireIdentity();
+  try {
+    assertCanEdit(ctx);
+    const count = await bulkAssignChecklistOwners(input);
+    revalidateChecklist();
+    return { ok: true as const, count };
+  } catch (error) {
+    logStoreError("bulk_assign_owners", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionSetDependencyOverride(
+  taskId: string,
+  override: boolean,
+) {
+  const ctx = await requireIdentity();
+  try {
+    assertCanEdit(ctx);
+    await setTaskDependencyOverride(taskId, override);
+    revalidateChecklist();
+    return { ok: true as const };
+  } catch (error) {
+    logStoreError("dependency_override", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionPreviewActualBirthDate(birthDate: string) {
+  await requireIdentity();
+  try {
+    const preview = await previewActualBirthDate(birthDate);
+    return { ok: true as const, preview };
+  } catch (error) {
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function actionSetActualBirthDate(
+  birthDate: string | null,
+  apply = true,
+) {
+  const ctx = await requireIdentity();
+  try {
+    assertCanEdit(ctx);
+    const result = await setActualBirthDate(birthDate, { apply });
+    revalidateChecklist();
+    return { ok: true as const, ...result };
+  } catch (error) {
+    logStoreError("set_actual_birth_date", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
   }
 }

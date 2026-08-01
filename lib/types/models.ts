@@ -107,6 +107,16 @@ export interface Question {
   question_type: QuestionType;
   response_schema: Record<string, unknown>;
   life_stages: LifeStage[];
+  /** Exactly one primary discussion timing window (seeded/migrated). */
+  primary_discussion_stage?: LifeStage | null;
+  /** Optional later review stages (not equal to primary). */
+  review_stages?: LifeStage[];
+  /** Optional event that should resurface this question. */
+  trigger_event?: string | null;
+  /** Why this question is timed the way it is. */
+  timing_reason?: string | null;
+  /** True when primary stage was set by deterministic rules, not manual edit. */
+  primary_stage_source?: "seeded" | "rule_based" | "manual" | null;
   categories: string[];
   subcategories: string[];
   outcomes: string[];
@@ -350,6 +360,8 @@ export interface FamilySettings {
   include_perspective_history_in_playbook: boolean;
   /** Family expected due date (YYYY-MM-DD). Drives Before Baby scheduling. */
   expected_due_date?: string | null;
+  /** Actual birth date (YYYY-MM-DD). When set, post-birth tasks recalculate from this. */
+  actual_birth_date?: string | null;
   before_baby_scheduling_mode?: BeforeBabySchedulingMode;
   /** Preferred weekdays 0=Sun … 6=Sat for flexible task placement. */
   before_baby_preferred_task_days?: number[];
@@ -448,6 +460,43 @@ export interface ChecklistInstance {
   updated_at: string;
 }
 
+export type ChecklistDependencyStatus =
+  | "open"
+  | "blocked"
+  | "satisfied"
+  | "overridden";
+
+export type ChecklistOwnershipSource =
+  | "suggested"
+  | "explicit"
+  | "bulk"
+  | "default"
+  | "decide_later";
+
+export type ChecklistTimingWindowLabel =
+  | "second_trimester"
+  | "early_third_trimester"
+  | "by_30_weeks"
+  | "by_32_weeks"
+  | "by_34_weeks"
+  | "by_36_weeks"
+  | "final_two_weeks"
+  | "final_week"
+  | "after_birth"
+  | "triggered_after_birth"
+  | "unscheduled";
+
+export type ChecklistTaskTag =
+  | "setup"
+  | "assembly"
+  | "purchase"
+  | "legal"
+  | "insurance"
+  | "provider_selection"
+  | "training"
+  | "final_check"
+  | "confirm_with_provider";
+
 export interface ChecklistTask {
   id: string;
   checklist_id: string;
@@ -461,6 +510,11 @@ export interface ChecklistTask {
   due_date: string | null;
   priority: ChecklistPriority;
   owner: ChecklistOwner;
+  /** Optional contributor (other parent) when owner is not both. */
+  contributor?: ChecklistOwner | null;
+  joint_approval_required?: boolean;
+  ownership_source?: ChecklistOwnershipSource | null;
+  ownership_updated_at?: string | null;
   notes: string | null;
   is_custom: boolean;
   is_default: boolean;
@@ -468,17 +522,36 @@ export interface ChecklistTask {
   sort_order: number;
   created_at: string;
   updated_at: string;
-  /** Days relative to expected due date (negative = before birth). */
+  /** Days relative to scheduling anchor (negative = before birth). */
   recommended_start_offset_days?: number | null;
   recommended_due_offset_days?: number | null;
+  /** Alias preferred by content architecture; mirrors recommended_due_offset_days. */
+  recommended_target_offset_days?: number | null;
   hard_deadline_offset_days?: number | null;
   timing_reason?: string | null;
+  timing_window_label?: ChecklistTimingWindowLabel | null;
   timing_flexibility?: ChecklistTimingFlexibility;
   timing_type?: ChecklistTimingType;
+  provider_confirmation_needed?: boolean;
+  task_tags?: ChecklistTaskTag[];
   manual_due_date?: string | null;
   calculated_due_date?: string | null;
   calculated_start_date?: string | null;
   date_source?: ChecklistDateSource;
+  /** True when post-birth date is still estimated from due date. */
+  date_estimated?: boolean;
+  /** Task IDs this task depends on (prerequisites). */
+  depends_on_task_ids?: string[];
+  /** Template slugs used when IDs are not yet resolved. */
+  depends_on_template_slugs?: string[];
+  blocked_by_count?: number;
+  dependency_status?: ChecklistDependencyStatus;
+  dependency_reason?: string | null;
+  dependency_override?: boolean;
+  /** Optional milestone id this task belongs to. */
+  milestone_id?: string | null;
+  /** House-reset style nested checklist steps (title only). */
+  subtasks?: Array<{ id: string; title: string; completed: boolean }>;
 }
 
 export interface AppStore {

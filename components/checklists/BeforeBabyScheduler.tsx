@@ -30,6 +30,16 @@ import {
 } from "@/lib/checklists/scheduling";
 import { DueDateHeader } from "@/components/checklists/DueDateHeader";
 import { BeforeBabySchedulingSettings } from "@/components/checklists/BeforeBabySchedulingSettings";
+import { MilestoneBoard } from "@/components/checklists/MilestoneBoard";
+
+type BoardMode = "milestones" | "timeline" | "owner" | "category";
+
+const BOARD_MODES: Array<{ id: BoardMode; label: string }> = [
+  { id: "milestones", label: "Milestones" },
+  { id: "timeline", label: "Timeline" },
+  { id: "owner", label: "Owner" },
+  { id: "category", label: "Category" },
+];
 
 const VIEWS: Array<{ id: TimelineView; label: string }> = [
   { id: "recommended", label: "Recommended timeline" },
@@ -74,6 +84,7 @@ export function BeforeBabyScheduler({
       ),
   );
   const [pending, startTransition] = useTransition();
+  const [boardMode, setBoardMode] = useState<BoardMode>("milestones");
   const [view, setView] = useState<TimelineView>("recommended");
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -195,10 +206,16 @@ export function BeforeBabyScheduler({
               Before Baby
             </p>
             <h2 className="mt-1 font-display text-2xl text-ink sm:text-3xl">
-              Timeline
+              Checklist
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link href="/before-baby/assign" className="btn btn-secondary">
+              Assign owners
+            </Link>
+            <Link href="/after-birth" className="btn btn-secondary">
+              First Month
+            </Link>
             <Link href="/before-baby/plan" className="btn btn-secondary">
               Plan
             </Link>
@@ -249,6 +266,31 @@ export function BeforeBabyScheduler({
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2">
+        {BOARD_MODES.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className={clsx(
+              "btn",
+              boardMode === item.id ? "btn-primary" : "btn-ghost",
+            )}
+            onClick={() => {
+              setBoardMode(item.id);
+              if (item.id === "owner") setView("by_owner");
+              if (item.id === "category") setView("by_category");
+              if (item.id === "timeline") setView("recommended");
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {boardMode === "milestones" ? (
+        <MilestoneBoard tasks={optimisticTasks} settings={settings} />
+      ) : (
+        <>
       <div className="sticky top-0 z-10 -mx-1 space-y-3 bg-bg/95 px-1 py-2 backdrop-blur">
         <div className="flex gap-2 overflow-x-auto pb-1">
           {VIEWS.map((item) => (
@@ -316,6 +358,8 @@ export function BeforeBabyScheduler({
           <p className="text-sm text-ink-muted">No tasks in this view.</p>
         ) : null}
       </div>
+        </>
+      )}
     </div>
   );
 }
@@ -379,7 +423,16 @@ function CompactTaskRow({
               </span>
             ) : null}
             {recommended ? <span className="badge">{recommended}</span> : null}
+            {task.dependency_status === "blocked" ? (
+              <span className="badge badge-warning">Blocked</span>
+            ) : null}
+            {task.date_estimated ? (
+              <span className="badge">Estimated</span>
+            ) : null}
           </div>
+          {task.dependency_reason ? (
+            <p className="mt-1 text-xs text-amber-800">{task.dependency_reason}</p>
+          ) : null}
           {why ? (
             <p className="mt-1 text-xs text-ink-subtle">
               Why: {why}

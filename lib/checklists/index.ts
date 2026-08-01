@@ -1,4 +1,5 @@
 import "@/lib/checklists/templates/before-baby";
+import "@/lib/checklists/templates/after-birth";
 
 export {
   getChecklistTemplate,
@@ -19,3 +20,10 @@ export type {
 } from "@/lib/checklists/types";
 
 export { BEFORE_BABY_TEMPLATE } from "@/lib/checklists/templates/before-baby";
+export { AFTER_BIRTH_TEMPLATE } from "@/lib/checklists/templates/after-birth";
+export { BEFORE_BABY_MILESTONES, buildMilestoneViews } from "@/lib/checklists/milestones";
+export {
+  TEMPLATE_DEPENDENCIES,
+  applyDependencyState,
+  validateDependencies,
+} from "@/lib/checklists/dependencies";
