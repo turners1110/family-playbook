@@ -195,6 +195,35 @@ export function BeforeBabyScheduler({
     });
   }
 
+  function importMissing() {
+    setError(null);
+    setMessage(null);
+    startTransition(async () => {
+      const result = await actionImportBeforeBaby();
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      if (result.added > 0) {
+        setMessage(
+          `Imported ${result.added} missing default task(s). Generate schedule to place dates.`,
+        );
+        window.location.reload();
+        return;
+      }
+      setMessage(
+        `All ${result.totalDefaults} default Before Baby tasks are already present.`,
+      );
+    });
+  }
+
+  const missingDefaults = Math.max(
+    0,
+    templateTaskCount -
+      optimisticTasks.filter((t) => t.is_default && Boolean(t.template_task_slug))
+        .length,
+  );
+
   return (
     <div className="space-y-4">
       <DueDateHeader settings={settings} pregnancy={pregnancy} />
@@ -208,8 +237,21 @@ export function BeforeBabyScheduler({
             <h2 className="mt-1 font-display text-2xl text-ink sm:text-3xl">
               Checklist
             </h2>
+            {missingDefaults > 0 ? (
+              <p className="mt-1 text-sm text-ink-muted">
+                {missingDefaults} seeded default task(s) not in your checklist yet.
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending}
+              onClick={importMissing}
+            >
+              {pending ? "Importing…" : "Import missing tasks"}
+            </button>
             <Link href="/before-baby/assign" className="btn btn-secondary">
               Assign owners
             </Link>

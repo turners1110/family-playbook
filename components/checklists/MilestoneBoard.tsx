@@ -155,8 +155,8 @@ export function MilestoneBoard({
                 ))}
                 {ms.missing_slugs.length ? (
                   <li className="text-xs text-ink-subtle">
-                    Import Before Baby template to add {ms.missing_slugs.length}{" "}
-                    mapped step(s).
+                    Use “Import missing tasks” above to add{" "}
+                    {ms.missing_slugs.length} mapped step(s).
                   </li>
                 ) : null}
               </ul>
