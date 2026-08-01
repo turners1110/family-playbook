@@ -2,8 +2,9 @@
  * In-process EPUB document/chapter store (local + tests).
  * Supabase persistence happens in the processing pipeline when configured.
  */
+import { randomUUID } from "crypto";
 import type { EpubChapter, EpubInspectionResult } from "@/lib/research/epub/extract";
-import { newId, nowIso } from "@/lib/research/public-research/artifact-store";
+import { nowIso } from "@/lib/research/public-research/artifact-store";
 
 export type ResearchSourceDocument = {
   id: string;
@@ -82,7 +83,7 @@ export function saveEpubExtraction(input: {
 
   const ts = nowIso();
   const document: ResearchSourceDocument = {
-    id: newId("doc"),
+    id: randomUUID(),
     source_id: input.sourceId,
     file_id: input.fileId,
     extraction_version: "epub-v1",
@@ -105,7 +106,7 @@ export function saveEpubExtraction(input: {
   const savedChapters: ResearchSourceChapterMeta[] = input.result.chapters.map(
     (ch: EpubChapter) => {
       const row: ResearchSourceChapterMeta = {
-        id: newId("ch"),
+        id: randomUUID(),
         document_id: document.id,
         source_id: input.sourceId,
         chapter_index: ch.chapterIndex,
@@ -124,4 +125,20 @@ export function saveEpubExtraction(input: {
   );
 
   return { document, chapters: savedChapters };
+}
+
+/** Replace in-memory document/chapter meta for a source (no full text). */
+export function replaceSourceDocuments(
+  sourceId: string,
+  nextDocs: ResearchSourceDocument[],
+  nextChapters: ResearchSourceChapterMeta[],
+) {
+  for (let i = documents.length - 1; i >= 0; i -= 1) {
+    if (documents[i].source_id === sourceId) documents.splice(i, 1);
+  }
+  for (let i = chapters.length - 1; i >= 0; i -= 1) {
+    if (chapters[i].source_id === sourceId) chapters.splice(i, 1);
+  }
+  documents.push(...nextDocs);
+  chapters.push(...nextChapters);
 }

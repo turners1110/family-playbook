@@ -31,6 +31,7 @@ import {
 } from "@/lib/research/types";
 import { readStore } from "@/lib/db/store";
 import { LIFE_STAGE_LABELS, type LifeStage } from "@/lib/constants/enums";
+import { EpubProcessControls } from "@/components/research/EpubProcessControls";
 import { ResearchFileDownloadButton } from "@/components/research/ResearchFileDownloadButton";
 
 export const dynamic = "force-dynamic";
@@ -94,6 +95,11 @@ export default async function ResearchSourceDetailPage({
       total_words_extracted: 0,
       public_overview_available: false,
     },
+    epubProcessStatus = {
+      code: "not_started",
+      label: "Not started",
+      active: false,
+    },
   } = detail;
   const storageStatus = getResearchStorageStatus();
   const drmJob = jobs.find((j) => j.error_code === "drm_protected");
@@ -119,9 +125,9 @@ export default async function ResearchSourceDetailPage({
   const shortSummary = summaries.find((s) => s.summary_type === "short_summary");
   const why = summaries.find((s) => s.summary_type === "why_it_matters");
   const isBook = source.source_type === "book";
-  const busy = ["queued", "running"].some((status) =>
-    jobs.some((j) => j.status === status),
-  );
+  const busy =
+    epubProcessStatus.active ||
+    ["queued", "running"].some((status) => jobs.some((j) => j.status === status));
 
   return (
     <AppShell
@@ -189,6 +195,26 @@ export default async function ResearchSourceDetailPage({
                   hasOverview={Boolean(publicOverview)}
                   busy={busy}
                 />
+                {files.some(
+                  (f) =>
+                    f.mime_type.includes("epub") ||
+                    f.original_filename.toLowerCase().endsWith(".epub"),
+                ) ? (
+                  <div className="mt-3">
+                    <EpubProcessControls
+                      sourceId={sourceId}
+                      latestFileId={latestFileId}
+                      statusLabel={epubProcessStatus.label}
+                      statusCode={epubProcessStatus.code}
+                      active={epubProcessStatus.active || busy}
+                      writesAllowed={storageStatus.writesAllowed}
+                      jobMessage={
+                        jobs.find((j) => j.job_type === "epub_source_grounded")
+                          ?.safe_error_message ?? null
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             ) : null}
             <div className="mt-3 flex flex-wrap gap-2">

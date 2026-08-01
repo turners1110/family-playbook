@@ -177,7 +177,10 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
     const coverageBase = getResearchCoverage(sourceId);
     const {
       getEpubCoverageExtras,
+      hydrateEpubArtifactsFromSupabase,
+      describeEpubProcessStatus,
     } = await import("@/lib/research/epub/processing");
+    await hydrateEpubArtifactsFromSupabase(sourceId);
     const epub = getEpubCoverageExtras(sourceId);
     const coverage = {
       ...coverageBase,
@@ -223,18 +226,34 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
       (c) => c.research_source_id === sourceId,
     );
 
+    const jobs = listJobsForSource(sourceId);
+    const sourceGroundedOverview = getPublicOverview(sourceId, "source_grounded");
+    const processStatus = describeEpubProcessStatus({
+      jobs,
+      hasEpubFile:
+        detail.files.some(
+          (f) =>
+            f.mime_type.includes("epub") ||
+            f.original_filename.toLowerCase().endsWith(".epub"),
+        ) || epub.epub_uploaded,
+      drmProtected: coverage.drm_protected,
+      readableExtracted: coverage.readable_text_extracted,
+      hasGroundedOverview: Boolean(sourceGroundedOverview),
+    });
+
     return {
       ...detail,
       source,
       externalSources: listExternalSources(sourceId),
       publicOverview: getPublicOverview(sourceId, "public_sources_only"),
-      sourceGroundedOverview: getPublicOverview(sourceId, "source_grounded"),
+      sourceGroundedOverview,
       preliminaryFindings: listPreliminaryFindings(sourceId),
-      jobs: listJobsForSource(sourceId),
+      jobs,
       coverage,
       chapters: epub.chapters,
       epubDocument: epub.document,
       comparisons,
+      epubProcessStatus: processStatus,
     };
   } catch (error) {
     if (error instanceof ResearchUnavailableError) return null;
@@ -498,6 +517,43 @@ function assertUploadRateLimit(key: string, maxPerMinute = 12) {
   uploadActionTimestamps.set(key, recent);
 }
 
+const LEGACY_PROCESSING_STATUS: Record<string, string> = {
+  source_text_uploaded: "queued",
+  extracting_source_text: "processing",
+  source_grounded_analysis_ready: "needs_review",
+  awaiting_source_text: "processing_failed",
+  public_research_queued: "queued",
+  gathering_public_sources: "processing",
+  public_overview_ready: "processed",
+};
+
+function sanitizeSourcePatch(
+  patch: Record<string, unknown>,
+  legacy = false,
+): Record<string, unknown> {
+  const next = { ...patch };
+  if (legacy && typeof next.processing_status === "string") {
+    next.processing_status =
+      LEGACY_PROCESSING_STATUS[next.processing_status] ?? next.processing_status;
+  }
+  if (legacy) {
+    // Drop columns that may not exist until migration 0011 is applied.
+    delete next.source_grounded_status;
+    delete next.chapters_processed;
+    delete next.full_book_processed;
+    delete next.needs_review;
+    delete next.book_pages_processed;
+    delete next.public_sources_reviewed;
+    delete next.public_overview_status;
+    delete next.finding_count;
+  }
+  // Unarchive when reprocessing an uploaded book.
+  if (next.processing_status && next.processing_status !== "archived") {
+    next.archived_at = null;
+  }
+  return next;
+}
+
 export async function prepareResearchUpload(
   ctx: FamilyContext,
   input: {
@@ -600,19 +656,26 @@ async function queueEpubAfterUpload(
     mime_type: string;
     original_filename: string;
   },
-  options?: { force?: boolean },
+  options?: { force?: boolean; advance?: boolean },
 ) {
   const repo = getRepository();
   const {
-    queueEpubProcessing,
+    enqueueEpubJob,
     setEpubProcessingSourcePatcher,
-  } = await import("@/lib/research/epub/processing");
+    runEpubJobToCompletion,
+    advanceEpubJob,
+  } = await import("@/lib/research/epub/runner");
+  const { getResearchStorageMode } = await import("@/lib/research/mode");
 
   setEpubProcessingSourcePatcher(async (id, patch) => {
     try {
-      await repo.updateSource(familyId, id, patch);
+      await repo.updateSource(familyId, id, sanitizeSourcePatch(patch));
     } catch {
-      /* optional columns may be absent in local JSON */
+      try {
+        await repo.updateSource(familyId, id, sanitizeSourcePatch(patch, true));
+      } catch {
+        /* optional columns may be absent in local JSON / legacy schema */
+      }
     }
   });
 
@@ -620,18 +683,23 @@ async function queueEpubAfterUpload(
   if (repo.readUploadedBytes) {
     buffer = await repo.readUploadedBytes(familyId, file.storage_path);
   }
-  if (!buffer) {
-    throw new Error("Uploaded EPUB bytes could not be read for processing.");
-  }
 
-  // Enqueue only — extraction/AI run asynchronously.
-  await queueEpubProcessing({
+  const job = await enqueueEpubJob({
     sourceId: file.source_id,
     familyId,
     fileId: file.id,
     buffer,
     force: options?.force,
   });
+
+  // Local/tests: finish synchronously. Production: leave queued for runner.
+  if (getResearchStorageMode() !== "supabase") {
+    await runEpubJobToCompletion(job.id);
+  } else if (options?.advance) {
+    await advanceEpubJob({ jobId: job.id, maxStages: 2 });
+  }
+
+  return job;
 }
 
 /** Local/memory only helper used by import script and tests. */
@@ -696,6 +764,108 @@ export async function uploadResearchFile(
   return file;
 }
 
+/** Start or resume processing for an already-uploaded EPUB (no re-upload). */
+export async function processExistingEpubUpload(
+  ctx: FamilyContext,
+  sourceId: string,
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  assertUploadRateLimit(`${ctx.profile.id}:process-epub`, 8);
+  const repo = getRepository();
+  const familyId = await familyIdFor(ctx);
+  const detail = await repo.getSource(familyId, sourceId);
+  if (!detail) throw new Error("Source not found.");
+  const file =
+    detail.files.find(
+      (f) =>
+        f.mime_type.includes("epub") ||
+        f.original_filename.toLowerCase().endsWith(".epub"),
+    ) ?? detail.files[0];
+  if (!file) {
+    throw new Error("No uploaded EPUB file found for this book.");
+  }
+  const job = await queueEpubAfterUpload(ctx, familyId, file, {
+    force: false,
+    advance: true,
+  });
+  return { ok: true as const, jobId: job.id, status: job.status };
+}
+
+/** Advance the active EPUB job by a few stages (timeout-safe). */
+export async function runNextEpubProcessingStep(
+  ctx: FamilyContext,
+  sourceId: string,
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  assertUploadRateLimit(`${ctx.profile.id}:epub-step`, 30);
+  const familyId = await familyIdFor(ctx);
+  const repo = getRepository();
+  const detail = await repo.getSource(familyId, sourceId);
+  if (!detail) throw new Error("Source not found.");
+
+  const {
+    hydrateEpubArtifactsFromSupabase,
+    advanceEpubJob,
+    enqueueEpubJob,
+    setEpubProcessingSourcePatcher,
+  } = await import("@/lib/research/epub/runner");
+  setEpubProcessingSourcePatcher(async (id, patch) => {
+    try {
+      await repo.updateSource(familyId, id, sanitizeSourcePatch(patch));
+    } catch {
+      try {
+        await repo.updateSource(familyId, id, sanitizeSourcePatch(patch, true));
+      } catch {
+        /* ignore */
+      }
+    }
+  });
+  await hydrateEpubArtifactsFromSupabase(sourceId);
+
+  const { listJobsForSource } = await import(
+    "@/lib/research/public-research/pipeline"
+  );
+  let job = listJobsForSource(sourceId).find(
+    (j) =>
+      j.job_type === "epub_source_grounded" &&
+      (j.status === "queued" ||
+        j.status === "running" ||
+        j.current_stage === "awaiting_ai_configuration"),
+  );
+
+  if (!job) {
+    const file =
+      detail.files.find(
+        (f) =>
+          f.mime_type.includes("epub") ||
+          f.original_filename.toLowerCase().endsWith(".epub"),
+      ) ?? detail.files[0];
+    if (!file) throw new Error("No uploaded EPUB file found for this book.");
+    let buffer: Buffer | null = null;
+    if (repo.readUploadedBytes) {
+      buffer = await repo.readUploadedBytes(familyId, file.storage_path);
+    }
+    job = await enqueueEpubJob({
+      sourceId,
+      familyId,
+      fileId: file.id,
+      buffer,
+    });
+  }
+
+  const result = await advanceEpubJob({ jobId: job.id, maxStages: 2 });
+  return {
+    ok: true as const,
+    jobId: result.job?.id ?? job.id,
+    status: result.job?.status ?? job.status,
+    stage: result.job?.current_stage ?? null,
+    stagesRun: result.stagesRun,
+    done: result.done,
+  };
+}
+
 export async function retryEpubProcessing(
   ctx: FamilyContext,
   sourceId: string,
@@ -710,8 +880,11 @@ export async function retryEpubProcessing(
   if (!detail) throw new Error("Source not found.");
   const file = detail.files.find((f) => f.id === fileId);
   if (!file) throw new Error("File not found.");
-  await queueEpubAfterUpload(ctx, familyId, file, { force: true });
-  return { ok: true as const };
+  const job = await queueEpubAfterUpload(ctx, familyId, file, {
+    force: true,
+    advance: true,
+  });
+  return { ok: true as const, jobId: job.id };
 }
 
 export async function createSignedResearchFileUrl(

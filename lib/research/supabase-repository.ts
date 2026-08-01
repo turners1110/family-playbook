@@ -590,16 +590,33 @@ export function createSupabaseResearchRepository(
         throw new Error(error.message);
       }
 
-      await admin()
-        .from("research_sources")
-        .update({
-          availability_type: "partial_text",
-          processing_status: "source_text_uploaded",
-          epub_uploaded: input.mimeType.includes("epub") || input.originalFilename.toLowerCase().endsWith(".epub"),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", input.sourceId)
-        .eq("family_id", familyId);
+      {
+        const isEpub =
+          input.mimeType.includes("epub") ||
+          input.originalFilename.toLowerCase().endsWith(".epub");
+        const { error: statusError } = await admin()
+          .from("research_sources")
+          .update({
+            availability_type: "partial_text",
+            processing_status: "source_text_uploaded",
+            epub_uploaded: isEpub,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", input.sourceId)
+          .eq("family_id", familyId);
+        if (statusError) {
+          // Legacy DBs may lack the expanded processing_status allow-list.
+          await admin()
+            .from("research_sources")
+            .update({
+              availability_type: "partial_text",
+              processing_status: "queued",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", input.sourceId)
+            .eq("family_id", familyId);
+        }
+      }
 
       return data as ResearchSourceFile;
     },

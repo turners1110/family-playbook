@@ -21,6 +21,8 @@ import {
   linkResearchQuestion,
   prepareResearchUpload,
   retryEpubProcessing,
+  processExistingEpubUpload,
+  runNextEpubProcessingStep,
 } from "@/lib/research/services";
 import type { CreateResearchSourceInput } from "@/lib/research/validation";
 
@@ -241,6 +243,28 @@ export async function actionRetryEpubProcessing(
     await retryEpubProcessing(ctx, sourceId, fileId);
     revalidateResearch(sourceId);
     return { ok: true as const };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionProcessExistingEpub(sourceId: string) {
+  const ctx = await requireIdentity();
+  try {
+    const result = await processExistingEpubUpload(ctx, sourceId);
+    revalidateResearch(sourceId);
+    return result;
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionRunNextEpubStep(sourceId: string) {
+  const ctx = await requireIdentity();
+  try {
+    const result = await runNextEpubProcessingStep(ctx, sourceId);
+    revalidateResearch(sourceId);
+    return result;
   } catch (error) {
     return toError(error);
   }
