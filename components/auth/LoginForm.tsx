@@ -60,13 +60,79 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
             }
 
             const supabase = createClient();
-            const { error: otpError } = await supabase.auth.signInWithOtp({
-              email: email.trim().toLowerCase(),
-              options: {
-                shouldCreateUser: false,
-                emailRedirectTo,
-              },
+            const normalizedEmail = email.trim().toLowerCase();
+            console.info("[auth] before_signInWithOtp", {
+              email: normalizedEmail,
             });
+
+            let otpError: {
+              message: string;
+              status?: number | string;
+              code?: string;
+              name?: string;
+            } | null = null;
+
+            try {
+              const result = await supabase.auth.signInWithOtp({
+                email: normalizedEmail,
+                options: {
+                  shouldCreateUser: false,
+                  emailRedirectTo,
+                },
+              });
+              otpError = result.error
+                ? {
+                    message: result.error.message,
+                    status: result.error.status,
+                    code: result.error.code,
+                    name: result.error.name,
+                  }
+                : null;
+
+              // Never log session tokens / secrets — only safe shape + email.
+              const safeData =
+                result.data == null
+                  ? result.data
+                  : {
+                      hasUser: Boolean(result.data.user),
+                      hasSession: Boolean(result.data.session),
+                      keys: Object.keys(result.data),
+                    };
+
+              console.info("[auth] after_signInWithOtp", {
+                data: safeData,
+                error: otpError,
+                responseType:
+                  result.data === null
+                    ? "null"
+                    : result.data === undefined
+                      ? "undefined"
+                      : typeof result.data,
+                otpReturned: Boolean(result.data),
+                email: normalizedEmail,
+              });
+            } catch (otpException) {
+              const err =
+                otpException instanceof Error ? otpException : null;
+              console.error("[auth] signInWithOtp exception", {
+                message: err?.message ?? String(otpException),
+                name: err?.name ?? typeof otpException,
+                stack: err?.stack ?? null,
+                cause:
+                  err && "cause" in err
+                    ? err.cause instanceof Error
+                      ? {
+                          message: err.cause.message,
+                          name: err.cause.name,
+                        }
+                      : err.cause == null
+                        ? null
+                        : typeof err.cause
+                    : null,
+              });
+              setError("Something went wrong. Please try again.");
+              return;
+            }
 
             // Instrumentation only — hashes / counts, never raw secrets.
             try {

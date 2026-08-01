@@ -145,6 +145,10 @@ describe("browser PKCE magic-link login", () => {
     expect(source).toMatch(/emailRedirectTo/);
     expect(source).toMatch(/pkce-instrumentation/);
     expect(source).toMatch(/collectBrowserPkceInstrumentation/);
+    expect(source).toMatch(/before_signInWithOtp/);
+    expect(source).toMatch(/after_signInWithOtp/);
+    expect(source).toMatch(/signInWithOtp exception/);
+    expect(source).toMatch(/otpReturned/);
     expect(source).not.toMatch(/fetch\(/);
     expect(source).not.toMatch(/\/auth\/magic-link/);
     expect(source).not.toMatch(/pendingCookiesForOtpResponse/);
