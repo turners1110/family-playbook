@@ -29,6 +29,7 @@ export function isProtectedPath(pathname: string) {
     "/decisions",
     "/outcomes",
     "/knowledge",
+    "/research",
     "/playbook",
     "/dashboard",
     "/settings",

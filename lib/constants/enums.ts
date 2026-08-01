@@ -269,6 +269,7 @@ export const NAV_ITEMS = [
   { href: "/before-baby", label: "Before Baby" },
   { href: "/discuss", label: "Discuss" },
   { href: "/questions", label: "Questions" },
+  { href: "/research", label: "Research & Books" },
   { href: "/decisions", label: "Decisions" },
   { href: "/outcomes", label: "Outcomes" },
   { href: "/knowledge", label: "Knowledge" },

@@ -13,6 +13,11 @@ import {
   buildQuestionStatusIndex,
   getQuestionAnswerStatus,
 } from "@/lib/services/question-status";
+import { getResearchForQuestion } from "@/lib/research/services";
+import {
+  RESEARCH_AVAILABILITY_LABELS,
+  RESEARCH_EVIDENCE_RATING_LABELS,
+} from "@/lib/research/types";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +44,7 @@ export default async function QuestionDetailPage({
     k.related_question_ids.includes(question.id),
   );
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
+  const research = await getResearchForQuestion(question.id);
 
   return (
     <AppShell
@@ -52,6 +58,57 @@ export default async function QuestionDetailPage({
     >
       <section className="mb-5">
         <AnswerStatusHeader status={status} />
+      </section>
+
+      <section className="surface mb-5 p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-display text-xl">Relevant Research</h3>
+          <Link href="/research/new" className="btn btn-ghost">
+            {research.length ? "Add another source" : "Add source"}
+          </Link>
+        </div>
+        {research.length === 0 ? (
+          <p className="text-sm text-ink-muted">
+            No linked research yet.{" "}
+            <Link href="/research/new" className="text-accent hover:underline">
+              Add a source
+            </Link>{" "}
+            — evidence informs discussion and does not replace your answers.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {research.map(({ link, source, shortFinding }) =>
+              source ? (
+                <li key={link.id} className="rounded-xl border border-border p-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/research/${source.id}`}
+                      className="font-medium hover:text-accent"
+                    >
+                      {source.title}
+                    </Link>
+                    {source.evidence_rating && (
+                      <span className="badge badge-info">
+                        {RESEARCH_EVIDENCE_RATING_LABELS[source.evidence_rating]}
+                      </span>
+                    )}
+                    <span className="badge">
+                      {RESEARCH_AVAILABILITY_LABELS[source.availability_type]}
+                    </span>
+                  </div>
+                  {(shortFinding || link.relevance_note) && (
+                    <p className="mt-1 text-ink-muted line-clamp-2">
+                      {shortFinding || link.relevance_note}
+                    </p>
+                  )}
+                </li>
+              ) : null,
+            )}
+          </ul>
+        )}
+        <p className="mt-3 text-xs text-ink-subtle">
+          Outside evidence is separate from your family decision.
+        </p>
       </section>
 
       <section className="surface p-5">

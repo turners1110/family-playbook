@@ -42,6 +42,9 @@ yarn-error.log*
 /data/local-store.json
 /data/local-store.json.tmp
 /data/exports/
+/data/research-library.json
+/data/research-library.json.tmp
+/data/research-files/
 
 # vercel
 .vercel
