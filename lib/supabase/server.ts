@@ -26,8 +26,13 @@ export async function createClient() {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options),
           );
-        } catch {
-          // Called from a Server Component — safe to ignore when proxy refreshes sessions.
+        } catch (error) {
+          // Server Components cannot write cookies; the proxy refreshes sessions.
+          // In Server Actions / Route Handlers this should not fail — log names only.
+          console.error("[auth] supabase cookie setAll failed", {
+            cookieNames: cookiesToSet.map(({ name }) => name),
+            message: error instanceof Error ? error.message : String(error),
+          });
         }
       },
     },

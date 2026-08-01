@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { requestMagicLink } from "@/lib/auth/actions";
+import type { MagicLinkResult } from "@/lib/auth/magic-link-types";
 
 export function LoginForm({ initialError }: { initialError?: string | null }) {
   const [email, setEmail] = useState("");
@@ -17,11 +17,20 @@ export function LoginForm({ initialError }: { initialError?: string | null }) {
         setMessage(null);
         setError(null);
         startTransition(async () => {
-          const result = await requestMagicLink(email);
-          if (result.ok) {
-            setMessage(result.message);
-          } else {
-            setError(result.message);
+          try {
+            const res = await fetch("/auth/magic-link", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email }),
+            });
+            const result = (await res.json()) as MagicLinkResult;
+            if (result.ok) {
+              setMessage(result.message);
+            } else {
+              setError(result.message);
+            }
+          } catch {
+            setError("Something went wrong. Please try again.");
           }
         });
       }}

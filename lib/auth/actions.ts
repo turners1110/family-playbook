@@ -4,17 +4,19 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getMagicLinkRedirectTo } from "@/lib/auth/app-url";
+import { summarizeAuthCookies } from "@/lib/auth/pkce-cookies";
 import { AuthIdentityError } from "@/lib/auth/errors";
+import type { MagicLinkResult } from "@/lib/auth/magic-link-types";
+import { cookies } from "next/headers";
+
+export type { MagicLinkResult };
 
 const emailSchema = z.string().trim().email();
 
-export type MagicLinkResult =
-  | { ok: true; message: string }
-  | { ok: false; code: "invalid_email" | "config" | "magic_link_failed"; message: string };
-
 /**
- * Sends a magic link. Always returns a generic success message on the happy path
- * and for unknown emails, to avoid account enumeration.
+ * Server-action magic link (legacy / non-UI callers).
+ * Prefer POST /auth/magic-link so the PKCE verifier is attached via Set-Cookie
+ * on a real Route Handler response.
  */
 export async function requestMagicLink(emailInput: string): Promise<MagicLinkResult> {
   const parsed = emailSchema.safeParse(emailInput);
@@ -62,14 +64,19 @@ export async function requestMagicLink(emailInput: string): Promise<MagicLinkRes
     },
   });
 
-  // Intentionally do not reveal whether the email exists.
+  const cookieStore = await cookies();
+  const cookieSummary = summarizeAuthCookies(cookieStore.getAll());
+  console.info("[auth] magic link otp cookie state (server action)", {
+    hasCode: false,
+    hasPkceCodeVerifier: cookieSummary.hasPkceCodeVerifier,
+    authCookieNames: cookieSummary.authCookieNames,
+  });
+
   if (error) {
-    // Detailed diagnostics stay on the server; never return these to the browser.
     console.error("[auth] magic link request failed", {
       message: error.message,
       status: error.status,
       code: error.code,
-      details: error,
     });
   }
 

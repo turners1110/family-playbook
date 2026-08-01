@@ -48,9 +48,10 @@ describe("route classification", () => {
     }
   });
 
-  it("marks login and callback as public", () => {
+  it("marks login and auth routes as public", () => {
     expect(isPublicPath("/login")).toBe(true);
     expect(isPublicPath("/auth/callback")).toBe(true);
+    expect(isPublicPath("/auth/magic-link")).toBe(true);
     expect(isProtectedPath("/login")).toBe(false);
   });
 });
@@ -120,14 +121,105 @@ describe("magic link redirect URL", () => {
 
   it("signInWithOtp options use shouldCreateUser false and emailRedirectTo", async () => {
     const source = await fs.readFile(
-      path.join(process.cwd(), "lib/auth/actions.ts"),
+      path.join(process.cwd(), "app/auth/magic-link/route.ts"),
       "utf8",
     );
     expect(source).toMatch(/signInWithOtp\(/);
     expect(source).toMatch(/shouldCreateUser:\s*false/);
     expect(source).toMatch(/getMagicLinkRedirectTo/);
+    expect(source).toMatch(/createRouteHandlerClient/);
+    expect(source).toMatch(/applyPendingCookies/);
     expect(source).not.toMatch(/localhost:3000/);
     expect(source).not.toMatch(/VERCEL_URL/);
+  });
+});
+
+describe("PKCE cookie handoff", () => {
+  it("detects code-verifier cookie names without exposing values", async () => {
+    const {
+      hasPkceCodeVerifierCookie,
+      listSupabaseAuthCookieNames,
+      summarizeAuthCookies,
+    } = await import("@/lib/auth/pkce-cookies");
+
+    const cookies = [
+      { name: "sb-abcproject-auth-token-code-verifier", value: "SECRET_VERIFIER" },
+      { name: "sb-abcproject-auth-token.0", value: "SECRET_CHUNK" },
+      { name: "other", value: "nope" },
+    ];
+
+    expect(hasPkceCodeVerifierCookie(cookies)).toBe(true);
+    expect(listSupabaseAuthCookieNames(cookies)).toEqual([
+      "sb-abcproject-auth-token-code-verifier",
+      "sb-abcproject-auth-token.0",
+    ]);
+    expect(summarizeAuthCookies(cookies)).toEqual({
+      hasPkceCodeVerifier: true,
+      authCookieNames: [
+        "sb-abcproject-auth-token-code-verifier",
+        "sb-abcproject-auth-token.0",
+      ],
+    });
+    // Ensure helpers never echo values into the summary object.
+    expect(JSON.stringify(summarizeAuthCookies(cookies))).not.toContain("SECRET");
+  });
+
+  it("reports missing verifier when only unrelated cookies exist", async () => {
+    const { hasPkceCodeVerifierCookie, summarizeAuthCookies } = await import(
+      "@/lib/auth/pkce-cookies"
+    );
+    const cookies = [{ name: "session", value: "x" }];
+    expect(hasPkceCodeVerifierCookie(cookies)).toBe(false);
+    expect(summarizeAuthCookies(cookies).authCookieNames).toEqual([]);
+  });
+
+  it("route handler client buffers Set-Cookie writes for the response", async () => {
+    const { applyPendingCookies } = await import("@/lib/supabase/route");
+    const { NextResponse } = await import("next/server");
+    const pending = [
+      {
+        name: "sb-test-auth-token-code-verifier",
+        value: "verifier-value",
+        options: { path: "/", sameSite: "lax" as const },
+      },
+    ];
+    const response = applyPendingCookies(NextResponse.json({ ok: true }), pending);
+    const names = response.cookies.getAll().map((c) => c.name);
+    expect(names).toContain("sb-test-auth-token-code-verifier");
+  });
+
+  it("callback reads request cookies before exchangeCodeForSession", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "app/auth/callback/route.ts"),
+      "utf8",
+    );
+    const startIdx = source.indexOf("summarizeAuthCookies(request.cookies.getAll())");
+    const exchangeIdx = source.indexOf("exchangeCodeForSession");
+    expect(startIdx).toBeGreaterThan(-1);
+    expect(exchangeIdx).toBeGreaterThan(startIdx);
+    expect(source).toMatch(/hasPkceCodeVerifier/);
+    expect(source).toMatch(/authCookieNames/);
+    expect(source).toMatch(/createRouteHandlerClient/);
+    expect(source).not.toMatch(/cookie\.value|cookies\.get\([^)]+\)\?\.value/);
+  });
+
+  it("proxy skips session refresh on PKCE auth routes", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/supabase/proxy.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/\/auth\/callback/);
+    expect(source).toMatch(/\/auth\/magic-link/);
+    expect(source).toMatch(/return supabaseResponse/);
+  });
+
+  it("login form posts to magic-link route so Set-Cookie reaches the browser", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "components/auth/LoginForm.tsx"),
+      "utf8",
+    );
+    expect(source).toMatch(/fetch\("\/auth\/magic-link"/);
+    expect(source).not.toMatch(/requestMagicLink/);
   });
 });
 

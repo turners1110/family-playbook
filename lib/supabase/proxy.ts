@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/auth/magic-link"];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
@@ -31,11 +31,24 @@ export function isProtectedPath(pathname: string) {
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  const { pathname } = request.nextUrl;
+
+  // Auth routes manage their own cookies (PKCE verifier + code exchange).
+  // Do not run getUser()/setAll here — it can drop or rewrite auth cookies.
+  if (
+    pathname === "/auth/callback" ||
+    pathname.startsWith("/auth/callback/") ||
+    pathname === "/auth/magic-link" ||
+    pathname.startsWith("/auth/magic-link/")
+  ) {
+    return supabaseResponse;
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !key) {
-    if (isProtectedPath(request.nextUrl.pathname)) {
+    if (isProtectedPath(pathname)) {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/login";
       redirectUrl.searchParams.set("error", "config");
@@ -62,8 +75,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
 
   if (!user && isProtectedPath(pathname)) {
     const redirectUrl = request.nextUrl.clone();
