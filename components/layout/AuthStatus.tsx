@@ -2,13 +2,16 @@
 
 import { useTransition } from "react";
 import { logoutAction } from "@/lib/auth/actions";
+import { emergencyLogoutAction } from "@/lib/auth/emergency-actions";
 
 export function AuthStatus({
   displayName,
   email,
+  mode = "supabase",
 }: {
   displayName: string;
   email: string;
+  mode?: "supabase" | "emergency";
 }) {
   const [pending, startTransition] = useTransition();
 
@@ -24,11 +27,19 @@ export function AuthStatus({
         disabled={pending}
         onClick={() => {
           startTransition(async () => {
-            await logoutAction();
+            if (mode === "emergency") {
+              await emergencyLogoutAction();
+            } else {
+              await logoutAction();
+            }
           });
         }}
       >
-        {pending ? "Signing out…" : "Sign out"}
+        {pending
+          ? "Signing out…"
+          : mode === "emergency"
+            ? "End trip session"
+            : "Sign out"}
       </button>
     </div>
   );

@@ -51,6 +51,8 @@ describe("route classification", () => {
   it("marks login and callback as public", () => {
     expect(isPublicPath("/login")).toBe(true);
     expect(isPublicPath("/auth/callback")).toBe(true);
+    expect(isPublicPath("/access")).toBe(true);
+    expect(isPublicPath("/storage-unavailable")).toBe(true);
     expect(isPublicPath("/auth/magic-link")).toBe(false);
     expect(isProtectedPath("/login")).toBe(false);
   });

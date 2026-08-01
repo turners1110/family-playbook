@@ -13,20 +13,31 @@ import {
 import { savePlaybookSnapshot } from "@/lib/services/playbook";
 import type { SaveAnswerInput, CreateSessionInput, SaveDecisionInput } from "@/lib/validation/schemas";
 import { aiService } from "@/lib/services/ai";
-import { updateStore, id, nowIso } from "@/lib/db/local-store";
+import { updateStore, id, nowIso } from "@/lib/db/store";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
+import { publicRemoteStoreMessage, logStoreError } from "@/lib/db/store-errors";
 
 async function requireIdentity() {
   const ctx = await requireFamilyContext();
-  await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
+  if (ctx.mode === "supabase") {
+    await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
+  }
   return ctx;
+}
+
+function toActionError(error: unknown): { ok: false; error: string } {
+  logStoreError("action", error);
+  return { ok: false, error: publicRemoteStoreMessage(error) };
 }
 
 export async function actionSaveAnswer(input: SaveAnswerInput) {
   await requireIdentity();
-  // Phase 1: product data remains on the local store. Phase 3 migrates answers.
-  await saveAnswer(input);
+  try {
+    await saveAnswer(input);
+  } catch (error) {
+    return toActionError(error);
+  }
   revalidatePath("/home");
   revalidatePath("/questions");
   revalidatePath("/dashboard");
@@ -56,7 +67,11 @@ export async function actionAdvanceSession(
 
 export async function actionSaveDecision(input: SaveDecisionInput) {
   await requireIdentity();
-  await saveDecision(input);
+  try {
+    await saveDecision(input);
+  } catch (error) {
+    return toActionError(error);
+  }
   revalidatePath("/decisions");
   revalidatePath("/playbook");
   revalidatePath("/dashboard");

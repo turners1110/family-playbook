@@ -26,6 +26,15 @@ In the Supabase SQL editor (or CLI), run in order:
 
 1. `supabase/migrations/0001_init.sql`
 2. `supabase/migrations/0002_auth_and_identity.sql`
+3. `supabase/migrations/0003_remote_json_store.sql` (Trip Online Mode remote JSON bridge)
+
+### Trip Online Mode (temporary)
+
+See [docs/trip-online-mode.md](docs/trip-online-mode.md) for enabling shared-code access + remote JSON storage on Vercel while magic-link auth is debugged.
+
+```bash
+pnpm upload:remote-store
+```
 
 ### 3. Supabase Auth dashboard settings
 
@@ -77,6 +86,7 @@ Open [http://localhost:3000/login](http://localhost:3000/login), enter your emai
 | `pnpm dev` | Start Next.js |
 | `pnpm seed` | Seed local JSON product data |
 | `pnpm setup:family` | Link Auth users to Turner Family (service role) |
+| `pnpm upload:remote-store` | Upload `data/local-store.json` into remote JSONB bridge |
 | `pnpm generate:questions` | Generate ≥300 seed questions |
 | `pnpm test` | Vitest |
 | `pnpm test:e2e` | Playwright |

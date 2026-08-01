@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
-    "setup:family": "tsx scripts/setup-family.ts"
+    "setup:family": "tsx scripts/setup-family.ts",
+    "upload:remote-store": "tsx scripts/upload-local-store.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.5.7",

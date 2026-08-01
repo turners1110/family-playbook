@@ -16,7 +16,9 @@ export async function AppShell({
   actions?: React.ReactNode;
 }) {
   const ctx = await requireFamilyContext();
-  await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
+  if (ctx.mode === "supabase" && ctx.profile.email) {
+    await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
+  }
 
   return (
     <div className="min-h-screen">
@@ -34,9 +36,15 @@ export async function AppShell({
             </div>
             <div className="truncate text-xs text-ink-subtle">
               {ctx.family.name}
+              {ctx.mode === "emergency" ? " · Trip Mode · Online Backup Enabled" : ""}
             </div>
           </Link>
           <div className="flex items-center gap-2">
+            {ctx.mode === "emergency" && (
+              <span className="hidden rounded-full border border-border bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent-strong sm:inline">
+                Trip Mode · Online Backup Enabled
+              </span>
+            )}
             <Link href="/search" className="btn btn-ghost hidden sm:inline-flex">
               Search
             </Link>
@@ -45,7 +53,12 @@ export async function AppShell({
             </Link>
             <AuthStatus
               displayName={ctx.member.display_name || ctx.profile.display_name}
-              email={ctx.profile.email}
+              email={
+                ctx.mode === "emergency"
+                  ? `Answering as ${ctx.member.display_name}`
+                  : ctx.profile.email
+              }
+              mode={ctx.mode}
             />
           </div>
         </div>

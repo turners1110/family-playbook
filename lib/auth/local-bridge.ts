@@ -1,4 +1,4 @@
-import { readStore, updateStore } from "@/lib/db/local-store";
+import { readStore, updateStore } from "@/lib/db/store";
 import type { FamilyMember, UserProfile } from "@/lib/types/models";
 
 /**

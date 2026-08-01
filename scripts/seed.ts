@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
-import { clearMemoryStore, ensureDataDir, writeStore, nowIso } from "@/lib/db/local-store";
+import { clearMemoryStore, ensureDataDir, writeStore, nowIso } from "@/lib/db/local-json-store";
 import type { AppStore, Outcome, Question } from "@/lib/types/models";
 import { LIFE_STAGE_LABELS, LIFE_STAGES, OUTCOME_DOMAIN_LABELS, OUTCOME_DOMAINS } from "@/lib/constants/enums";
 import { questionSeedSchema } from "@/lib/validation/schemas";

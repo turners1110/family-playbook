@@ -4,8 +4,15 @@ import {
   hasSupabasePublicConfig,
   requireSupabasePublicConfig,
 } from "@/lib/supabase/env";
+import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
+import { hasValidEmergencySessionFromRequest } from "@/lib/auth/emergency-session";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/auth/callback",
+  "/access",
+  "/storage-unavailable",
+];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(
@@ -43,17 +50,37 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  // Trip mode off: /access is unavailable.
+  if (
+    !isEmergencyAccessModeEnabled() &&
+    (pathname === "/access" || pathname.startsWith("/access/"))
+  ) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  const emergencyOk = hasValidEmergencySessionFromRequest(
+    request.headers.get("cookie") ?? undefined,
+  );
+
   if (!hasSupabasePublicConfig()) {
-    // requireSupabasePublicConfig logs missing_url vs missing_public_key.
     try {
       requireSupabasePublicConfig();
     } catch {
       /* already logged */
     }
+
     if (isProtectedPath(pathname)) {
+      if (isEmergencyAccessModeEnabled() && emergencyOk) {
+        return supabaseResponse;
+      }
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/login";
-      redirectUrl.searchParams.set("error", "config");
+      redirectUrl.pathname = isEmergencyAccessModeEnabled() ? "/access" : "/login";
+      if (!isEmergencyAccessModeEnabled()) {
+        redirectUrl.searchParams.set("error", "config");
+      }
       return NextResponse.redirect(redirectUrl);
     }
     return supabaseResponse;
@@ -81,9 +108,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user && isProtectedPath(pathname)) {
+    if (isEmergencyAccessModeEnabled() && emergencyOk) {
+      return supabaseResponse;
+    }
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("next", pathname);
+    redirectUrl.pathname = isEmergencyAccessModeEnabled() ? "/access" : "/login";
+    if (!isEmergencyAccessModeEnabled()) {
+      redirectUrl.searchParams.set("next", pathname);
+    }
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -94,7 +126,30 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (user && (pathname === "/access" || pathname.startsWith("/access/"))) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/home";
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (emergencyOk && (pathname === "/access" || pathname === "/login")) {
+    // Allow /access/actor even with session; only bounce bare /access and /login.
+    if (pathname === "/access" || pathname === "/login") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/home";
+      redirectUrl.search = "";
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   if (user && pathname === "/") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/home";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (!user && emergencyOk && pathname === "/") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/home";
     return NextResponse.redirect(redirectUrl);

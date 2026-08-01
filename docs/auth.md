@@ -17,6 +17,10 @@ reads/writes `data/local-store.json` until later migration phases.
 | `TURNER_SAM_EMAIL` | setup script | Not committed with real values |
 | `TURNER_MICHELLE_EMAIL` | setup script | Not committed with real values |
 | `TURNER_FAMILY_NAME` | setup script | Optional, default `Turner Family` |
+| `EMERGENCY_ACCESS_MODE` | Trip Mode | Server-only; must be exactly `true` to enable `/access` |
+| `EMERGENCY_ACCESS_CODE` | Trip Mode | Server-only shared code; never `NEXT_PUBLIC_` |
+| `EMERGENCY_COOKIE_SECRET` | Trip Mode | Server-only HMAC secret for signed cookies |
+| `USE_REMOTE_JSON_STORE` | Store facade | Server-only; `true` selects remote JSONB bridge |
 
 Public key resolution order:
 
@@ -31,6 +35,11 @@ Server logs distinguish missing URL, missing public key, and invalid `NEXT_PUBLI
 
 1. `0001_init.sql` — schema + RLS
 2. `0002_auth_and_identity.sql` — profile trigger, profile RLS, backfill
+3. `0003_remote_json_store.sql` — Trip Online Mode remote JSON bridge (service-role only)
+
+## Trip Online Mode
+
+When `EMERGENCY_ACCESS_MODE=true`, `/access` accepts a shared code and sets a signed HttpOnly cookie. Protected product routes accept **either** a valid Supabase session **or** a valid emergency cookie. Supabase Auth identity always overrides the temporary Sam/Michelle actor selector. See `docs/trip-online-mode.md`.
 
 ## Key modules
 

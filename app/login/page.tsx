@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { getOptionalUser } from "@/lib/auth/family-context";
 import { publicAuthMessage } from "@/lib/auth/errors";
+import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,7 @@ export default async function LoginPage({
   }
 
   const errorMessage = publicAuthMessage(params.error);
+  const tripMode = isEmergencyAccessModeEnabled();
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col justify-center px-4 py-10">
@@ -32,6 +35,15 @@ export default async function LoginPage({
           can access this space.
         </p>
         <LoginForm initialError={errorMessage} />
+        {tripMode && (
+          <p className="mt-6 text-sm text-ink-muted">
+            On the trip? Use{" "}
+            <Link href="/access" className="font-medium text-accent underline">
+              Trip Mode access
+            </Link>{" "}
+            with the shared family code.
+          </p>
+        )}
         <p className="mt-6 text-xs text-ink-subtle">
           After signing in for the first time, an administrator must link your account
           to the Turner Family with <code>pnpm setup:family</code>.
