@@ -24,6 +24,8 @@ import {
   setResearchRepositoryForTests,
   uploadResearchFile,
 } from "@/lib/research/services";
+import { clearPublicResearchArtifactsForTests } from "@/lib/research/public-research/artifact-store";
+import { waitForPublicResearchIdle } from "@/lib/research/public-research/pipeline";
 import {
   availabilityDisclosure,
   deriveAvailability,
@@ -88,6 +90,7 @@ beforeEach(() => {
 
 afterEach(() => {
   setResearchRepositoryForTests(null, null);
+  clearPublicResearchArtifactsForTests();
   vi.unstubAllEnvs();
 });
 
@@ -171,10 +174,13 @@ describe("research library persistence (memory backend)", () => {
       rights_attested: false,
       ingestion_path: "owned_physical",
     });
+    await waitForPublicResearchIdle();
     const detail = await getResearchSource(id, ctx);
     expect(detail?.source.availability_type).toBe("metadata_only");
     expect(detail?.source.added_by_display_name).toBe("Sam");
-    expect(detail?.source.processing_status).toBe("metadata_only");
+    // Books auto-queue public research after metadata create.
+    expect(detail?.source.processing_status).toBe("public_overview_ready");
+    expect(detail?.publicOverview?.full_book_processed).toBe(false);
   });
 
   it("persists notes and question links", async () => {

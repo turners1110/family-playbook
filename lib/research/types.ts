@@ -55,6 +55,13 @@ export const RESEARCH_PROCESSING_STATUSES = [
   "processing_failed",
   "metadata_only",
   "archived",
+  "public_research_queued",
+  "gathering_public_sources",
+  "public_overview_ready",
+  "awaiting_source_text",
+  "source_text_uploaded",
+  "extracting_source_text",
+  "source_grounded_analysis_ready",
 ] as const;
 
 export type ResearchProcessingStatus = (typeof RESEARCH_PROCESSING_STATUSES)[number];
@@ -68,6 +75,13 @@ export const RESEARCH_PROCESSING_LABELS: Record<ResearchProcessingStatus, string
   processing_failed: "Processing failed",
   metadata_only: "Metadata only",
   archived: "Archived",
+  public_research_queued: "Public research queued",
+  gathering_public_sources: "Gathering public sources",
+  public_overview_ready: "Public overview ready",
+  awaiting_source_text: "Awaiting book text",
+  source_text_uploaded: "Book text uploaded",
+  extracting_source_text: "Extracting book text",
+  source_grounded_analysis_ready: "Source-grounded analysis ready",
 };
 
 export const RESEARCH_EVIDENCE_RATINGS = [
@@ -260,6 +274,13 @@ export type ResearchSource = {
   added_by_display_name: string | null;
   /** Present when this family source was added from the built-in Recommended Library. */
   recommended_slug: string | null;
+  public_sources_reviewed?: number;
+  uploaded_file_count?: number;
+  book_pages_processed?: number;
+  chapters_processed?: number;
+  full_book_processed?: boolean;
+  public_overview_status?: "not_started" | "queued" | "processing" | "complete" | "failed";
+  source_grounded_status?: "not_started" | "queued" | "processing" | "complete" | "failed";
   created_at: string;
   updated_at: string;
   processed_at: string | null;
@@ -352,4 +373,149 @@ export type ResearchSourceLink = {
   finding_id: string | null;
   relevance_note: string | null;
   created_at: string;
+};
+
+export const RESEARCH_EXTERNAL_SOURCE_TYPES = [
+  "publisher_page",
+  "author_website",
+  "author_interview",
+  "author_podcast",
+  "public_talk",
+  "author_article",
+  "book_review",
+  "library_catalog",
+  "related_study",
+  "professional_guidance",
+  "other_public",
+] as const;
+
+export type ResearchExternalSourceType = (typeof RESEARCH_EXTERNAL_SOURCE_TYPES)[number];
+
+export type ResearchExternalSource = {
+  id: string;
+  research_source_id: string;
+  title: string;
+  author: string | null;
+  publisher: string | null;
+  url: string | null;
+  source_type: ResearchExternalSourceType;
+  publication_date: string | null;
+  accessed_at: string;
+  reliability_rating:
+    | "high"
+    | "moderate"
+    | "low"
+    | "reviewer_interpretation"
+    | "unknown";
+  notes: string | null;
+  supports_finding_ids: string[];
+  created_at: string;
+};
+
+export type ResearchPublicOverview = {
+  id: string;
+  research_source_id: string;
+  processing_mode: "public_sources_only" | "source_grounded" | "comparison";
+  short_summary: string;
+  detailed_overview: string;
+  main_themes: string[];
+  author_arguments: string[];
+  core_framework: string | null;
+  important_conclusions: string[];
+  practical_lessons: string[];
+  questions_raised: string[];
+  discussion_points: string[];
+  relevant_checklist_task_ids: string[];
+  relevant_question_ids: string[];
+  potential_principles: string[];
+  related_research: string[];
+  criticism_limitations: string[];
+  areas_of_disagreement: string[];
+  confidence: "low" | "moderate" | "high";
+  review_status: "needs_review" | "approved" | "rejected" | "edited";
+  full_book_processed: boolean;
+  source_basis: "public_sources" | "uploaded_text" | "mixed";
+  ai_provider: string | null;
+  model_name: string | null;
+  prompt_version: string | null;
+  source_count: number;
+  created_at: string;
+  updated_at: string;
+  approved_by_member_id: string | null;
+  approved_at: string | null;
+};
+
+export type ResearchPreliminaryFinding = {
+  id: string;
+  source_id: string;
+  finding_type:
+    | "claim"
+    | "recommendation"
+    | "principle"
+    | "warning"
+    | "statistic"
+    | "framework"
+    | "exercise"
+    | "question";
+  title: string;
+  finding_text: string;
+  confidence: "low" | "medium" | "moderate" | "high" | null;
+  evidence_strength: string | null;
+  source_basis: "public_sources" | "uploaded_text" | "mixed";
+  is_preliminary: boolean;
+  external_source_ids: string[];
+  related_topics: string[];
+  linked_question_ids: string[];
+  linked_checklist_task_ids: string[];
+  ai_generated: boolean;
+  review_status: "needs_review" | "approved" | "rejected" | "edited";
+  created_at: string;
+  updated_at: string;
+};
+
+export type ResearchProcessingJob = {
+  id: string;
+  source_id: string;
+  family_id: string | null;
+  job_type: string;
+  status: "queued" | "running" | "completed" | "failed" | "cancelled";
+  progress_percent: number;
+  current_stage: string | null;
+  error_code: string | null;
+  safe_error_message: string | null;
+  ai_provider: string | null;
+  model_name: string | null;
+  prompt_version: string | null;
+  source_count: number;
+  dedupe_key: string | null;
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+};
+
+export type ResearchCoverageComparison = {
+  id: string;
+  research_source_id: string;
+  claim_key: string;
+  claim_text: string;
+  comparison_status:
+    | "confirmed_by_uploaded_text"
+    | "expanded_by_uploaded_text"
+    | "not_supported_by_uploaded_text"
+    | "contradicted_by_uploaded_text"
+    | "still_uncertain";
+  public_overview_id: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+export type ResearchSourceCoverage = {
+  public_sources_reviewed: number;
+  uploaded_files: number;
+  book_pages_processed: number;
+  chapters_processed: number;
+  full_book_processed: boolean;
+  public_overview: "not_started" | "queued" | "processing" | "complete" | "failed";
+  source_grounded_analysis: "not_started" | "queued" | "processing" | "complete" | "failed";
 };

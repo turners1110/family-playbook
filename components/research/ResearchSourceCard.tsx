@@ -14,13 +14,20 @@ export function ResearchStatusBadge({
   status: ResearchSourceCard["processing_status"];
 }) {
   const tone =
-    status === "processed"
+    status === "processed" ||
+    status === "public_overview_ready" ||
+    status === "source_grounded_analysis_ready"
       ? "badge-accent"
       : status === "processing_failed"
         ? "badge-danger"
-        : status === "needs_review" || status === "queued" || status === "processing"
+        : status === "needs_review" ||
+            status === "queued" ||
+            status === "processing" ||
+            status === "public_research_queued" ||
+            status === "gathering_public_sources" ||
+            status === "extracting_source_text"
           ? "badge-warning"
-          : status === "metadata_only"
+          : status === "metadata_only" || status === "awaiting_source_text"
             ? "badge-info"
             : "";
   return (

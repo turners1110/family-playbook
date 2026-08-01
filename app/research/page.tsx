@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ResearchLibraryCard } from "@/components/research/ResearchLibraryCard";
+import { BulkGeneratePublicOverviewsButton } from "@/components/research/PublicResearchActions";
 import {
   getResearchStorageStatus,
   listResearchSources,
@@ -104,6 +105,12 @@ export default async function ResearchLibraryPage({
           </Link>
         ))}
       </div>
+
+      {tab === "my-library" && storage.writesAllowed ? (
+        <div className="mb-5">
+          <BulkGeneratePublicOverviewsButton />
+        </div>
+      ) : null}
 
       {tab === "recommended" ? (
         <div className="mb-5 flex flex-wrap items-center gap-2">

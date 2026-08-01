@@ -1,7 +1,13 @@
 import type { FamilyContext } from "@/lib/auth/family-context";
 import type {
+  ResearchCoverageComparison,
+  ResearchExternalSource,
+  ResearchPreliminaryFinding,
+  ResearchProcessingJob,
+  ResearchPublicOverview,
   ResearchSource,
   ResearchSourceCard,
+  ResearchSourceCoverage,
   ResearchSourceFile,
   ResearchSourceLink,
   ResearchSourceNote,
@@ -16,6 +22,13 @@ export type ResearchSourceDetail = {
   summaries: ResearchSourceSummary[];
   notes: ResearchSourceNote[];
   links: ResearchSourceLink[];
+  externalSources?: ResearchExternalSource[];
+  publicOverview?: ResearchPublicOverview | null;
+  sourceGroundedOverview?: ResearchPublicOverview | null;
+  preliminaryFindings?: ResearchPreliminaryFinding[];
+  jobs?: ResearchProcessingJob[];
+  coverage?: ResearchSourceCoverage;
+  comparisons?: ResearchCoverageComparison[];
 };
 
 export type PrepareUploadResult = {

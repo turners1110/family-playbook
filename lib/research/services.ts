@@ -161,7 +161,44 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
   try {
     const repo = getRepository();
     const familyId = await familyIdFor(ctx ?? null);
-    return repo.getSource(familyId, sourceId);
+    const detail = await repo.getSource(familyId, sourceId);
+    if (!detail) return null;
+
+    const {
+      getPublicOverview,
+      listExternalSources,
+      listPreliminaryFindings,
+      listJobsForSource,
+      getResearchCoverage,
+      getCachedSourceResearchStatus,
+    } = await import("@/lib/research/public-research/pipeline");
+
+    const cached = getCachedSourceResearchStatus(sourceId);
+    const coverage = getResearchCoverage(sourceId);
+    const source = {
+      ...detail.source,
+      ...(cached ?? {}),
+      public_sources_reviewed: coverage.public_sources_reviewed,
+      uploaded_file_count: coverage.uploaded_files,
+      book_pages_processed: coverage.book_pages_processed,
+      chapters_processed: coverage.chapters_processed,
+      full_book_processed: coverage.full_book_processed,
+      public_overview_status: coverage.public_overview,
+      source_grounded_status: coverage.source_grounded_analysis,
+      finding_count: listPreliminaryFindings(sourceId).length,
+    };
+
+    return {
+      ...detail,
+      source,
+      externalSources: listExternalSources(sourceId),
+      publicOverview: getPublicOverview(sourceId, "public_sources_only"),
+      sourceGroundedOverview: getPublicOverview(sourceId, "source_grounded"),
+      preliminaryFindings: listPreliminaryFindings(sourceId),
+      jobs: listJobsForSource(sourceId),
+      coverage,
+      comparisons: [],
+    };
   } catch (error) {
     if (error instanceof ResearchUnavailableError) return null;
     throw error;
@@ -180,7 +217,166 @@ export async function createResearchSource(
   });
   const repo = getRepository();
   const familyId = await familyIdFor(ctx);
-  return repo.createSource(familyId, ctx, data);
+  const sourceId = await repo.createSource(familyId, ctx, data);
+
+  if (data.source_type === "book") {
+    await queuePublicResearchForSource(ctx, familyId, sourceId);
+  }
+
+  return sourceId;
+}
+
+async function queuePublicResearchForSource(
+  ctx: FamilyContext,
+  familyId: string,
+  sourceId: string,
+) {
+  const repo = getRepository();
+  const detail = await repo.getSource(familyId, sourceId);
+  if (!detail) return;
+
+  const {
+    queuePublicBookResearch,
+    setPublicResearchSourcePatcher,
+  } = await import("@/lib/research/public-research/pipeline");
+
+  setPublicResearchSourcePatcher(async (id, patch) => {
+    try {
+      await repo.updateSource(familyId, id, patch);
+    } catch {
+      // Local/memory may not persist every coverage column yet.
+    }
+  });
+
+  let questionIds: string[] = [];
+  let checklistTaskIds: string[] = [];
+  try {
+    const { readStore } = await import("@/lib/db/store");
+    const store = await readStore();
+    questionIds = store.questions.filter((q) => q.active).map((q) => q.id);
+    checklistTaskIds = (store.checklist_tasks ?? [])
+      .filter((t) => !t.archived)
+      .map((t) => t.id);
+  } catch {
+    // Store may be unavailable in some test modes.
+  }
+
+  await queuePublicBookResearch({
+    source: detail.source,
+    familyId,
+    questionIds,
+    checklistTaskIds,
+  });
+}
+
+export async function generatePublicOverviewForSource(
+  ctx: FamilyContext,
+  sourceId: string,
+  options?: { force?: boolean },
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  const familyId = await familyIdFor(ctx);
+  const detail = await getResearchSource(sourceId, ctx);
+  if (!detail) throw new Error("Source not found.");
+  if (detail.source.source_type !== "book") {
+    throw new Error("Public overview is only available for books.");
+  }
+
+  const {
+    queuePublicBookResearch,
+    retryPublicBookResearch,
+    setPublicResearchSourcePatcher,
+  } = await import("@/lib/research/public-research/pipeline");
+  const repo = getRepository();
+  setPublicResearchSourcePatcher(async (id, patch) => {
+    try {
+      await repo.updateSource(familyId, id, patch);
+    } catch {
+      /* ignore */
+    }
+  });
+
+  let questionIds: string[] = [];
+  let checklistTaskIds: string[] = [];
+  try {
+    const { readStore } = await import("@/lib/db/store");
+    const store = await readStore();
+    questionIds = store.questions.filter((q) => q.active).map((q) => q.id);
+    checklistTaskIds = (store.checklist_tasks ?? [])
+      .filter((t) => !t.archived)
+      .map((t) => t.id);
+  } catch {
+    /* ignore */
+  }
+
+  if (options?.force) {
+    return retryPublicBookResearch({
+      source: detail.source,
+      familyId,
+      questionIds,
+      checklistTaskIds,
+    });
+  }
+  return queuePublicBookResearch({
+    source: detail.source,
+    familyId,
+    questionIds,
+    checklistTaskIds,
+  });
+}
+
+export async function generatePublicOverviewsForRecommendedBooks(
+  ctx: FamilyContext,
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  const familyId = await familyIdFor(ctx);
+  const sources = await listResearchSources({ tab: "my-library" }, ctx);
+  const books = sources.filter(
+    (s) => s.source_type === "book" && Boolean(s.recommended_slug),
+  );
+  const {
+    queueBulkPublicOverviews,
+    setPublicResearchSourcePatcher,
+  } = await import("@/lib/research/public-research/pipeline");
+  const repo = getRepository();
+  setPublicResearchSourcePatcher(async (id, patch) => {
+    try {
+      await repo.updateSource(familyId, id, patch);
+    } catch {
+      /* ignore */
+    }
+  });
+
+  let questionIds: string[] = [];
+  let checklistTaskIds: string[] = [];
+  try {
+    const { readStore } = await import("@/lib/db/store");
+    const store = await readStore();
+    questionIds = store.questions.filter((q) => q.active).map((q) => q.id);
+    checklistTaskIds = (store.checklist_tasks ?? [])
+      .filter((t) => !t.archived)
+      .map((t) => t.id);
+  } catch {
+    /* ignore */
+  }
+
+  return queueBulkPublicOverviews({
+    sources: books,
+    familyId,
+    questionIds,
+    checklistTaskIds,
+  });
+}
+
+export async function cancelPublicOverviewJob(ctx: FamilyContext, sourceId: string) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  const { cancelPublicBookResearch } = await import(
+    "@/lib/research/public-research/pipeline"
+  );
+  await cancelPublicBookResearch(sourceId);
 }
 
 export async function updateResearchSource(
@@ -302,7 +498,7 @@ export async function finalizeResearchUpload(
 
   const repo = getRepository();
   const familyId = await familyIdFor(ctx);
-  return repo.finalizeUpload(familyId, {
+  const file = await repo.finalizeUpload(familyId, {
     sourceId: input.sourceId,
     storagePath: input.storagePath,
     originalFilename: input.originalFilename,
@@ -310,6 +506,21 @@ export async function finalizeResearchUpload(
     fileSize: input.fileSize,
     fileHash: input.fileHash,
   });
+
+  const { markSourceTextUploaded } = await import(
+    "@/lib/research/public-research/pipeline"
+  );
+  const isEpub = check.mimeType.includes("epub") || input.originalFilename.toLowerCase().endsWith(".epub");
+  await markSourceTextUploaded({
+    sourceId: input.sourceId,
+    fileCount: 1,
+    // Exact extraction counts arrive when extraction runs; record upload intent now.
+    pagesProcessed: 0,
+    chaptersProcessed: 0,
+    fullBook: isEpub,
+  });
+
+  return file;
 }
 
 /** Local/memory only helper used by import script and tests. */
@@ -338,13 +549,27 @@ export async function uploadResearchFile(
     );
   }
   const familyId = await familyIdFor(ctx);
-  return repo.uploadFileBytes(familyId, {
+  const file = await repo.uploadFileBytes(familyId, {
     sourceId: input.sourceId,
     filename: input.filename,
     mimeType: check.mimeType,
     buffer: input.buffer,
     fileHash: input.fileHash,
   });
+  const { markSourceTextUploaded } = await import(
+    "@/lib/research/public-research/pipeline"
+  );
+  const isEpub =
+    check.mimeType.includes("epub") ||
+    input.filename.toLowerCase().endsWith(".epub");
+  await markSourceTextUploaded({
+    sourceId: input.sourceId,
+    fileCount: 1,
+    pagesProcessed: 0,
+    chaptersProcessed: 0,
+    fullBook: isEpub,
+  });
+  return file;
 }
 
 export async function createSignedResearchFileUrl(

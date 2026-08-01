@@ -10,9 +10,12 @@ import {
   addRecommendedToLibrary,
   approveResearchSummary,
   archiveResearchSource,
+  cancelPublicOverviewJob,
   createResearchSource,
   createSignedResearchFileUrl,
   finalizeResearchUpload,
+  generatePublicOverviewForSource,
+  generatePublicOverviewsForRecommendedBooks,
   getResearchStorageStatus,
   hideRecommendedLibraryItem,
   linkResearchQuestion,
@@ -180,6 +183,47 @@ export async function actionHideRecommended(slug: string) {
   try {
     await hideRecommendedLibraryItem(ctx, slug);
     revalidateResearch();
+    return { ok: true as const };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionGeneratePublicOverview(
+  sourceId: string,
+  force = false,
+) {
+  const ctx = await requireIdentity();
+  try {
+    const job = await generatePublicOverviewForSource(ctx, sourceId, { force });
+    revalidateResearch(sourceId);
+    return { ok: true as const, jobId: job.id, status: job.status };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionGeneratePublicOverviewsBulk() {
+  const ctx = await requireIdentity();
+  try {
+    const jobs = await generatePublicOverviewsForRecommendedBooks(ctx);
+    revalidateResearch();
+    return {
+      ok: true as const,
+      queued: jobs.filter((j) => j.status === "queued" || j.status === "running")
+        .length,
+      total: jobs.length,
+    };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionCancelPublicOverview(sourceId: string) {
+  const ctx = await requireIdentity();
+  try {
+    await cancelPublicOverviewJob(ctx, sourceId);
+    revalidateResearch(sourceId);
     return { ok: true as const };
   } catch (error) {
     return toError(error);

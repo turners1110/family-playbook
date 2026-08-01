@@ -25,13 +25,26 @@ Apply after remote-store migration:
 1. `supabase/migrations/0004_research_library.sql`
 2. `supabase/migrations/0005_research_storage_policies.sql`
 3. `supabase/migrations/0007_seed_recommended_library.sql` (Recommended Library catalog + family prefs)
+4. `supabase/migrations/0008_public_book_research.sql` (public-source overviews, external sources, coverage)
 
-### Recommended Library
+### Public-source book research
 
-- Built-in metadata-only books and trusted organizations (no hosted copyrighted text).
-- Default `/research` tab shows **Recommended Library** with a **Built in** badge.
-- Users can **Add to My Library** (copies metadata into family `research_sources`) or **Hide recommendation**.
-- Filters: Added, Recommended, My Library, Books, Organizations.
+When a **book** is added (manual or from Recommended Library), the app automatically queues public research:
+
+1. Gather lawful public sources (publisher, author, reviews, related guidance)
+2. Generate a **public-source overview** (not a full-book summary)
+3. Extract **preliminary findings** and practical lessons
+4. Mark everything **needs review**
+
+Uploading an EPUB/PDF later creates separate source-grounded coverage and does **not** replace the public overview.
+
+Public-source findings never enter the final family playbook until Sam or Michelle approve them.
+
+Optional env (mock providers work without keys):
+
+- `RESEARCH_WEB_PROVIDER` / `TAVILY_API_KEY`
+- `RESEARCH_AI_PROVIDER` / `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+- `RESEARCH_PUBLIC_CONCURRENCY` (1–3)
 
 ### Bucket checks
 

@@ -38,9 +38,17 @@ export function filterAndSortSources(
     );
   } else if (filters.tab === "queue") {
     next = next.filter((s) =>
-      ["queued", "processing", "processing_failed", "needs_review"].includes(
-        s.processing_status,
-      ),
+      [
+        "queued",
+        "processing",
+        "processing_failed",
+        "needs_review",
+        "public_research_queued",
+        "gathering_public_sources",
+        "awaiting_source_text",
+        "source_text_uploaded",
+        "extracting_source_text",
+      ].includes(s.processing_status),
     );
   }
 
