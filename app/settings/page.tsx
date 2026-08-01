@@ -18,7 +18,7 @@ export default async function SettingsPage() {
       subtitle="Family preferences, privacy controls, and export."
       actions={
         <div className="flex flex-wrap gap-2">
-          <Link href="/before-birth" className="btn btn-ghost">
+          <Link href="/questions/before-birth" className="btn btn-ghost">
             Before Birth Essentials
           </Link>
           <Link href="/after-birth" className="btn btn-ghost">
@@ -84,7 +84,7 @@ export default async function SettingsPage() {
           <Link href="/settings/content-upgrade" className="btn btn-primary">
             Open content upgrade
           </Link>
-          <Link href="/before-birth" className="btn btn-secondary">
+          <Link href="/questions/before-birth" className="btn btn-secondary">
             Before Birth Essentials
           </Link>
         </div>

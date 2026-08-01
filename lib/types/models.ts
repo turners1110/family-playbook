@@ -161,6 +161,10 @@ export interface AnswerPayload {
   notes?: string;
   agreement_notes?: string;
   disagreement_notes?: string;
+  /** Responsibility matrix: row label → owner label. */
+  matrix?: Record<string, string>;
+  /** Named people / support list. */
+  named_people?: string[];
 }
 
 export interface Answer {

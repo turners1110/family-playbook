@@ -9,11 +9,14 @@ export async function AppShell({
   title,
   subtitle,
   actions,
+  focusMode = false,
 }: {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
   actions?: React.ReactNode;
+  /** Hide secondary nav for focused babymoon sessions. */
+  focusMode?: boolean;
 }) {
   const ctx = await requireFamilyContext();
   if (ctx.mode === "supabase" && ctx.profile.email) {
@@ -48,9 +51,16 @@ export async function AppShell({
             <Link href="/search" className="btn btn-ghost hidden sm:inline-flex">
               Search
             </Link>
-            <Link href="/babymoon" className="btn btn-secondary hidden md:inline-flex">
-              Babymoon
-            </Link>
+            {!focusMode ? (
+              <Link href="/questions/before-birth" className="btn btn-secondary hidden md:inline-flex">
+                Essentials
+              </Link>
+            ) : null}
+            {!focusMode ? (
+              <Link href="/babymoon" className="btn btn-secondary hidden md:inline-flex">
+                Babymoon
+              </Link>
+            ) : null}
             <AuthStatus
               displayName={ctx.member.display_name || ctx.profile.display_name}
               email={
@@ -62,19 +72,21 @@ export async function AppShell({
             />
           </div>
         </div>
-        <nav aria-label="Primary" className="border-t border-border/60">
-          <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 py-2 scrollbar-none">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-bg-muted hover:text-ink"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </nav>
+        {!focusMode ? (
+          <nav aria-label="Primary" className="border-t border-border/60">
+            <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 py-2 scrollbar-none">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-bg-muted hover:text-ink"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        ) : null}
       </header>
 
       <main id="main" className="mx-auto max-w-6xl px-4 py-6 sm:py-8">

@@ -33,8 +33,14 @@ export default async function BabymoonPage() {
           saves automatically and resumes on any device when connected.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link href="/discuss?babymoon=1&preset=fifteen_minutes" className="btn btn-primary">
-            15-minute session
+          <Link href="/questions/before-birth" className="btn btn-primary">
+            Before Birth Essentials
+          </Link>
+          <Link href="/questions/before-birth/session?length=30&start=1" className="btn btn-secondary">
+            Essentials · 30 min
+          </Link>
+          <Link href="/discuss?babymoon=1&preset=fifteen_minutes" className="btn btn-secondary">
+            15-minute library session
           </Link>
           <Link href="/discuss?babymoon=1&preset=practical" className="btn btn-secondary">
             Something practical

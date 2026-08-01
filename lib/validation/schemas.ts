@@ -32,6 +32,8 @@ export const answerPayloadSchema = z.object({
   notes: z.string().optional(),
   agreement_notes: z.string().optional(),
   disagreement_notes: z.string().optional(),
+  matrix: z.record(z.string(), z.string()).optional(),
+  named_people: z.array(z.string()).optional(),
 });
 
 export const saveAnswerSchema = z.object({
