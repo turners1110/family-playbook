@@ -127,6 +127,22 @@ export const settingsSchema = z.object({
   babymoon_target_date: z.string().nullable().optional(),
   babymoon_daily_questions: z.number().min(1).max(50).optional(),
   include_perspective_history_in_playbook: z.boolean().optional(),
+  expected_due_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
+  before_baby_scheduling_mode: z
+    .enum(["recommended", "earlier", "compact", "manual_only"])
+    .optional(),
+  before_baby_preferred_task_days: z.array(z.number().int().min(0).max(6)).optional(),
+  before_baby_max_tasks_per_week: z.number().int().min(1).max(40).nullable().optional(),
+  before_baby_weekend_heavy: z.boolean().optional(),
+  before_baby_include_post_birth: z.boolean().optional(),
+  before_baby_hide_completed: z.boolean().optional(),
+  before_baby_avoid_travel_dates: z
+    .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
+    .optional(),
 });
 
 export const questionSeedSchema = z.object({

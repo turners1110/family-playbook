@@ -348,8 +348,60 @@ export interface FamilySettings {
   babymoon_target_date: string | null;
   babymoon_daily_questions: number;
   include_perspective_history_in_playbook: boolean;
+  /** Family expected due date (YYYY-MM-DD). Drives Before Baby scheduling. */
+  expected_due_date?: string | null;
+  before_baby_scheduling_mode?: BeforeBabySchedulingMode;
+  /** Preferred weekdays 0=Sun … 6=Sat for flexible task placement. */
+  before_baby_preferred_task_days?: number[];
+  before_baby_max_tasks_per_week?: number | null;
+  before_baby_weekend_heavy?: boolean;
+  before_baby_include_post_birth?: boolean;
+  before_baby_hide_completed?: boolean;
+  /** YYYY-MM-DD dates to avoid when placing flexible tasks. */
+  before_baby_avoid_travel_dates?: string[];
   updated_at: string;
 }
+
+export type BeforeBabySchedulingMode =
+  | "recommended"
+  | "earlier"
+  | "compact"
+  | "manual_only";
+
+export type ChecklistTimingType =
+  | "before_birth"
+  | "after_birth"
+  | "exact_date"
+  | "no_date";
+
+export type ChecklistTimingFlexibility = "fixed" | "flexible" | "optional";
+
+export type ChecklistDateSource = "calculated" | "manual" | "none";
+
+export type ChecklistTimelineBadge =
+  | "overdue"
+  | "do_now"
+  | "due_this_week"
+  | "upcoming"
+  | "final_month"
+  | "final_week"
+  | "after_birth"
+  | "no_date"
+  | "completed";
+
+export type ChecklistTimelineGroup =
+  | "overdue"
+  | "do_now"
+  | "due_this_week"
+  | "due_next_week"
+  | "due_next_2_weeks"
+  | "final_month"
+  | "final_week"
+  | "later"
+  | "after_birth"
+  | "completed"
+  | "no_date";
+
 
 export interface AiOutput {
   id: string;
@@ -405,6 +457,7 @@ export interface ChecklistTask {
   category_label: string;
   completed: boolean;
   completed_at: string | null;
+  /** Effective display due date (manual or calculated). */
   due_date: string | null;
   priority: ChecklistPriority;
   owner: ChecklistOwner;
@@ -415,6 +468,17 @@ export interface ChecklistTask {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  /** Days relative to expected due date (negative = before birth). */
+  recommended_start_offset_days?: number | null;
+  recommended_due_offset_days?: number | null;
+  hard_deadline_offset_days?: number | null;
+  timing_reason?: string | null;
+  timing_flexibility?: ChecklistTimingFlexibility;
+  timing_type?: ChecklistTimingType;
+  manual_due_date?: string | null;
+  calculated_due_date?: string | null;
+  calculated_start_date?: string | null;
+  date_source?: ChecklistDateSource;
 }
 
 export interface AppStore {

@@ -129,10 +129,24 @@ export async function actionUpdateSettings(input: {
   babymoon_target_date?: string | null;
   babymoon_daily_questions?: number;
   include_perspective_history_in_playbook?: boolean;
+  expected_due_date?: string | null;
+  before_baby_scheduling_mode?:
+    | "recommended"
+    | "earlier"
+    | "compact"
+    | "manual_only";
+  before_baby_preferred_task_days?: number[];
+  before_baby_max_tasks_per_week?: number | null;
+  before_baby_weekend_heavy?: boolean;
+  before_baby_include_post_birth?: boolean;
+  before_baby_hide_completed?: boolean;
+  before_baby_avoid_travel_dates?: string[];
 }) {
   await requireIdentity();
   await updateSettings(input);
   revalidatePath("/settings");
+  revalidatePath("/before-baby");
+  revalidatePath("/before-baby/plan");
   revalidatePath("/playbook");
   return { ok: true as const };
 }

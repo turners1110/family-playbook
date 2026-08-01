@@ -39,6 +39,31 @@ export function assertValidAppStore(data: unknown): asserts data is AppStore {
   if (!Array.isArray(store.checklist_tasks)) {
     (store as { checklist_tasks: unknown[] }).checklist_tasks = [];
   }
+
+  // Soft-normalize Before Baby scheduling settings on older stores.
+  const settings = store.settings as Record<string, unknown>;
+  if (!("expected_due_date" in settings)) settings.expected_due_date = null;
+  if (!("before_baby_scheduling_mode" in settings)) {
+    settings.before_baby_scheduling_mode = "recommended";
+  }
+  if (!("before_baby_preferred_task_days" in settings)) {
+    settings.before_baby_preferred_task_days = [1, 2, 3, 4, 5];
+  }
+  if (!("before_baby_max_tasks_per_week" in settings)) {
+    settings.before_baby_max_tasks_per_week = 8;
+  }
+  if (!("before_baby_weekend_heavy" in settings)) {
+    settings.before_baby_weekend_heavy = false;
+  }
+  if (!("before_baby_include_post_birth" in settings)) {
+    settings.before_baby_include_post_birth = true;
+  }
+  if (!("before_baby_hide_completed" in settings)) {
+    settings.before_baby_hide_completed = false;
+  }
+  if (!("before_baby_avoid_travel_dates" in settings)) {
+    settings.before_baby_avoid_travel_dates = [];
+  }
 }
 
 export class StoreValidationError extends Error {

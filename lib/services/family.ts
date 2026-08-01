@@ -1,6 +1,7 @@
-import { readStore, updateStore, nowIso, id } from "@/lib/db/local-store";
+import { readStore, updateStore, nowIso, id } from "@/lib/db/store";
 import { coolingOffSchema, settingsSchema } from "@/lib/validation/schemas";
 import { z } from "zod";
+import { normalizeSchedulingSettings } from "@/lib/checklists/scheduling";
 
 export async function startCoolingOff(
   input: z.infer<typeof coolingOffSchema>,
@@ -88,8 +89,24 @@ export async function updateSettings(input: z.infer<typeof settingsSchema>) {
       ...data,
       updated_at: nowIso(),
     };
+    const normalized = normalizeSchedulingSettings(store.settings);
+    store.settings.expected_due_date = normalized.expected_due_date;
+    store.settings.before_baby_scheduling_mode =
+      normalized.before_baby_scheduling_mode;
+    store.settings.before_baby_preferred_task_days =
+      normalized.before_baby_preferred_task_days;
+    store.settings.before_baby_max_tasks_per_week =
+      normalized.before_baby_max_tasks_per_week;
+    store.settings.before_baby_weekend_heavy =
+      normalized.before_baby_weekend_heavy;
+    store.settings.before_baby_include_post_birth =
+      normalized.before_baby_include_post_birth;
+    store.settings.before_baby_hide_completed =
+      normalized.before_baby_hide_completed;
+    store.settings.before_baby_avoid_travel_dates =
+      normalized.before_baby_avoid_travel_dates;
     return store;
-  });
+  }, { operation: "updateSettings" });
 }
 
 export async function getFamilyContext() {
