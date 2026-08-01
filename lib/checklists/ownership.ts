@@ -120,6 +120,84 @@ export const BEFORE_BABY_OWNERSHIP: Record<string, OwnershipSuggestion> = {
     joint_approval_required: false,
     reason: "Fuel/car readiness.",
   },
+  final_week_3: {
+    primary_owner: "sam",
+    contributor: "michelle",
+    joint_approval_required: false,
+    reason: "Fuel car.",
+  },
+  final_week_5: {
+    primary_owner: "sam",
+    contributor: "michelle",
+    joint_approval_required: false,
+    reason: "Bags in car.",
+  },
+  work_leave_1: {
+    primary_owner: "sam",
+    contributor: null,
+    joint_approval_required: false,
+    reason: "Sam’s work handoff.",
+  },
+  work_leave_2: {
+    primary_owner: "michelle",
+    contributor: null,
+    joint_approval_required: false,
+    reason: "Michelle’s work handoff.",
+  },
+  work_leave_3: {
+    primary_owner: "both",
+    contributor: null,
+    joint_approval_required: true,
+    reason: "Leave dates need joint confirmation.",
+  },
+  work_leave_4: {
+    primary_owner: "both",
+    contributor: null,
+    joint_approval_required: false,
+    reason: "Each parent submits their own employer paperwork; track jointly.",
+  },
+  lulu_extra_1: {
+    primary_owner: "sam",
+    contributor: "michelle",
+    joint_approval_required: false,
+    reason: "Primary sitter confirmation.",
+  },
+  lulu_extra_2: {
+    primary_owner: "sam",
+    contributor: "michelle",
+    joint_approval_required: false,
+    reason: "Backup sitter confirmation.",
+  },
+  lulu_extra_6: {
+    primary_owner: "sam",
+    contributor: "michelle",
+    joint_approval_required: true,
+    reason: "Labor-day Lulu plan.",
+  },
+  legal_extra_1: {
+    primary_owner: "both",
+    contributor: null,
+    joint_approval_required: true,
+    reason: "Beneficiary review is joint.",
+  },
+  legal_extra_6: {
+    primary_owner: "both",
+    contributor: null,
+    joint_approval_required: true,
+    reason: "Beneficiary updates need joint approval.",
+  },
+  postpartum_prep_1: {
+    primary_owner: "michelle",
+    contributor: "sam",
+    joint_approval_required: false,
+    reason: "Triage number for Michelle’s care team.",
+  },
+  home_extra_3: {
+    primary_owner: "both",
+    contributor: null,
+    joint_approval_required: false,
+    reason: "Final house reset is shared.",
+  },
 };
 
 export function ownershipForSlug(slug: string | null | undefined): OwnershipSuggestion | null {
