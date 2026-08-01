@@ -32,6 +32,7 @@ describe("route classification", () => {
   it("marks product routes as protected", () => {
     for (const pathName of [
       "/home",
+      "/before-baby",
       "/discuss",
       "/discuss/abc",
       "/questions",

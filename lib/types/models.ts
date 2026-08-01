@@ -379,6 +379,40 @@ export interface PlaybookSection {
   ai_placeholder: boolean;
 }
 
+export type ChecklistOwner = "sam" | "michelle" | "both";
+export type ChecklistPriority = "high" | "medium" | "low";
+
+export interface ChecklistInstance {
+  id: string;
+  family_id: string;
+  template_slug: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChecklistTask {
+  id: string;
+  checklist_id: string;
+  template_task_slug: string | null;
+  title: string;
+  category: string;
+  category_label: string;
+  completed: boolean;
+  completed_at: string | null;
+  due_date: string | null;
+  priority: ChecklistPriority;
+  owner: ChecklistOwner;
+  notes: string | null;
+  is_custom: boolean;
+  is_default: boolean;
+  archived: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AppStore {
   family: Family;
   users: UserProfile[];
@@ -406,6 +440,8 @@ export interface AppStore {
   settings: FamilySettings;
   ai_outputs: AiOutput[];
   playbook_versions: PlaybookVersion[];
+  checklist_instances: ChecklistInstance[];
+  checklist_tasks: ChecklistTask[];
   current_user_id: string;
   demo_mode: boolean;
 }

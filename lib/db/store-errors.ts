@@ -31,6 +31,14 @@ export function assertValidAppStore(data: unknown): asserts data is AppStore {
   if (typeof store.current_user_id !== "string" || !store.current_user_id) {
     throw new StoreValidationError("Store is missing current_user_id.");
   }
+
+  // Checklist collections are optional on older stores — normalize in place.
+  if (!Array.isArray(store.checklist_instances)) {
+    (store as { checklist_instances: unknown[] }).checklist_instances = [];
+  }
+  if (!Array.isArray(store.checklist_tasks)) {
+    (store as { checklist_tasks: unknown[] }).checklist_tasks = [];
+  }
 }
 
 export class StoreValidationError extends Error {

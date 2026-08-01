@@ -38,6 +38,11 @@ export default async function HomePage() {
           Work through major parenting questions together. Record shared decisions,
           preserve disagreement, and build your playbook over time.
         </p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link href="/before-baby" className="btn btn-secondary">
+            Before Baby checklist
+          </Link>
+        </div>
         <div className="mt-6 max-w-md">
           <ProgressBar value={stats.babymoonPct} label="Babymoon-weighted progress" />
         </div>

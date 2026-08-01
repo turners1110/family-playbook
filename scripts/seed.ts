@@ -534,6 +534,8 @@ async function main() {
     },
     ai_outputs: [],
     playbook_versions: [],
+    checklist_instances: [],
+    checklist_tasks: [],
   };
 
   // Sample answers and decisions for demo realism
@@ -680,7 +682,10 @@ async function main() {
   });
 
   clearMemoryStore();
+  const { seedBeforeBabyIntoStore } = await import("@/lib/services/checklists");
+  const seededTasks = seedBeforeBabyIntoStore(store);
   await writeStore(store);
+  console.log(`Seeded Before Baby checklist tasks: ${seededTasks}`);
 
   // Also write portable seed JSON copies
   const seedDir = path.join(process.cwd(), "data", "seed");

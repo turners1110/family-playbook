@@ -23,6 +23,7 @@ export function isPublicPath(pathname: string) {
 export function isProtectedPath(pathname: string) {
   const protectedPrefixes = [
     "/home",
+    "/before-baby",
     "/discuss",
     "/questions",
     "/decisions",
