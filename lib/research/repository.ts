@@ -106,6 +106,7 @@ export type ResearchRepository = {
       mimeType: string;
       fileSize: number;
       fileHash: string;
+      rightsAttested?: boolean;
     },
   ): Promise<PrepareUploadResult>;
   finalizeUpload(
@@ -119,6 +120,11 @@ export type ResearchRepository = {
       fileHash: string;
     },
   ): Promise<ResearchSourceFile>;
+  /** Optional: load uploaded bytes for server-side extraction. */
+  readUploadedBytes?(
+    familyId: string,
+    storagePath: string,
+  ): Promise<Buffer | null>;
   /** Local/dev only — write bytes to private storage. */
   uploadFileBytes?(
     familyId: string,
@@ -128,6 +134,7 @@ export type ResearchRepository = {
       mimeType: string;
       buffer: Buffer;
       fileHash: string;
+      rightsAttested?: boolean;
     },
   ): Promise<ResearchSourceFile>;
   createSignedDownloadUrl(

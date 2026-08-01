@@ -10,14 +10,17 @@ import {
 } from "@/components/research/ResearchDetailActions";
 import {
   AddBookTextPanel,
+  ChaptersPanel,
+  CoverageComparisonPanel,
   PreliminaryFindingsPanel,
   ProcessingHistoryPanel,
   PublicOverviewPanel,
   PublicResearchControls,
   PublicSourcesPanel,
   SourceCoveragePanel,
+  SourceGroundedSummaryPanel,
 } from "@/components/research/PublicResearchPanels";
-import { getResearchSource } from "@/lib/research/services";
+import { getResearchSource, getResearchStorageStatus } from "@/lib/research/services";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { availabilityDisclosure } from "@/lib/research/validation";
 import {
@@ -34,16 +37,16 @@ export const dynamic = "force-dynamic";
 
 const DETAIL_TABS = [
   "overview",
-  "public-overview",
+  "source-grounded",
+  "chapters",
   "findings",
   "lessons",
-  "public-sources",
-  "add-text",
-  "source-grounded",
+  "public-overview",
   "coverage",
   "questions",
-  "principles",
+  "checklist",
   "notes",
+  "add-text",
   "file",
   "history",
 ] as const;
@@ -74,6 +77,8 @@ export default async function ResearchSourceDetailPage({
     sourceGroundedOverview = null,
     preliminaryFindings = [],
     jobs = [],
+    chapters = [],
+    comparisons = [],
     coverage = {
       public_sources_reviewed: 0,
       uploaded_files: 0,
@@ -82,8 +87,17 @@ export default async function ResearchSourceDetailPage({
       full_book_processed: false,
       public_overview: "not_started" as const,
       source_grounded_analysis: "not_started" as const,
+      epub_uploaded: false,
+      drm_protected: false,
+      readable_text_extracted: false,
+      chapters_detected: 0,
+      total_words_extracted: 0,
+      public_overview_available: false,
     },
   } = detail;
+  const storageStatus = getResearchStorageStatus();
+  const drmJob = jobs.find((j) => j.error_code === "drm_protected");
+  const latestFileId = files[0]?.id ?? null;
   const store = await readStore();
   const questionOptions = store.questions
     .filter((q) => q.active)
@@ -198,11 +212,18 @@ export default async function ResearchSourceDetailPage({
 
       <div className="mb-4 flex flex-wrap gap-2">
         {DETAIL_TABS.filter((key) => {
-          if (!isBook && ["public-overview", "public-sources", "add-text", "source-grounded", "coverage"].includes(key)) {
+          if (
+            !isBook &&
+            [
+              "public-overview",
+              "add-text",
+              "source-grounded",
+              "coverage",
+              "chapters",
+              "checklist",
+            ].includes(key)
+          ) {
             return false;
-          }
-          if (!sourceGroundedOverview && key === "source-grounded") {
-            return coverage.uploaded_files > 0 || coverage.source_grounded_analysis !== "not_started";
           }
           return true;
         }).map((key) => (
@@ -263,56 +284,61 @@ export default async function ResearchSourceDetailPage({
 
       {tab === "lessons" && (
         <section className="surface p-5">
-          <h2 className="font-display text-xl">Preliminary practical lessons</h2>
-          {publicOverview?.practical_lessons?.length ? (
+          <h2 className="font-display text-xl">Practical lessons</h2>
+          {(sourceGroundedOverview?.practical_lessons?.length
+            ? sourceGroundedOverview.practical_lessons
+            : publicOverview?.practical_lessons
+          )?.length ? (
             <ul className="mt-3 list-disc space-y-2 pl-5 text-ink-muted">
-              {publicOverview.practical_lessons.map((lesson) => (
+              {(sourceGroundedOverview?.practical_lessons?.length
+                ? sourceGroundedOverview.practical_lessons
+                : publicOverview?.practical_lessons ?? []
+              ).map((lesson) => (
                 <li key={lesson}>{lesson}</li>
               ))}
             </ul>
           ) : (
-            <p className="mt-3 text-ink-muted">No preliminary lessons yet.</p>
+            <p className="mt-3 text-ink-muted">No practical lessons yet.</p>
           )}
           <p className="mt-3 text-xs text-ink-subtle">
-            Source basis: Public sources · Review status: Needs review
+            Source basis:{" "}
+            {sourceGroundedOverview ? "uploaded_epub" : "Public sources"} · Review
+            status: Needs review
           </p>
         </section>
       )}
 
-      {tab === "public-sources" && isBook && (
-        <PublicSourcesPanel sources={externalSources} />
+      {tab === "add-text" && isBook && (
+        <AddBookTextPanel
+          sourceId={sourceId}
+          writesAllowed={storageStatus.writesAllowed}
+          latestFileId={latestFileId}
+          initialStatus={
+            coverage.drm_protected
+              ? "drm_protected"
+              : source.processing_status
+          }
+        />
       )}
 
-      {tab === "add-text" && isBook && <AddBookTextPanel sourceId={sourceId} />}
+      {tab === "chapters" && isBook && <ChaptersPanel chapters={chapters} />}
 
-      {tab === "coverage" && isBook && <SourceCoveragePanel coverage={coverage} />}
+      {tab === "coverage" && isBook && (
+        <div className="space-y-5">
+          <SourceCoveragePanel coverage={coverage} />
+          <CoverageComparisonPanel comparisons={comparisons} />
+        </div>
+      )}
 
       {tab === "source-grounded" && (
-        <section className="surface space-y-4 p-5">
-          <h2 className="font-display text-xl">Source-grounded analysis</h2>
-          {sourceGroundedOverview ? (
-            <p className="text-ink-muted">{sourceGroundedOverview.short_summary}</p>
-          ) : (
-            <p className="text-ink-muted">
-              Not started. Upload book text to create a separate source-grounded analysis.
-              The public overview stays preserved for comparison.
-            </p>
-          )}
-          {publicOverview && sourceGroundedOverview ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-border p-3">
-                <h3 className="font-medium">Public overview</h3>
-                <p className="mt-2 text-sm text-ink-muted">{publicOverview.short_summary}</p>
-              </div>
-              <div className="rounded-xl border border-border p-3">
-                <h3 className="font-medium">Source-grounded analysis</h3>
-                <p className="mt-2 text-sm text-ink-muted">
-                  {sourceGroundedOverview.short_summary}
-                </p>
-              </div>
-            </div>
-          ) : null}
-        </section>
+        <SourceGroundedSummaryPanel
+          overview={sourceGroundedOverview}
+          drmProtected={Boolean(coverage.drm_protected || drmJob)}
+          jobMessage={
+            jobs.find((j) => j.job_type === "epub_source_grounded")
+              ?.safe_error_message ?? null
+          }
+        />
       )}
 
       {tab === "questions" && (
@@ -341,17 +367,24 @@ export default async function ResearchSourceDetailPage({
         </section>
       )}
 
-      {tab === "principles" && (
+      {tab === "checklist" && (
         <section className="surface p-5">
-          <h2 className="font-display text-xl">Linked principles</h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            {linkedPrinciples.length === 0 && (
-              <li className="text-ink-muted">No linked principles yet.</li>
-            )}
-            {linkedPrinciples.map(({ link, principle }) => (
-              <li key={link.id}>{principle?.title ?? link.principle_id}</li>
-            ))}
-          </ul>
+          <h2 className="font-display text-xl">Linked checklist</h2>
+          <p className="mt-3 text-sm text-ink-muted">
+            Relevant Before Baby task IDs from analysis (needs review):{" "}
+            {(
+              sourceGroundedOverview?.relevant_checklist_task_ids ??
+              publicOverview?.relevant_checklist_task_ids ??
+              []
+            ).length || "none yet"}
+          </p>
+          {linkedPrinciples.length > 0 ? (
+            <ul className="mt-4 space-y-2 text-sm">
+              {linkedPrinciples.map(({ link, principle }) => (
+                <li key={link.id}>{principle?.title ?? link.principle_id}</li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       )}
 
@@ -371,10 +404,10 @@ export default async function ResearchSourceDetailPage({
 
       {tab === "file" && (
         <section className="surface p-5">
-          <h2 className="font-display text-xl">Source file</h2>
+          <h2 className="font-display text-xl">Source files</h2>
           <p className="mt-2 text-sm text-ink-muted">
-            Upload EPUB, PDF, selected chapters, or scans to improve analysis. Public
-            overview remains separate.
+            Private uploads only. Signed downloads expire quickly. Public overview
+            remains separate from source-grounded EPUB analysis.
           </p>
           <ul className="mt-4 space-y-2 text-sm">
             {files.length === 0 && <li className="text-ink-muted">No uploaded file.</li>}
@@ -384,7 +417,8 @@ export default async function ResearchSourceDetailPage({
                   <div>
                     <div className="font-medium">{file.original_filename}</div>
                     <div className="text-ink-subtle">
-                      {(file.file_size / 1024).toFixed(1)} KB · {file.mime_type}
+                      {(file.file_size / 1024).toFixed(1)} KB · {file.mime_type} ·{" "}
+                      {file.extraction_status}
                     </div>
                   </div>
                   <ResearchFileDownloadButton sourceId={sourceId} fileId={file.id} />
@@ -392,6 +426,12 @@ export default async function ResearchSourceDetailPage({
               </li>
             ))}
           </ul>
+          {externalSources.length > 0 ? (
+            <div className="mt-6">
+              <h3 className="font-medium">Public sources consulted</h3>
+              <PublicSourcesPanel sources={externalSources} />
+            </div>
+          ) : null}
         </section>
       )}
 
@@ -407,25 +447,25 @@ function labelTab(key: string) {
     case "public-overview":
       return "Public Overview";
     case "findings":
-      return "Preliminary Findings";
+      return "Key Findings";
     case "lessons":
       return "Practical Lessons";
-    case "public-sources":
-      return "Public Sources";
     case "add-text":
       return "Add Book Text";
     case "source-grounded":
       return "Source-Grounded Summary";
+    case "chapters":
+      return "Chapters";
     case "coverage":
       return "Coverage Comparison";
     case "questions":
       return "Linked Questions";
-    case "principles":
-      return "Linked Principles";
+    case "checklist":
+      return "Linked Checklist";
     case "notes":
       return "Notes";
     case "file":
-      return "Source File";
+      return "Source Files";
     case "history":
       return "Processing History";
     default:

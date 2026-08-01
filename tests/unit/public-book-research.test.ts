@@ -180,7 +180,12 @@ describe("public book research pipeline", () => {
       mimeType: "application/epub+zip",
       buffer,
       fileHash: hashBuffer(buffer),
+      rightsAttested: true,
     });
+    const { waitForEpubProcessingIdle } = await import(
+      "@/lib/research/epub/processing"
+    );
+    await waitForEpubProcessingIdle();
 
     const detail = await getResearchSource(sourceId, ctx);
     expect(getPublicOverview(sourceId)?.id).toBe(before!.id);

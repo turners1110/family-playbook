@@ -120,6 +120,7 @@ export function AddSourceForm({ writesAllowed = true }: { writesAllowed?: boolea
               size: file.size,
               type: file.type,
               fileHash,
+              rightsAttested: rights,
             });
             if (!prepared.ok) {
               setError(prepared.error);

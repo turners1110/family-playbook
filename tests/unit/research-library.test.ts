@@ -315,6 +315,7 @@ describe("research library persistence (memory backend)", () => {
       size: buffer.length,
       type: "text/plain",
       fileHash,
+      rightsAttested: true,
     });
     const first = await finalizeResearchUpload(ctx, {
       sourceId: id,

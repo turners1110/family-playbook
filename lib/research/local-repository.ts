@@ -343,13 +343,22 @@ export function createLocalResearchRepository(): ResearchRepository {
         (s) => s.id === input.sourceId && s.family_id === familyId,
       );
       if (!source) throw new ResearchNotFoundError();
-      if (!source.rights_attested) {
+      if (!source.rights_attested && !input.rightsAttested) {
         throw new Error(
           "Rights attestation is required before uploading a file.",
         );
       }
-      const safe = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `${familyId}/${input.sourceId}/${input.fileHash.slice(0, 16)}_${safe}`;
+      if (!source.rights_attested && input.rightsAttested) {
+        source.rights_attested = true;
+        source.updated_at = nowIso();
+        await writeStore(store);
+      }
+      const ext = input.filename.toLowerCase().endsWith(".epub")
+        ? ".epub"
+        : input.filename.includes(".")
+          ? input.filename.slice(input.filename.lastIndexOf("."))
+          : "";
+      const storagePath = `${familyId}/${input.sourceId}/${randomUUID()}${ext}`;
       return {
         storagePath,
         token: "local",
@@ -367,11 +376,17 @@ export function createLocalResearchRepository(): ResearchRepository {
         (s) => s.id === input.sourceId && s.family_id === familyId,
       );
       if (!source) throw new ResearchNotFoundError();
+      if (!input.storagePath.startsWith(`${familyId}/${input.sourceId}/`)) {
+        throw new Error("Storage path does not match family and source.");
+      }
       const existing = store.files.find(
         (f) =>
           f.source_id === input.sourceId && f.file_hash === input.fileHash,
       );
-      if (existing) return existing;
+      if (existing) {
+        if (existing.storage_path === input.storagePath) return existing;
+        throw new Error("This file was already uploaded for this source.");
+      }
       const file: ResearchSourceFile = {
         id: newId("rsf"),
         source_id: input.sourceId,
@@ -381,15 +396,24 @@ export function createLocalResearchRepository(): ResearchRepository {
         file_size: input.fileSize,
         file_hash: input.fileHash,
         page_count: null,
-        extraction_status: "not_started",
+        extraction_status: "queued",
         created_at: nowIso(),
       };
       store.files.push(file);
       source.availability_type = "partial_text";
-      source.processing_status = "not_processed";
+      source.processing_status = "source_text_uploaded";
       source.updated_at = nowIso();
       await writeStore(store);
       return file;
+    },
+
+    async readUploadedBytes(familyId, storagePath) {
+      if (!storagePath.startsWith(`${familyId}/`)) return null;
+      try {
+        return await fs.readFile(path.join(FILES_DIR, storagePath));
+      } catch {
+        return null;
+      }
     },
 
     async uploadFileBytes(familyId, input) {
@@ -399,6 +423,7 @@ export function createLocalResearchRepository(): ResearchRepository {
         mimeType: input.mimeType,
         fileSize: input.buffer.length,
         fileHash: input.fileHash,
+        rightsAttested: input.rightsAttested !== false,
       });
       const absolute = path.join(FILES_DIR, prepared.storagePath);
       await fs.mkdir(path.dirname(absolute), { recursive: true });

@@ -34,32 +34,17 @@ type QueueItem = {
 const queue: QueueItem[] = [];
 let active = 0;
 let concurrency = DEFAULT_CONCURRENCY;
-const sourceStatus = new Map<
-  string,
-  Partial<ResearchSource> & {
-    processing_status?: ResearchSource["processing_status"];
-  }
->();
+type ResearchStatusPatch = Record<string, unknown>;
+
+const sourceStatus = new Map<string, ResearchStatusPatch>();
 
 /** Optional hook so repositories can observe status changes in tests/local. */
 let onSourcePatch:
-  | ((
-      sourceId: string,
-      patch: Partial<ResearchSource> & {
-        processing_status?: ResearchSource["processing_status"];
-      },
-    ) => Promise<void> | void)
+  | ((sourceId: string, patch: ResearchStatusPatch) => Promise<void> | void)
   | null = null;
 
 export function setPublicResearchSourcePatcher(
-  fn:
-    | ((
-        sourceId: string,
-        patch: Partial<ResearchSource> & {
-          processing_status?: ResearchSource["processing_status"];
-        },
-      ) => Promise<void> | void)
-    | null,
+  fn: ((sourceId: string, patch: ResearchStatusPatch) => Promise<void> | void) | null,
 ) {
   onSourcePatch = fn;
 }
@@ -72,14 +57,17 @@ export function getPublicResearchConcurrency() {
   return concurrency;
 }
 
-async function patchSource(
-  sourceId: string,
-  patch: Partial<ResearchSource> & {
-    processing_status?: ResearchSource["processing_status"];
-  },
-) {
+async function patchSource(sourceId: string, patch: ResearchStatusPatch) {
   sourceStatus.set(sourceId, { ...sourceStatus.get(sourceId), ...patch });
   if (onSourcePatch) await onSourcePatch(sourceId, patch);
+}
+
+/** Shared status cache updater for EPUB and other research jobs. */
+export async function applyResearchSourceStatusPatch(
+  sourceId: string,
+  patch: ResearchStatusPatch,
+) {
+  await patchSource(sourceId, patch);
 }
 
 export function getCachedSourceResearchStatus(sourceId: string) {
@@ -88,19 +76,42 @@ export function getCachedSourceResearchStatus(sourceId: string) {
 
 function buildCoverage(sourceId: string): ResearchSourceCoverage {
   const store = getPublicResearchArtifactStore();
-  const cached = sourceStatus.get(sourceId);
+  const cached = sourceStatus.get(sourceId) ?? {};
   const external = store.externalSources.filter(
     (s) => s.research_source_id === sourceId,
   );
+  const hasPublicOverview = store.overviews.some(
+    (o) =>
+      o.research_source_id === sourceId &&
+      o.processing_mode === "public_sources_only",
+  );
+  const num = (v: unknown, fallback = 0) =>
+    typeof v === "number" ? v : fallback;
+  const str = (v: unknown, fallback: string) =>
+    typeof v === "string" ? v : fallback;
   return {
-    public_sources_reviewed:
-      cached?.public_sources_reviewed ?? external.length,
-    uploaded_files: cached?.uploaded_file_count ?? 0,
-    book_pages_processed: cached?.book_pages_processed ?? 0,
-    chapters_processed: cached?.chapters_processed ?? 0,
-    full_book_processed: cached?.full_book_processed ?? false,
-    public_overview: cached?.public_overview_status ?? "not_started",
-    source_grounded_analysis: cached?.source_grounded_status ?? "not_started",
+    public_sources_reviewed: num(cached.public_sources_reviewed, external.length),
+    uploaded_files: num(cached.uploaded_file_count, 0),
+    book_pages_processed: num(cached.book_pages_processed, 0),
+    chapters_processed: num(cached.chapters_processed, 0),
+    full_book_processed: Boolean(cached.full_book_processed),
+    public_overview: str(
+      cached.public_overview_status,
+      "not_started",
+    ) as ResearchSourceCoverage["public_overview"],
+    source_grounded_analysis: str(
+      cached.source_grounded_status,
+      "not_started",
+    ) as ResearchSourceCoverage["source_grounded_analysis"],
+    epub_uploaded: Boolean(cached.epub_uploaded),
+    drm_protected: Boolean(cached.drm_protected),
+    readable_text_extracted: Boolean(cached.readable_text_extracted),
+    chapters_detected: num(
+      cached.chapters_detected,
+      num(cached.chapters_processed, 0),
+    ),
+    total_words_extracted: num(cached.total_words_extracted, 0),
+    public_overview_available: hasPublicOverview,
   };
 }
 
@@ -549,18 +560,20 @@ export async function markSourceTextUploaded(input: {
   sourceId: string;
   pagesProcessed?: number;
   chaptersProcessed?: number;
+  /** Only true after successful full EPUB extraction — never on upload alone. */
   fullBook?: boolean;
   fileCount?: number;
+  epubUploaded?: boolean;
 }) {
   await patchSource(input.sourceId, {
-    processing_status: input.fullBook
-      ? "source_text_uploaded"
-      : "source_text_uploaded",
+    processing_status: "source_text_uploaded",
     uploaded_file_count: input.fileCount ?? 1,
     book_pages_processed: input.pagesProcessed ?? 0,
     chapters_processed: input.chaptersProcessed ?? 0,
-    full_book_processed: Boolean(input.fullBook),
-    source_grounded_status: "not_started",
+    // Upload alone never means the full book was processed.
+    full_book_processed: false,
+    epub_uploaded: Boolean(input.epubUploaded),
+    source_grounded_status: "queued",
   });
 }
 

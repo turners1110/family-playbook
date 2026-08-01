@@ -20,6 +20,7 @@ import {
   hideRecommendedLibraryItem,
   linkResearchQuestion,
   prepareResearchUpload,
+  retryEpubProcessing,
 } from "@/lib/research/services";
 import type { CreateResearchSourceInput } from "@/lib/research/validation";
 
@@ -68,6 +69,7 @@ export async function actionPrepareResearchUpload(input: {
   size: number;
   type?: string;
   fileHash: string;
+  rightsAttested?: boolean;
 }) {
   const ctx = await requireIdentity();
   try {
@@ -223,6 +225,20 @@ export async function actionCancelPublicOverview(sourceId: string) {
   const ctx = await requireIdentity();
   try {
     await cancelPublicOverviewJob(ctx, sourceId);
+    revalidateResearch(sourceId);
+    return { ok: true as const };
+  } catch (error) {
+    return toError(error);
+  }
+}
+
+export async function actionRetryEpubProcessing(
+  sourceId: string,
+  fileId: string,
+) {
+  const ctx = await requireIdentity();
+  try {
+    await retryEpubProcessing(ctx, sourceId, fileId);
     revalidateResearch(sourceId);
     return { ok: true as const };
   } catch (error) {

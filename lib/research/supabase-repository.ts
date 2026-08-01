@@ -40,7 +40,7 @@ import {
 } from "@/lib/research/validation";
 
 export const RESEARCH_BUCKET = "research-sources";
-const SIGNED_UPLOAD_TTL = 60 * 30; // 30 minutes for large uploads
+const SIGNED_UPLOAD_TTL = 5 * 60; // 5 minutes — signed upload URLs expire quickly
 const SIGNED_DOWNLOAD_TTL = 60; // 60 seconds
 
 type SourceRow = {
@@ -483,21 +483,35 @@ export function createSupabaseResearchRepository(
       return data as ResearchSourceLink;
     },
 
-    async prepareUpload(familyId, input): Promise<PrepareUploadResult> {
+    async prepareUpload(familyId, input) {
       await assertOwned(familyId, input.sourceId);
       const { data: source } = await admin()
         .from("research_sources")
         .select("rights_attested")
         .eq("id", input.sourceId)
         .single();
-      if (!source?.rights_attested) {
+      const attested =
+        source?.rights_attested === true || input.rightsAttested === true;
+      if (!attested) {
         throw new Error(
           "Rights attestation is required before uploading a file.",
         );
       }
+      if (!source?.rights_attested && input.rightsAttested) {
+        await admin()
+          .from("research_sources")
+          .update({ rights_attested: true, updated_at: new Date().toISOString() })
+          .eq("id", input.sourceId)
+          .eq("family_id", familyId);
+      }
 
-      const safe = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `${familyId}/${input.sourceId}/${input.fileHash.slice(0, 16)}_${safe}`;
+      const ext =
+        input.filename.toLowerCase().endsWith(".epub")
+          ? ".epub"
+          : input.filename.includes(".")
+            ? input.filename.slice(input.filename.lastIndexOf("."))
+            : "";
+      const storagePath = `${familyId}/${input.sourceId}/${randomUUID()}${ext}`;
 
       const { data, error } = await admin()
         .storage
@@ -521,13 +535,40 @@ export function createSupabaseResearchRepository(
     async finalizeUpload(familyId, input) {
       await assertOwned(familyId, input.sourceId);
 
+      // Validate storage path belongs to family/source
+      const expectedPrefix = `${familyId}/${input.sourceId}/`;
+      if (!input.storagePath.startsWith(expectedPrefix)) {
+        throw new Error("Storage path does not match family and source.");
+      }
+
       const { data: existing } = await admin()
         .from("research_source_files")
         .select("*")
         .eq("source_id", input.sourceId)
         .eq("file_hash", input.fileHash)
         .maybeSingle();
-      if (existing) return existing as ResearchSourceFile;
+      if (existing) {
+        if (existing.storage_path === input.storagePath) {
+          return existing as ResearchSourceFile;
+        }
+        throw new Error("This file was already uploaded for this source.");
+      }
+
+      // Confirm object exists
+      const { data: listed } = await admin()
+        .storage
+        .from(RESEARCH_BUCKET)
+        .list(`${familyId}/${input.sourceId}`, { search: input.storagePath.split("/").pop() });
+      if (!listed || listed.length === 0) {
+        // Fallback: try download head
+        const { error: dlErr } = await admin()
+          .storage
+          .from(RESEARCH_BUCKET)
+          .download(input.storagePath);
+        if (dlErr) {
+          throw new Error("Uploaded object was not found in private storage.");
+        }
+      }
 
       const { data, error } = await admin()
         .from("research_source_files")
@@ -538,23 +579,40 @@ export function createSupabaseResearchRepository(
           mime_type: input.mimeType,
           file_size: input.fileSize,
           file_hash: input.fileHash,
-          extraction_status: "not_started",
+          extraction_status: "queued",
         })
         .select("*")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) {
+        if (error.message?.toLowerCase().includes("duplicate") || error.code === "23505") {
+          throw new Error("This file was already uploaded for this source.");
+        }
+        throw new Error(error.message);
+      }
 
       await admin()
         .from("research_sources")
         .update({
           availability_type: "partial_text",
-          processing_status: "not_processed",
+          processing_status: "source_text_uploaded",
+          epub_uploaded: input.mimeType.includes("epub") || input.originalFilename.toLowerCase().endsWith(".epub"),
           updated_at: new Date().toISOString(),
         })
         .eq("id", input.sourceId)
         .eq("family_id", familyId);
 
       return data as ResearchSourceFile;
+    },
+
+    async readUploadedBytes(familyId, storagePath) {
+      if (!storagePath.startsWith(`${familyId}/`)) return null;
+      const { data, error } = await admin()
+        .storage
+        .from(RESEARCH_BUCKET)
+        .download(storagePath);
+      if (error || !data) return null;
+      const ab = await data.arrayBuffer();
+      return Buffer.from(ab);
     },
 
     async createSignedDownloadUrl(

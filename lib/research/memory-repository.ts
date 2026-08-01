@@ -282,9 +282,21 @@ export function createMemoryResearchRepository(
     },
 
     async prepareUpload(familyId, input) {
-      assertOwned(familyId, input.sourceId);
-      const safe = input.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-      const storagePath = `${familyId}/${input.sourceId}/${input.fileHash.slice(0, 16)}_${safe}`;
+      const source = assertOwned(familyId, input.sourceId);
+      if (!source.rights_attested && !input.rightsAttested) {
+        throw new Error(
+          "Rights attestation is required before uploading a file.",
+        );
+      }
+      if (!source.rights_attested && input.rightsAttested) {
+        source.rights_attested = true;
+      }
+      const ext = input.filename.toLowerCase().endsWith(".epub")
+        ? ".epub"
+        : input.filename.includes(".")
+          ? input.filename.slice(input.filename.lastIndexOf("."))
+          : "";
+      const storagePath = `${familyId}/${input.sourceId}/${randomUUID()}${ext}`;
       return {
         storagePath,
         token: `mem_${input.fileHash.slice(0, 12)}`,
@@ -298,11 +310,17 @@ export function createMemoryResearchRepository(
 
     async finalizeUpload(familyId, input) {
       assertOwned(familyId, input.sourceId);
+      if (!input.storagePath.startsWith(`${familyId}/${input.sourceId}/`)) {
+        throw new Error("Storage path does not match family and source.");
+      }
       const existing = store.files.find(
         (f) =>
           f.source_id === input.sourceId && f.file_hash === input.fileHash,
       );
-      if (existing) return existing;
+      if (existing) {
+        if (existing.storage_path === input.storagePath) return existing;
+        throw new Error("This file was already uploaded for this source.");
+      }
       const file: ResearchSourceFile = {
         id: id("rsf"),
         source_id: input.sourceId,
@@ -312,15 +330,20 @@ export function createMemoryResearchRepository(
         file_size: input.fileSize,
         file_hash: input.fileHash,
         page_count: null,
-        extraction_status: "not_started",
+        extraction_status: "queued",
         created_at: nowIso(),
       };
       store.files.push(file);
       const source = assertOwned(familyId, input.sourceId);
       source.availability_type = "partial_text";
-      source.processing_status = "not_processed";
+      source.processing_status = "source_text_uploaded";
       source.updated_at = nowIso();
       return file;
+    },
+
+    async readUploadedBytes(familyId, storagePath) {
+      if (!storagePath.startsWith(`${familyId}/`)) return null;
+      return files.get(storagePath) ?? null;
     },
 
     async uploadFileBytes(familyId, input) {
@@ -330,6 +353,7 @@ export function createMemoryResearchRepository(
         mimeType: input.mimeType,
         fileSize: input.buffer.length,
         fileHash: input.fileHash,
+        rightsAttested: input.rightsAttested !== false,
       });
       files.set(prepared.storagePath, input.buffer);
       return repo.finalizeUpload(familyId, {

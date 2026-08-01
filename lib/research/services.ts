@@ -174,7 +174,35 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
     } = await import("@/lib/research/public-research/pipeline");
 
     const cached = getCachedSourceResearchStatus(sourceId);
-    const coverage = getResearchCoverage(sourceId);
+    const coverageBase = getResearchCoverage(sourceId);
+    const {
+      getEpubCoverageExtras,
+    } = await import("@/lib/research/epub/processing");
+    const epub = getEpubCoverageExtras(sourceId);
+    const coverage = {
+      ...coverageBase,
+      epub_uploaded: epub.epub_uploaded || coverageBase.epub_uploaded,
+      drm_protected: epub.drm_protected || coverageBase.drm_protected,
+      readable_text_extracted:
+        epub.readable_text_extracted || coverageBase.readable_text_extracted,
+      chapters_detected: Math.max(
+        epub.chapters_detected,
+        coverageBase.chapters_detected ?? 0,
+      ),
+      chapters_processed: Math.max(
+        epub.chapters_processed,
+        coverageBase.chapters_processed,
+      ),
+      total_words_extracted: Math.max(
+        epub.total_words_extracted,
+        coverageBase.total_words_extracted ?? 0,
+      ),
+      full_book_processed:
+        epub.full_book_processed || coverageBase.full_book_processed,
+      public_overview_available: Boolean(
+        getPublicOverview(sourceId, "public_sources_only"),
+      ),
+    };
     const source = {
       ...detail.source,
       ...(cached ?? {}),
@@ -188,6 +216,13 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
       finding_count: listPreliminaryFindings(sourceId).length,
     };
 
+    const { getPublicResearchArtifactStore } = await import(
+      "@/lib/research/public-research/artifact-store"
+    );
+    const comparisons = getPublicResearchArtifactStore().comparisons.filter(
+      (c) => c.research_source_id === sourceId,
+    );
+
     return {
       ...detail,
       source,
@@ -197,7 +232,9 @@ export async function getResearchSource(sourceId: string, ctx?: FamilyContext) {
       preliminaryFindings: listPreliminaryFindings(sourceId),
       jobs: listJobsForSource(sourceId),
       coverage,
-      comparisons: [],
+      chapters: epub.chapters,
+      epubDocument: epub.document,
+      comparisons,
     };
   } catch (error) {
     if (error instanceof ResearchUnavailableError) return null;
@@ -446,6 +483,21 @@ export async function linkResearchQuestion(ctx: FamilyContext, raw: unknown) {
 /** @deprecated Use linkResearchQuestion */
 export const linkResearchSource = linkResearchQuestion;
 
+const uploadActionTimestamps = new Map<string, number[]>();
+
+function assertUploadRateLimit(key: string, maxPerMinute = 12) {
+  const now = Date.now();
+  const windowMs = 60_000;
+  const recent = (uploadActionTimestamps.get(key) ?? []).filter(
+    (t) => now - t < windowMs,
+  );
+  if (recent.length >= maxPerMinute) {
+    throw new Error("Too many upload actions. Wait a moment and try again.");
+  }
+  recent.push(now);
+  uploadActionTimestamps.set(key, recent);
+}
+
 export async function prepareResearchUpload(
   ctx: FamilyContext,
   input: {
@@ -454,10 +506,17 @@ export async function prepareResearchUpload(
     size: number;
     type?: string;
     fileHash: string;
+    rightsAttested?: boolean;
   },
 ) {
   assertWritable();
   assertCanWriteResearch(ctx);
+  assertUploadRateLimit(`${ctx.profile.id}:prepare`);
+  if (!input.rightsAttested) {
+    throw new Error(
+      "Confirm you have the right to upload and privately process this file.",
+    );
+  }
   const check = validateResearchUpload({
     name: input.filename,
     size: input.size,
@@ -473,6 +532,7 @@ export async function prepareResearchUpload(
     mimeType: check.mimeType,
     fileSize: input.size,
     fileHash: input.fileHash,
+    rightsAttested: true,
   });
 }
 
@@ -489,6 +549,7 @@ export async function finalizeResearchUpload(
 ) {
   assertWritable();
   assertCanWriteResearch(ctx);
+  assertUploadRateLimit(`${ctx.profile.id}:finalize`);
   const check = validateResearchUpload({
     name: input.originalFilename,
     size: input.fileSize,
@@ -510,17 +571,67 @@ export async function finalizeResearchUpload(
   const { markSourceTextUploaded } = await import(
     "@/lib/research/public-research/pipeline"
   );
-  const isEpub = check.mimeType.includes("epub") || input.originalFilename.toLowerCase().endsWith(".epub");
+  const isEpub =
+    check.mimeType.includes("epub") ||
+    input.originalFilename.toLowerCase().endsWith(".epub");
   await markSourceTextUploaded({
     sourceId: input.sourceId,
     fileCount: 1,
-    // Exact extraction counts arrive when extraction runs; record upload intent now.
     pagesProcessed: 0,
     chaptersProcessed: 0,
-    fullBook: isEpub,
+    fullBook: false,
+    epubUploaded: isEpub,
   });
 
+  if (isEpub) {
+    await queueEpubAfterUpload(ctx, familyId, file);
+  }
+
   return file;
+}
+
+async function queueEpubAfterUpload(
+  ctx: FamilyContext,
+  familyId: string,
+  file: {
+    id: string;
+    source_id: string;
+    storage_path: string;
+    mime_type: string;
+    original_filename: string;
+  },
+  options?: { force?: boolean },
+) {
+  const repo = getRepository();
+  const {
+    queueEpubProcessing,
+    setEpubProcessingSourcePatcher,
+  } = await import("@/lib/research/epub/processing");
+
+  setEpubProcessingSourcePatcher(async (id, patch) => {
+    try {
+      await repo.updateSource(familyId, id, patch);
+    } catch {
+      /* optional columns may be absent in local JSON */
+    }
+  });
+
+  let buffer: Buffer | null = null;
+  if (repo.readUploadedBytes) {
+    buffer = await repo.readUploadedBytes(familyId, file.storage_path);
+  }
+  if (!buffer) {
+    throw new Error("Uploaded EPUB bytes could not be read for processing.");
+  }
+
+  // Enqueue only — extraction/AI run asynchronously.
+  await queueEpubProcessing({
+    sourceId: file.source_id,
+    familyId,
+    fileId: file.id,
+    buffer,
+    force: options?.force,
+  });
 }
 
 /** Local/memory only helper used by import script and tests. */
@@ -532,6 +643,7 @@ export async function uploadResearchFile(
     mimeType?: string;
     buffer: Buffer;
     fileHash: string;
+    rightsAttested?: boolean;
   },
 ) {
   assertWritable();
@@ -542,6 +654,11 @@ export async function uploadResearchFile(
     type: input.mimeType,
   });
   if (!check.ok) throw new Error(check.error);
+  if (input.rightsAttested === false) {
+    throw new Error(
+      "Confirm you have the right to upload and privately process this file.",
+    );
+  }
   const repo = getRepository();
   if (!repo.uploadFileBytes) {
     throw new Error(
@@ -555,7 +672,9 @@ export async function uploadResearchFile(
     mimeType: check.mimeType,
     buffer: input.buffer,
     fileHash: input.fileHash,
+    rightsAttested: true,
   });
+
   const { markSourceTextUploaded } = await import(
     "@/lib/research/public-research/pipeline"
   );
@@ -567,9 +686,32 @@ export async function uploadResearchFile(
     fileCount: 1,
     pagesProcessed: 0,
     chaptersProcessed: 0,
-    fullBook: isEpub,
+    fullBook: false,
+    epubUploaded: isEpub,
   });
+
+  if (isEpub) {
+    await queueEpubAfterUpload(ctx, familyId, file);
+  }
   return file;
+}
+
+export async function retryEpubProcessing(
+  ctx: FamilyContext,
+  sourceId: string,
+  fileId: string,
+) {
+  assertWritable();
+  assertCanWriteResearch(ctx);
+  assertUploadRateLimit(`${ctx.profile.id}:retry-epub`, 6);
+  const repo = getRepository();
+  const familyId = await familyIdFor(ctx);
+  const detail = await repo.getSource(familyId, sourceId);
+  if (!detail) throw new Error("Source not found.");
+  const file = detail.files.find((f) => f.id === fileId);
+  if (!file) throw new Error("File not found.");
+  await queueEpubAfterUpload(ctx, familyId, file, { force: true });
+  return { ok: true as const };
 }
 
 export async function createSignedResearchFileUrl(
@@ -577,6 +719,7 @@ export async function createSignedResearchFileUrl(
   sourceId: string,
   fileId: string,
 ) {
+  assertCanWriteResearch(ctx);
   const repo = getRepository();
   const familyId = await familyIdFor(ctx);
   return repo.createSignedDownloadUrl(familyId, sourceId, fileId);

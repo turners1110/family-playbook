@@ -518,4 +518,10 @@ export type ResearchSourceCoverage = {
   full_book_processed: boolean;
   public_overview: "not_started" | "queued" | "processing" | "complete" | "failed";
   source_grounded_analysis: "not_started" | "queued" | "processing" | "complete" | "failed";
+  epub_uploaded?: boolean;
+  drm_protected?: boolean;
+  readable_text_extracted?: boolean;
+  chapters_detected?: number;
+  total_words_extracted?: number;
+  public_overview_available?: boolean;
 };
