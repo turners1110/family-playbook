@@ -41,9 +41,14 @@ describe("Before Baby template system", () => {
       "financial",
       "relationship",
       "pets",
+      "work_leave",
+      "postpartum_prep",
+      "legal_extra",
+      "lulu_extra",
+      "home_extra",
       "final_week",
     ]);
-    expect(countTemplateTasks(BEFORE_BABY_TEMPLATE)).toBeGreaterThan(90);
+    expect(countTemplateTasks(BEFORE_BABY_TEMPLATE)).toBeGreaterThan(110);
     expect(listChecklistTemplates().some((t) => t.slug === "before-baby")).toBe(
       true,
     );
@@ -92,13 +97,15 @@ describe("Before Baby template system", () => {
     expect(groups[0].tasks.length).toBeGreaterThan(0);
   });
 
-  it("includes Lulu pet prep and final-week relax together", () => {
+  it("includes Lulu pet prep and final-week rest check", () => {
     const titles = BEFORE_BABY_TEMPLATE.sections.flatMap((s) =>
       s.tasks.map((t) => t.title),
     );
     expect(titles).toContain("Prepare Lulu");
-    expect(titles).toContain("Relax together");
+    expect(titles).toContain("Rest and reduce workload");
     expect(titles).toContain("Pack hospital bag for Michelle");
+    expect(titles).toContain("Document Sam work handoff");
+    expect(titles).toContain("Complete final house reset");
   });
 });
 
@@ -131,10 +138,10 @@ describe("Before Baby due-date scheduling", () => {
     expect(peds?.date_source).toBe("calculated");
     expect(peds?.due_date).toBeTruthy();
     expect(peds?.calculated_due_date).toBe(peds?.due_date);
-    // Target ~60 days before due (may snap to preferred weekday).
+    // Target ~90 days before due after rebalance (may snap to preferred weekday).
     const daysBeforeBirth = diffDays(peds!.due_date!, due);
-    expect(daysBeforeBirth).toBeGreaterThanOrEqual(50);
-    expect(daysBeforeBirth).toBeLessThanOrEqual(75);
+    expect(daysBeforeBirth).toBeGreaterThanOrEqual(75);
+    expect(daysBeforeBirth).toBeLessThanOrEqual(105);
   });
 
   it("moves flexible tasks earlier in earlier mode", () => {
@@ -300,8 +307,8 @@ describe("Before Baby due-date scheduling", () => {
 
   it("assigns pediatrician and insurance default timings", () => {
     const peds = getDefaultTimingForTask("medical_1", "medical");
-    expect(peds.recommended_start_offset_days).toBe(-120);
-    expect(peds.recommended_due_offset_days).toBe(-60);
+    expect(peds.recommended_start_offset_days).toBe(-150);
+    expect(peds.recommended_due_offset_days).toBe(-90);
     const insurance = getDefaultTimingForTask("paperwork_3", "paperwork");
     expect(insurance.timing_type).toBe("after_birth");
   });
