@@ -8,8 +8,9 @@ export type EssentialsModule = {
   id: string;
   title: string;
   description: string;
-  /** Match against question text / short_title / slug (case-insensitive includes). */
+  /** Prefer exact slug fragments / distinctive phrases. */
   questionMatchers: string[];
+  maxPrimary: number;
 };
 
 export const BEFORE_BIRTH_ESSENTIAL_MODULES: EssentialsModule[] = [
@@ -17,15 +18,13 @@ export const BEFORE_BIRTH_ESSENTIAL_MODULES: EssentialsModule[] = [
     id: "birth_and_medical",
     title: "Birth and medical",
     description: "Labor preferences, visitors, urgent decisions, and medical choices.",
+    maxPrimary: 5,
     questionMatchers: [
-      "labor and delivery",
+      "during labor and delivery",
       "birth plan",
-      "flexible if the birth",
       "present during labor",
       "visitor",
-      "pain-management",
       "pain management",
-      "urgent medical",
       "cord blood",
       "circumcision",
     ],
@@ -34,25 +33,24 @@ export const BEFORE_BIRTH_ESSENTIAL_MODULES: EssentialsModule[] = [
     id: "feeding_and_sleep",
     title: "Feeding and sleep",
     description: "Initial feeding goals, overnight duties, and safe sleep.",
+    maxPrimary: 5,
     questionMatchers: [
       "feeding goals",
-      "backup feeding",
       "feeding responsibilities",
-      "overnight duties",
-      "protected sleep",
-      "sleep plan needs",
+      "overnight",
       "safe sleep",
+      "sleep plan",
     ],
   },
   {
     id: "postpartum_recovery",
     title: "Postpartum recovery",
     description: "Recovery needs, household support, and warning signs.",
+    maxPrimary: 4,
     questionMatchers: [
-      "protected during recovery",
-      "meals, laundry",
+      "recovery",
+      "postpartum",
       "warning signs",
-      "postpartum support",
       "unwanted advice",
     ],
   },
@@ -60,43 +58,40 @@ export const BEFORE_BIRTH_ESSENTIAL_MODULES: EssentialsModule[] = [
     id: "parent_partnership",
     title: "Parent partnership",
     description: "Decisions while exhausted, fairness, and conflict repair.",
+    maxPrimary: 4,
     questionMatchers: [
-      "decisions while exhausted",
-      "disagreement in front",
-      "ask for relief",
-      "recurring household",
-      "check in about stress",
+      "exhausted",
+      "disagreement",
+      "resentment",
       "protect time for our marriage",
-      "relationship after the bab",
+      "household work",
     ],
   },
   {
     id: "family_and_visitors",
     title: "Family and visitors",
     description: "Visitor rules, photos, grandparents, and health boundaries.",
+    maxPrimary: 4,
     questionMatchers: [
       "visitor rules",
       "first two weeks",
-      "photo and social",
-      "grandparents be involved",
-      "health boundaries",
-      "communicates boundaries",
+      "grandparents",
+      "photo",
+      "social-media rules",
     ],
   },
   {
     id: "work_money_legal",
     title: "Work, money and legal",
     description: "Leave, return-to-work, childcare, insurance, and guardians.",
+    maxPrimary: 5,
     questionMatchers: [
       "leave plan",
-      "return-to-work",
       "return to work",
-      "childcare plan",
-      "insurance actions",
-      "chosen guardians",
-      "legal and financial",
-      "will",
-      "beneficiary",
+      "return-to-work",
+      "childcare",
+      "guardian",
+      "beneficiar",
       "529",
     ],
   },
@@ -104,22 +99,23 @@ export const BEFORE_BIRTH_ESSENTIAL_MODULES: EssentialsModule[] = [
     id: "home_and_lulu",
     title: "Home and Lulu",
     description: "Dog care during labor, boundaries, and home readiness.",
-    questionMatchers: [
-      "lulu",
-      "dog",
-      "pet",
-      "home setup",
-      "36 weeks",
-      "backup plan",
-    ],
+    maxPrimary: 3,
+    questionMatchers: ["lulu", "dog sitter", "pet boundar", "stroller walk"],
   },
 ];
 
-/** Priority tiers after content upgrade (narrow essentials). */
-export const PRIORITY_UPGRADE = {
-  essential_before_birth_max: 35,
-  demote_to: "high" as const,
-};
+/** Stages that should stay out of pregnancy / newborn interview queues. */
+export const FUTURE_STAGE_MARKERS = [
+  "driving",
+  "substance use",
+  "college savings",
+  "teen independence",
+  "puberty",
+  "social media account",
+  "dating",
+  "adult child",
+  "young adult transition",
+];
 
 export function matchEssentialQuestion(input: {
   id: string;
@@ -136,19 +132,31 @@ export function matchEssentialQuestion(input: {
   return null;
 }
 
-/** Stages that should stay out of pregnancy / newborn interview queues. */
-export const FUTURE_STAGE_MARKERS = [
-  "driving",
-  "substance",
-  "college",
-  "teen independence",
-  "puberty",
-  "social media",
-  "dating",
-  "adult child",
-  "adult transition",
-  "young adult",
-];
+export function selectEssentialPrimaryQuestions<T extends {
+  id: string;
+  slug: string;
+  short_title: string;
+  text: string;
+  logical_order: number;
+  active: boolean;
+}>(questions: T[]): T[] {
+  const selected: T[] = [];
+  for (const mod of BEFORE_BIRTH_ESSENTIAL_MODULES) {
+    const hits = questions
+      .filter((q) => q.active)
+      .filter((q) => matchEssentialQuestion(q)?.moduleId === mod.id)
+      .sort((a, b) => a.logical_order - b.logical_order)
+      .slice(0, mod.maxPrimary);
+    selected.push(...hits);
+  }
+  // Deduplicate by id while preserving order
+  const seen = new Set<string>();
+  return selected.filter((q) => {
+    if (seen.has(q.id)) return false;
+    seen.add(q.id);
+    return true;
+  });
+}
 
 export function looksLikeFutureStageQuestion(input: {
   short_title: string;

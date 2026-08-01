@@ -5,8 +5,8 @@
 import type { AppStore, ChecklistTask, Question } from "@/lib/types/models";
 import {
   BEFORE_BIRTH_ESSENTIALS_VERSION,
-  matchEssentialQuestion,
   looksLikeFutureStageQuestion,
+  selectEssentialPrimaryQuestions,
 } from "@/lib/content/before-birth-essentials";
 import seedQuestions from "@/data/seed/questions.json";
 import { BEFORE_BABY_OWNERSHIP } from "@/lib/checklists/ownership";
@@ -53,7 +53,10 @@ function seedById(): Map<string, (typeof seedQuestions)[number]> {
 export function buildContentUpgradePreview(store: AppStore): ContentUpgradePreview {
   const changes: ContentChange[] = [];
   const seedMap = seedById();
-  let essentials = 0;
+  const essentialPrimary = new Set(
+    selectEssentialPrimaryQuestions(store.questions).map((q) => q.id),
+  );
+  const essentials = essentialPrimary.size;
 
   for (const q of store.questions) {
     const seeded = seedMap.get(q.id);
@@ -94,9 +97,6 @@ export function buildContentUpgradePreview(store: AppStore): ContentUpgradePrevi
       }
     }
 
-    const essential = matchEssentialQuestion(q);
-    if (essential) essentials += 1;
-
     if (
       q.priority === "essential_before_birth" &&
       looksLikeFutureStageQuestion(q)
@@ -115,7 +115,7 @@ export function buildContentUpgradePreview(store: AppStore): ContentUpgradePrevi
       });
     } else if (
       q.priority === "essential_before_birth" &&
-      !essential &&
+      !essentialPrimary.has(q.id) &&
       !q.required_before_birth
     ) {
       changes.push({

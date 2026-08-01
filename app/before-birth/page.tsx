@@ -5,6 +5,7 @@ import { readStore } from "@/lib/db/store";
 import {
   BEFORE_BIRTH_ESSENTIAL_MODULES,
   matchEssentialQuestion,
+  selectEssentialPrimaryQuestions,
 } from "@/lib/content/before-birth-essentials";
 import {
   buildQuestionStatusIndex,
@@ -17,18 +18,17 @@ export default async function BeforeBirthEssentialsPage() {
   await requireFamilyContext();
   const store = await readStore();
   const statusIndex = buildQuestionStatusIndex(store);
+  const primaryIds = new Set(
+    selectEssentialPrimaryQuestions(store.questions).map((q) => q.id),
+  );
 
   const modules = BEFORE_BIRTH_ESSENTIAL_MODULES.map((mod) => {
-    const questions = store.questions
+    const related = store.questions
       .filter((q) => q.active)
-      .filter((q) => {
-        const match = matchEssentialQuestion(q);
-        return match?.moduleId === mod.id;
-      })
+      .filter((q) => matchEssentialQuestion(q)?.moduleId === mod.id)
       .sort((a, b) => a.logical_order - b.logical_order);
-    // Deduplicate by keeping first ~6 per module for primary screens
-    const primary = questions.slice(0, 6);
-    return { mod, primary, total: questions.length };
+    const primary = related.filter((q) => primaryIds.has(q.id));
+    return { mod, primary, total: related.length };
   });
 
   const primaryCount = modules.reduce((n, m) => n + m.primary.length, 0);

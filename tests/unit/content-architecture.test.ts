@@ -13,6 +13,7 @@ import type { ChecklistTask, FamilySettings } from "@/lib/types/models";
 import seedQuestions from "@/data/seed/questions.json";
 import {
   matchEssentialQuestion,
+  selectEssentialPrimaryQuestions,
   BEFORE_BIRTH_ESSENTIAL_MODULES,
 } from "@/lib/content/before-birth-essentials";
 import { classifyTopics } from "@/lib/content-review/topics";
@@ -125,9 +126,18 @@ describe("Question title and essentials content", () => {
   });
 
   it("matches Before Birth Essentials modules", () => {
-    const matched = seedQuestions.filter((q) => matchEssentialQuestion(q));
+    const matched = seedQuestions.filter((q) => matchEssentialQuestion(q as never));
     expect(matched.length).toBeGreaterThan(15);
     expect(BEFORE_BIRTH_ESSENTIAL_MODULES.length).toBe(7);
+    const primary = selectEssentialPrimaryQuestions(
+      seedQuestions.map((q) => ({
+        ...q,
+        active: true,
+        logical_order: q.logical_order ?? 0,
+      })) as never,
+    );
+    expect(primary.length).toBeGreaterThanOrEqual(20);
+    expect(primary.length).toBeLessThanOrEqual(35);
   });
 
   it("avoids loose topic false matches for common words", () => {
