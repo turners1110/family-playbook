@@ -199,8 +199,134 @@ describe("PKCE cookie handoff", () => {
     expect(exchangeIdx).toBeGreaterThan(startIdx);
     expect(source).toMatch(/hasPkceCodeVerifier/);
     expect(source).toMatch(/authCookieNames/);
+    expect(source).toMatch(/buildSafeCallbackRequestLog/);
     expect(source).toMatch(/createRouteHandlerClient/);
     expect(source).not.toMatch(/cookie\.value|cookies\.get\([^)]+\)\?\.value/);
+  });
+
+  it("safe callback request log omits query values and secrets", async () => {
+    const { buildSafeCallbackRequestLog, redactUrlForLog } = await import(
+      "@/lib/auth/callback-log"
+    );
+
+    const log = buildSafeCallbackRequestLog({
+      url: "https://preview.vercel.app/auth/callback?code=SECRET_CODE&error=access_denied&error_code=otp_expired&error_description=Link%20expired&next=/home",
+      method: "GET",
+      headers: new Headers({
+        "user-agent": "Mozilla/5.0 TestAgent",
+        referer: "https://mail.example.com/inbox?token=SECRET_TOKEN",
+      }),
+      hasPkceCodeVerifier: true,
+      hasAnyCookies: true,
+      authCookieNames: ["sb-abc-auth-token-code-verifier"],
+    });
+
+    expect(log.pathname).toBe("/auth/callback");
+    expect(log.hostname).toBe("preview.vercel.app");
+    expect(log.queryParamNames).toEqual([
+      "code",
+      "error",
+      "error_code",
+      "error_description",
+      "next",
+    ]);
+    expect(log.queryParams).toEqual([
+      { key: "code", value_present: true },
+      { key: "error", value_present: true },
+      { key: "error_code", value_present: true },
+      { key: "error_description", value_present: true },
+      { key: "next", value_present: true },
+    ]);
+    expect(log.redactedUrl).toBe(
+      "https://preview.vercel.app/auth/callback?code=***&error=***&error_code=***&error_description=***&next=***",
+    );
+    expect(log.userAgent).toBe("Mozilla/5.0 TestAgent");
+    expect(log.refererHost).toBe("mail.example.com");
+    expect(log.referer).toBe("https://mail.example.com/inbox?token=***");
+    expect(redactUrlForLog("https://x.test/auth/callback?code=abc#access_token=xyz")).toBe(
+      "https://x.test/auth/callback?code=***#***",
+    );
+
+    const serialized = JSON.stringify(log);
+    expect(serialized).not.toContain("SECRET_CODE");
+    expect(serialized).not.toContain("SECRET_TOKEN");
+    expect(serialized).not.toContain("access_denied");
+    expect(serialized).not.toContain("otp_expired");
+    expect(serialized).not.toContain("Link expired");
+  });
+
+  it("safe callback request log handles missing referer and error params", async () => {
+    const { buildSafeCallbackRequestLog } = await import(
+      "@/lib/auth/callback-log"
+    );
+
+    const log = buildSafeCallbackRequestLog({
+      url: "https://example.com/auth/callback",
+      headers: new Headers({ "user-agent": "UA" }),
+      hasPkceCodeVerifier: false,
+      hasAnyCookies: false,
+      authCookieNames: [],
+    });
+
+    expect(log.hasCode).toBe(false);
+    expect(log.hasTokenHash).toBe(false);
+    expect(log.hasType).toBe(false);
+    expect(log.hasError).toBe(false);
+    expect(log.hasErrorCode).toBe(false);
+    expect(log.hasErrorDescription).toBe(false);
+    expect(log.hasPkceCodeVerifier).toBe(false);
+    expect(log.hasAnyCookies).toBe(false);
+    expect(log.queryParamNames).toEqual([]);
+    expect(log.queryParams).toEqual([]);
+    expect(log.redactedUrl).toBe("https://example.com/auth/callback");
+    expect(log.referer).toBeNull();
+    expect(log.refererHost).toBeNull();
+  });
+
+  it("safe callback request log detects token_hash flow params by name only", async () => {
+    const { buildSafeCallbackRequestLog } = await import(
+      "@/lib/auth/callback-log"
+    );
+
+    const log = buildSafeCallbackRequestLog({
+      url: "https://example.com/auth/callback?token_hash=SECRET_HASH&type=email",
+      headers: new Headers(),
+      hasPkceCodeVerifier: false,
+      hasAnyCookies: false,
+      authCookieNames: [],
+    });
+
+    expect(log.hasCode).toBe(false);
+    expect(log.hasTokenHash).toBe(true);
+    expect(log.hasType).toBe(true);
+    expect(log.queryParamNames).toEqual(["token_hash", "type"]);
+    expect(log.queryParams).toEqual([
+      { key: "token_hash", value_present: true },
+      { key: "type", value_present: true },
+    ]);
+    expect(log.redactedUrl).toBe(
+      "https://example.com/auth/callback?token_hash=***&type=***",
+    );
+    expect(JSON.stringify(log)).not.toContain("SECRET_HASH");
+    expect(JSON.stringify(log)).not.toContain("email");
+  });
+
+  it("callback logs incoming request before auth and before every redirect", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "app/auth/callback/route.ts"),
+      "utf8",
+    );
+    const incomingIdx = source.indexOf("incoming_request");
+    const codeIdx = source.indexOf('url.searchParams.get("code")');
+    const exchangeLogIdx = source.indexOf("before_exchangeCodeForSession");
+    const exchangeCallIdx = source.indexOf("exchangeCodeForSession(code)");
+    expect(incomingIdx).toBeGreaterThan(-1);
+    expect(codeIdx).toBeGreaterThan(incomingIdx);
+    expect(exchangeLogIdx).toBeGreaterThan(-1);
+    expect(exchangeCallIdx).toBeGreaterThan(exchangeLogIdx);
+    expect(source).toMatch(/"redirect"/);
+    expect(source).toMatch(/redactRedirectTargetForLog/);
+    expect(source).toMatch(/reachedExchangeCodeForSession/);
   });
 
   it("proxy skips session refresh on PKCE auth routes", async () => {

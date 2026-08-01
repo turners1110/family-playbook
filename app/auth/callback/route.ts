@@ -1,4 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  buildSafeCallbackRequestLog,
+  redactRedirectTargetForLog,
+} from "@/lib/auth/callback-log";
 import { summarizeAuthCookies } from "@/lib/auth/pkce-cookies";
 import {
   applyPendingCookies,
@@ -20,61 +24,95 @@ function logAuthCallback(
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next");
-  const safeNext =
-    next && next.startsWith("/") && !next.startsWith("//") ? next : "/home";
+  const url = new URL(request.url);
+  const { origin } = url;
 
+  // Cookie name summary only — no values — before any auth exchange.
   const incomingCookies = summarizeAuthCookies(request.cookies.getAll());
-
-  logAuthCallback("info", "start", {
-    hasCode: Boolean(code),
+  const requestLog = buildSafeCallbackRequestLog({
+    url,
+    method: request.method,
+    headers: request.headers,
     hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
+    hasAnyCookies: request.cookies.getAll().length > 0,
     authCookieNames: incomingCookies.authCookieNames,
   });
 
+  // Log the incoming request before ANY auth logic executes.
+  logAuthCallback("info", "incoming_request", {
+    ...requestLog,
+    reachedExchangeCodeForSession: false,
+  });
+
+  const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next");
+  const safeNext =
+    next && next.startsWith("/") && !next.startsWith("//") ? next : "/home";
+
+  const pendingCookies: PendingCookie[] = [];
+
+  const redirectWithCookies = (
+    target: string,
+    reason: string,
+    extra?: Record<string, unknown>,
+  ) => {
+    logAuthCallback("info", "redirect", {
+      ...requestLog,
+      reason,
+      redirectTo: redactRedirectTargetForLog(target, origin),
+      reachedExchangeCodeForSession: Boolean(extra?.reachedExchangeCodeForSession),
+      ...extra,
+    });
+    return applyPendingCookies(NextResponse.redirect(target), pendingCookies);
+  };
+
   if (!code) {
     logAuthCallback("error", "missing_code", {
-      hasCode: false,
-      hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
-      authCookieNames: incomingCookies.authCookieNames,
+      ...requestLog,
+      reachedExchangeCodeForSession: false,
       message: "No auth code in callback URL",
     });
-    return NextResponse.redirect(`${origin}/login?error=callback_failed`);
+    return redirectWithCookies(
+      `${origin}/login?error=callback_failed`,
+      "missing_code",
+      { reachedExchangeCodeForSession: false },
+    );
   }
 
   if (!incomingCookies.hasPkceCodeVerifier) {
     logAuthCallback("error", "missing_pkce_verifier", {
-      hasCode: true,
-      hasPkceCodeVerifier: false,
-      authCookieNames: incomingCookies.authCookieNames,
+      ...requestLog,
+      reachedExchangeCodeForSession: false,
       message:
         "PKCE code-verifier cookie missing; exchangeCodeForSession will fail. Request the magic link in the same browser that opens the email link.",
     });
   }
 
-  const pendingCookies: PendingCookie[] = [];
-
-  const redirectWithCookies = (url: string) =>
-    applyPendingCookies(NextResponse.redirect(url), pendingCookies);
-
   try {
     const supabase = createRouteHandlerClient(request, pendingCookies);
+
+    logAuthCallback("info", "before_exchangeCodeForSession", {
+      ...requestLog,
+      reachedExchangeCodeForSession: true,
+    });
+
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error || !data.session || !data.user) {
       logAuthCallback("error", "exchangeCodeForSession", {
-        hasCode: true,
-        hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
-        authCookieNames: incomingCookies.authCookieNames,
+        ...requestLog,
+        reachedExchangeCodeForSession: true,
         message: error?.message,
         status: error?.status,
         code: error?.code,
         hasSession: Boolean(data.session),
         hasUser: Boolean(data.user),
       });
-      return redirectWithCookies(`${origin}/login?error=callback_failed`);
+      return redirectWithCookies(
+        `${origin}/login?error=callback_failed`,
+        "exchangeCodeForSession_failed",
+        { reachedExchangeCodeForSession: true },
+      );
     }
 
     const {
@@ -84,12 +122,17 @@ export async function GET(request: NextRequest) {
 
     if (userError || !user) {
       logAuthCallback("error", "getUser", {
-        hasCode: true,
+        ...requestLog,
+        reachedExchangeCodeForSession: true,
         message: userError?.message,
         status: userError?.status,
         code: userError?.code,
       });
-      return redirectWithCookies(`${origin}/login?error=callback_failed`);
+      return redirectWithCookies(
+        `${origin}/login?error=callback_failed`,
+        "getUser_failed",
+        { reachedExchangeCodeForSession: true },
+      );
     }
 
     const { data: profile, error: profileError } = await supabase
@@ -100,11 +143,16 @@ export async function GET(request: NextRequest) {
 
     if (profileError) {
       logAuthCallback("error", "profile_lookup", {
-        hasCode: true,
+        ...requestLog,
+        reachedExchangeCodeForSession: true,
         message: profileError.message,
         code: profileError.code,
       });
-      return redirectWithCookies(`${origin}/login?error=callback_failed`);
+      return redirectWithCookies(
+        `${origin}/login?error=callback_failed`,
+        "profile_lookup_failed",
+        { reachedExchangeCodeForSession: true },
+      );
     }
 
     if (!profile) {
@@ -125,20 +173,25 @@ export async function GET(request: NextRequest) {
 
       if (upsertError) {
         logAuthCallback("error", "profile_upsert", {
-          hasCode: true,
+          ...requestLog,
+          reachedExchangeCodeForSession: true,
           message: upsertError.message,
           code: upsertError.code,
         });
-        return redirectWithCookies(`${origin}/login?error=no_profile`);
+        return redirectWithCookies(
+          `${origin}/login?error=no_profile`,
+          "profile_upsert_failed",
+          { reachedExchangeCodeForSession: true },
+        );
       }
     }
 
     logAuthCallback("info", "success", {
-      hasCode: true,
-      hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
+      ...requestLog,
+      reachedExchangeCodeForSession: true,
       authCookieNames: [
         ...new Set([
-          ...incomingCookies.authCookieNames,
+          ...requestLog.authCookieNames,
           ...pendingCookies
             .map((c) => c.name)
             .filter((n) => n.startsWith("sb-")),
@@ -146,14 +199,19 @@ export async function GET(request: NextRequest) {
       ].sort(),
     });
 
-    return redirectWithCookies(`${origin}${safeNext}`);
+    return redirectWithCookies(`${origin}${safeNext}`, "success", {
+      reachedExchangeCodeForSession: true,
+    });
   } catch (error) {
     logAuthCallback("error", "unhandled", {
-      hasCode: Boolean(code),
-      hasPkceCodeVerifier: incomingCookies.hasPkceCodeVerifier,
-      authCookieNames: incomingCookies.authCookieNames,
+      ...requestLog,
+      reachedExchangeCodeForSession: false,
       message: error instanceof Error ? error.message : String(error),
     });
-    return redirectWithCookies(`${origin}/login?error=callback_failed`);
+    return redirectWithCookies(
+      `${origin}/login?error=callback_failed`,
+      "unhandled",
+      { reachedExchangeCodeForSession: false },
+    );
   }
 }
