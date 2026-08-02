@@ -11,9 +11,11 @@ import {
   pauseConversationSession,
   resolveConversationDifference,
   saveConversationQuickAnswer,
+  saveConversationQuickAnswersBatch,
   skipConversationItem,
   startConversationSession,
   updateConversationSummary,
+  type ConversationAnswerWrite,
 } from "@/lib/services/conversations";
 import type {
   ConversationItemStatus,
@@ -21,6 +23,10 @@ import type {
   ConversationSessionSummary,
   DifferenceResolution,
 } from "@/lib/types/models";
+import {
+  publicRemoteStoreMessage,
+  RemoteStoreError,
+} from "@/lib/db/store-errors";
 
 async function requireIdentity() {
   const ctx = await requireFamilyContext();
@@ -30,12 +36,17 @@ async function requireIdentity() {
   return ctx;
 }
 
-function revalidateConversationPaths(sessionId?: string) {
-  revalidatePath("/conversations");
-  revalidatePath("/conversations/history");
+function revalidateConversationPaths(sessionId?: string, light = false) {
   if (sessionId) {
     revalidatePath(`/conversations/session/${sessionId}`);
-    revalidatePath(`/conversations/session/${sessionId}/summary`);
+    revalidatePath(`/conversations/test/${sessionId}`);
+  }
+  if (!light) {
+    revalidatePath("/conversations");
+    revalidatePath("/conversations/history");
+    if (sessionId) {
+      revalidatePath(`/conversations/session/${sessionId}/summary`);
+    }
   }
 }
 
@@ -59,9 +70,12 @@ export async function actionOpenConversationItem(
   itemId: string,
 ) {
   await requireIdentity();
-  await openConversationItem(sessionId, itemId);
-  revalidateConversationPaths(sessionId);
-  return { ok: true as const };
+  const result = await openConversationItem(sessionId, itemId);
+  // No revalidation on skipped/no-op opens — avoids full page churn.
+  if (!result.skipped) {
+    revalidateConversationPaths(sessionId, true);
+  }
+  return { ok: true as const, skipped: result.skipped };
 }
 
 export async function actionSaveConversationAnswer(input: {
@@ -74,14 +88,99 @@ export async function actionSaveConversationAnswer(input: {
   scale?: number | null;
   status?: ConversationItemStatus;
   advance?: boolean;
+  mutationId?: string;
 }) {
-  await requireIdentity();
-  await saveConversationQuickAnswer(input);
-  if (input.advance) {
-    await advanceConversationItem(input.sessionId, "next");
+  const started = Date.now();
+  try {
+    await requireIdentity();
+    await saveConversationQuickAnswer(input);
+    if (input.advance) {
+      await advanceConversationItem(input.sessionId, "next");
+    }
+    revalidateConversationPaths(input.sessionId, true);
+    console.info("[save_timing]", {
+      operation: "actionSaveConversationAnswer",
+      sessionId: input.sessionId,
+      questionId: input.itemId,
+      durationMs: Date.now() - started,
+      result: "success",
+      retryCount: 0,
+      conflict: false,
+      stage: "server_action",
+    });
+    return { ok: true as const };
+  } catch (error) {
+    const conflict =
+      error instanceof RemoteStoreError && error.code === "version_conflict";
+    console.info("[save_timing]", {
+      operation: "actionSaveConversationAnswer",
+      sessionId: input.sessionId,
+      questionId: input.itemId,
+      durationMs: Date.now() - started,
+      result: conflict ? "conflict" : "failed",
+      retryCount: 0,
+      conflict,
+      stage: "server_action",
+    });
+    return {
+      ok: false as const,
+      error: publicRemoteStoreMessage(error),
+      code: error instanceof RemoteStoreError ? error.code : "failed",
+    };
   }
-  revalidateConversationPaths(input.sessionId);
-  return { ok: true as const };
+}
+
+export async function actionSaveConversationAnswersBatch(input: {
+  sessionId: string;
+  itemId: string;
+  answers: ConversationAnswerWrite[];
+  status?: ConversationItemStatus;
+  advance?: boolean;
+  mutationId?: string;
+  testRunId?: string | null;
+}) {
+  const started = Date.now();
+  try {
+    await requireIdentity();
+    await saveConversationQuickAnswersBatch({
+      sessionId: input.sessionId,
+      itemId: input.itemId,
+      answers: input.answers,
+      status: input.status,
+      mutationId: input.mutationId,
+      advance: input.advance,
+    });
+    revalidateConversationPaths(input.sessionId, true);
+    console.info("[save_timing]", {
+      operation: "actionSaveConversationAnswersBatch",
+      sessionId: input.sessionId,
+      testRunId: input.testRunId ?? null,
+      questionId: input.itemId,
+      durationMs: Date.now() - started,
+      result: "success",
+      retryCount: 0,
+      conflict: false,
+      stage: "server_action",
+    });
+    return { ok: true as const };
+  } catch (error) {
+    const conflict =
+      error instanceof RemoteStoreError && error.code === "version_conflict";
+    console.info("[save_timing]", {
+      operation: "actionSaveConversationAnswersBatch",
+      sessionId: input.sessionId,
+      testRunId: input.testRunId ?? null,
+      questionId: input.itemId,
+      durationMs: Date.now() - started,
+      result: conflict ? "conflict" : "failed",
+      retryCount: 0,
+      conflict,
+      stage: "server_action",
+    });
+    const err = new Error(publicRemoteStoreMessage(error));
+    if (conflict) (err as Error & { code: string }).code = "version_conflict";
+    throw err;
+  }
 }
 
 export async function actionAdvanceConversation(
@@ -90,7 +189,7 @@ export async function actionAdvanceConversation(
 ) {
   await requireIdentity();
   await advanceConversationItem(sessionId, direction);
-  revalidateConversationPaths(sessionId);
+  revalidateConversationPaths(sessionId, true);
   return { ok: true as const };
 }
 
@@ -105,10 +204,12 @@ export async function actionSkipConversationItem(
   sessionId: string,
   itemId: string,
   status: "skipped" | "discuss_later" | "undecided",
+  mutationId?: string,
 ) {
   await requireIdentity();
   await skipConversationItem(sessionId, itemId, status);
-  revalidateConversationPaths(sessionId);
+  void mutationId;
+  revalidateConversationPaths(sessionId, true);
   return { ok: true as const };
 }
 
@@ -119,10 +220,11 @@ export async function actionResolveDifference(input: {
   samReason?: string | null;
   michelleReason?: string | null;
   sharedAnswerText?: string | null;
+  mutationId?: string;
 }) {
   await requireIdentity();
   await resolveConversationDifference(input);
-  revalidateConversationPaths(input.sessionId);
+  revalidateConversationPaths(input.sessionId, true);
   return { ok: true as const };
 }
 
@@ -149,6 +251,6 @@ export async function actionAppendMomentum(
 ) {
   await requireIdentity();
   await appendMomentumPrompt(sessionId, promptId);
-  revalidateConversationPaths(sessionId);
+  revalidateConversationPaths(sessionId, true);
   return { ok: true as const };
 }

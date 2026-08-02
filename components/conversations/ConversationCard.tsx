@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
@@ -24,9 +24,17 @@ import {
   actionOpenConversationItem,
   actionPauseConversation,
   actionResolveDifference,
-  actionSaveConversationAnswer,
+  actionSaveConversationAnswersBatch,
   actionSkipConversationItem,
 } from "@/lib/actions/conversations";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import {
+  CardSkeleton,
+  PendingNavigationGuard,
+  RetrySavePanel,
+  SaveButton,
+  SlowSaveNotice,
+} from "@/components/ui/save-feedback";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -61,9 +69,10 @@ export function ConversationCard({
 }) {
   void _difference;
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [error, setError] = useState<string | null>(null);
+  const save = useSaveFeedback();
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const [showMomentum, setShowMomentum] = useState(false);
+  const pending = save.isBusy;
 
   const samMember = members.find((m) => m.display_name === "Sam");
   const michelleMember = members.find((m) => m.display_name === "Michelle");
@@ -95,10 +104,16 @@ export function ConversationCard({
   const [keepGoing, setKeepGoing] = useState(false);
 
   useEffect(() => {
-    startTransition(async () => {
-      await actionOpenConversationItem(session.id, item.id);
-    });
-  }, [item.id, session.id]);
+    void actionOpenConversationItem(session.id, item.id);
+    headingRef.current?.focus();
+    // Prefetch next session route so Save and next can advance without a blank screen.
+    if (itemIndex < itemCount - 1) {
+      router.prefetch(`/conversations/session/${session.id}`);
+      if (session.test_run_id) {
+        router.prefetch(`/conversations/test/${session.test_run_id}`);
+      }
+    }
+  }, [item.id, session.id, session.test_run_id, itemIndex, itemCount, router]);
 
   const energyLabel = ENERGY_LABELS[storeEnergyToLevel(item.energy)];
   const differs =
@@ -129,20 +144,7 @@ export function ConversationCard({
     });
   }
 
-  function run(fn: () => Promise<unknown>, then?: () => void) {
-    setError(null);
-    startTransition(async () => {
-      try {
-        await fn();
-        then?.();
-        router.refresh();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Something went wrong.");
-      }
-    });
-  }
-
-  function saveActor(actor: "sam" | "michelle") {
+  function buildActorWrite(actor: "sam" | "michelle") {
     const choices = actor === "sam" ? samChoices : michelleChoices;
     const custom = actor === "sam" ? customSam : customMichelle;
     const text = actor === "sam" ? samText : michelleText;
@@ -152,76 +154,85 @@ export function ConversationCard({
       prompt.allow_custom_answer && custom.trim()
         ? [...choices, custom.trim()]
         : choices;
+    return {
+      actor,
+      selectedOptions:
+        prompt.response_type === "short_text" ||
+        prompt.response_type === "open_time_boxed"
+          ? []
+          : selected,
+      shortText:
+        prompt.response_type === "short_text" ||
+        prompt.response_type === "open_time_boxed"
+          ? text
+          : null,
+      explanation: explain || null,
+      scale: prompt.response_type === "reaction_scale" ? scale : null,
+    };
+  }
 
-    run(() =>
-      actionSaveConversationAnswer({
+  function saveActor(actor: "sam" | "michelle") {
+    void save.runSave(
+      async () => {
+        await actionSaveConversationAnswersBatch({
+          sessionId: session.id,
+          itemId: item.id,
+          answers: [buildActorWrite(actor)],
+          mutationId: save.mutationId(),
+          testRunId: session.test_run_id,
+        });
+      },
+      {
+        operation: `save_actor_${actor}`,
+        route: "/conversations/session",
         sessionId: session.id,
-        itemId: item.id,
-        actor,
-        selectedOptions:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? []
-            : selected,
-        shortText:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? text
-            : prompt.response_type === "either_or" &&
-                prompt.short_text_max_length
-              ? explain
-              : null,
-        explanation: explain || null,
-        scale: prompt.response_type === "reaction_scale" ? scale : null,
-      }),
+        testRunId: session.test_run_id,
+        questionId: prompt.id,
+        onSuccess: async () => {
+          router.refresh();
+        },
+      },
     );
   }
 
   function saveAndNext() {
-    run(async () => {
-      await actionSaveConversationAnswer({
+    void save.runSave(
+      async () => {
+        await actionSaveConversationAnswersBatch({
+          sessionId: session.id,
+          itemId: item.id,
+          answers: [buildActorWrite("sam"), buildActorWrite("michelle")],
+          mutationId: save.mutationId(),
+          testRunId: session.test_run_id,
+          advance: itemIndex < itemCount - 1,
+        });
+      },
+      {
+        operation: "save_and_next",
+        route: "/conversations/session",
         sessionId: session.id,
-        itemId: item.id,
-        actor: "sam",
-        selectedOptions:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? []
-            : prompt.allow_custom_answer && customSam.trim()
-              ? [...samChoices, customSam.trim()]
-              : samChoices,
-        shortText:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? samText
-            : null,
-        explanation: samExplain || null,
-        scale: prompt.response_type === "reaction_scale" ? samScale : null,
-      });
-      await actionSaveConversationAnswer({
-        sessionId: session.id,
-        itemId: item.id,
-        actor: "michelle",
-        selectedOptions:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? []
-            : prompt.allow_custom_answer && customMichelle.trim()
-              ? [...michelleChoices, customMichelle.trim()]
-              : michelleChoices,
-        shortText:
-          prompt.response_type === "short_text" ||
-          prompt.response_type === "open_time_boxed"
-            ? michelleText
-            : null,
-        explanation: michelleExplain || null,
-        scale: prompt.response_type === "reaction_scale" ? michelleScale : null,
-      });
-      if (itemIndex >= itemCount - 1) {
-        setShowMomentum(true);
-      } else {
-        await actionAdvanceConversation(session.id, "next");
-      }
+        testRunId: session.test_run_id,
+        questionId: prompt.id,
+        advanceAfterSave: itemIndex < itemCount - 1,
+        onSuccess: async () => {
+          if (itemIndex >= itemCount - 1) {
+            setShowMomentum(true);
+            router.refresh();
+            return;
+          }
+          router.refresh();
+        },
+      },
+    );
+  }
+
+  function runGuarded(fn: () => Promise<unknown>) {
+    void save.runSave(fn, {
+      operation: "conversation_action",
+      sessionId: session.id,
+      testRunId: session.test_run_id,
+      questionId: prompt.id,
+      onSuccess: async () => router.refresh(),
     });
   }
 
@@ -253,7 +264,11 @@ export function ConversationCard({
         className="surface animate-[fadeUp_280ms_ease-out] p-5"
         key={item.id}
       >
-        <h1 className="font-display text-2xl leading-snug text-ink">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-display text-2xl leading-snug text-ink outline-none"
+        >
           {prompt.prompt}
         </h1>
         {prompt.suggested_discussion_minutes ? (
@@ -364,7 +379,7 @@ export function ConversationCard({
             onSharedText={setSharedText}
             pending={pending}
             onResolve={(resolution) =>
-              run(() =>
+              runGuarded(() =>
                 actionResolveDifference({
                   sessionId: session.id,
                   promptId: prompt.id,
@@ -375,6 +390,7 @@ export function ConversationCard({
                     resolution === "shared_answer_created"
                       ? sharedText || null
                       : null,
+                  mutationId: save.mutationId(),
                 }),
               )
             }
@@ -389,18 +405,41 @@ export function ConversationCard({
               Your quick answers stay as context when you open the deeper
               discussion.
             </p>
-            <Link href={essentialsDeepHref} className="btn btn-secondary mt-3">
+            <Link
+              href={essentialsDeepHref}
+              className="btn btn-secondary mt-3"
+              onClick={async (e) => {
+                if (save.isBusy) {
+                  e.preventDefault();
+                  const leave = await save.requestLeave();
+                  if (leave) router.push(essentialsDeepHref);
+                }
+              }}
+            >
               Open deeper question
             </Link>
           </div>
         ) : null}
 
-        {error ? (
-          <p className="mt-3 text-sm text-danger" role="alert">
-            {error}
+        <div className="mt-3 space-y-2">
+          <SlowSaveNotice tier={save.slowTier} />
+          <RetrySavePanel
+            state={save.state}
+            message={save.statusMessage}
+            onRetry={() => void save.retry()}
+            disabled={save.isBusy}
+          />
+          <p className="sr-only" aria-live="polite">
+            {save.statusMessage}
           </p>
-        ) : null}
+        </div>
       </article>
+
+      {save.state === "moving_to_next" ? (
+        <div className="mt-4">
+          <CardSkeleton />
+        </div>
+      ) : null}
 
       {showMomentum || itemIndex >= itemCount - 1 ? (
         <section className="surface mt-4 p-5">
@@ -416,7 +455,7 @@ export function ConversationCard({
                   className="btn btn-secondary w-full justify-start text-left"
                   disabled={pending}
                   onClick={() =>
-                    run(async () => {
+                    runGuarded(async () => {
                       await actionAppendMomentum(session.id, m.prompt_id);
                       setShowMomentum(false);
                     })
@@ -438,7 +477,7 @@ export function ConversationCard({
               className="btn btn-primary"
               disabled={pending}
               onClick={() =>
-                run(async () => {
+                runGuarded(async () => {
                   await actionCompleteConversation(session.id);
                   router.push(`/conversations/session/${session.id}/summary`);
                 })
@@ -452,7 +491,9 @@ export function ConversationCard({
                 className="btn btn-secondary"
                 disabled={pending}
                 onClick={() =>
-                  run(() => actionAdvanceConversation(session.id, "next"))
+                  runGuarded(() =>
+                    actionAdvanceConversation(session.id, "next"),
+                  )
                 }
               >
                 Continue session
@@ -463,67 +504,88 @@ export function ConversationCard({
       ) : null}
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg-elevated/95 px-3 py-3 backdrop-blur">
-        <div className="mx-auto flex max-w-lg flex-wrap gap-2">
-          <button
-            type="button"
-            className="btn btn-secondary min-h-11 flex-1"
-            disabled={pending || itemIndex === 0}
-            onClick={() =>
-              run(() => actionAdvanceConversation(session.id, "back"))
-            }
-          >
-            Back
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary min-h-11"
-            disabled={pending}
-            onClick={() =>
-              run(() =>
-                actionSkipConversationItem(session.id, item.id, "skipped"),
-              )
-            }
-          >
-            Skip
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary min-h-11"
-            disabled={pending}
-            onClick={() =>
-              run(() =>
-                actionSkipConversationItem(
-                  session.id,
-                  item.id,
-                  "discuss_later",
-                ),
-              )
-            }
-          >
-            Later
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary min-h-11"
-            disabled={pending}
-            onClick={() =>
-              run(() => actionPauseConversation(session.id), () =>
-                router.push("/conversations"),
-              )
-            }
-          >
-            Pause
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary min-h-11 flex-[1.4]"
-            disabled={pending}
-            onClick={saveAndNext}
-          >
-            Save and next
-          </button>
+        <div className="mx-auto flex max-w-lg flex-col gap-2">
+          <SlowSaveNotice tier={save.slowTier} />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-secondary min-h-11 flex-1"
+              disabled={pending || itemIndex === 0}
+              onClick={() =>
+                runGuarded(() => actionAdvanceConversation(session.id, "back"))
+              }
+            >
+              Back
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary min-h-11"
+              disabled={pending}
+              onClick={() =>
+                runGuarded(() =>
+                  actionSkipConversationItem(
+                    session.id,
+                    item.id,
+                    "skipped",
+                    save.mutationId(),
+                  ),
+                )
+              }
+            >
+              Skip
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary min-h-11"
+              disabled={pending}
+              onClick={() =>
+                runGuarded(() =>
+                  actionSkipConversationItem(
+                    session.id,
+                    item.id,
+                    "discuss_later",
+                    save.mutationId(),
+                  ),
+                )
+              }
+            >
+              Later
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary min-h-11"
+              disabled={pending}
+              onClick={() =>
+                void save.runSave(
+                  async () => {
+                    await actionPauseConversation(session.id);
+                  },
+                  {
+                    operation: "pause_session",
+                    sessionId: session.id,
+                    testRunId: session.test_run_id,
+                    questionId: prompt.id,
+                    onSuccess: async () => router.push("/conversations"),
+                  },
+                )
+              }
+            >
+              {save.state === "saving" ? "Saving…" : "Pause"}
+            </button>
+            <SaveButton
+              state={save.state}
+              className="min-h-11 flex-[1.4]"
+              onClick={saveAndNext}
+            />
+          </div>
         </div>
       </div>
+
+      <PendingNavigationGuard
+        open={save.showLeaveGuard}
+        onStay={save.confirmStay}
+        onLeave={save.confirmLeave}
+      />
     </div>
   );
 }

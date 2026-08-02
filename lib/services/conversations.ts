@@ -165,6 +165,24 @@ export async function startConversationSession(input: {
 }
 
 export async function openConversationItem(sessionId: string, itemId: string) {
+  // Skip no-op writes — opening the same card again must not hit remote store.
+  const preview = await readStore();
+  ensureCollections(preview);
+  const existing = preview.conversation_session_items?.find(
+    (i) => i.id === itemId && i.session_id === sessionId,
+  );
+  const sessionPreview = preview.conversation_sessions?.find(
+    (s) => s.id === sessionId,
+  );
+  if (
+    existing?.opened_at &&
+    existing.status !== "pending" &&
+    sessionPreview?.current_item_index === existing.display_order &&
+    sessionPreview.status === "active"
+  ) {
+    return { skipped: true as const };
+  }
+
   const ts = nowIso();
   await updateStore(
     (store) => {
@@ -189,7 +207,16 @@ export async function openConversationItem(sessionId: string, itemId: string) {
     },
     { operation: "openConversationItem" },
   );
+  return { skipped: false as const };
 }
+
+export type ConversationAnswerWrite = {
+  actor: "sam" | "michelle" | "shared";
+  selectedOptions?: string[];
+  shortText?: string | null;
+  explanation?: string | null;
+  scale?: number | null;
+};
 
 export async function saveConversationQuickAnswer(input: {
   sessionId: string;
@@ -200,17 +227,52 @@ export async function saveConversationQuickAnswer(input: {
   explanation?: string | null;
   scale?: number | null;
   status?: ConversationItemStatus;
+  mutationId?: string;
 }) {
-  if (input.shortText) {
+  return saveConversationQuickAnswersBatch({
+    sessionId: input.sessionId,
+    itemId: input.itemId,
+    answers: [
+      {
+        actor: input.actor,
+        selectedOptions: input.selectedOptions,
+        shortText: input.shortText,
+        explanation: input.explanation,
+        scale: input.scale,
+      },
+    ],
+    status: input.status,
+    mutationId: input.mutationId,
+    advance: false,
+  });
+}
+
+/**
+ * Batch Sam/Michelle/shared writes into one store mutation.
+ * Cuts remote round-trips that made “Save and next” feel stuck.
+ */
+export async function saveConversationQuickAnswersBatch(input: {
+  sessionId: string;
+  itemId: string;
+  answers: ConversationAnswerWrite[];
+  status?: ConversationItemStatus;
+  mutationId?: string;
+  advance?: boolean;
+}) {
+  if (input.answers.some((a) => a.shortText)) {
     const { validateShortTextLength } = await import("@/lib/qa/validation");
     const preview = await readStore();
     const itemPreview = preview.conversation_session_items?.find(
       (i) => i.id === input.itemId,
     );
     if (itemPreview) {
-      const valid = validateShortTextLength(itemPreview.prompt_id, input.shortText);
-      if (!valid.ok) {
-        throw new Error(valid.message);
+      for (const answer of input.answers) {
+        if (!answer.shortText) continue;
+        const valid = validateShortTextLength(
+          itemPreview.prompt_id,
+          answer.shortText,
+        );
+        if (!valid.ok) throw new Error(valid.message);
       }
     }
   }
@@ -236,39 +298,43 @@ export async function saveConversationQuickAnswer(input: {
             }
           : {};
 
-      const existing = store.conversation_quick_answers!.find(
-        (a) =>
-          a.session_item_id === input.itemId && a.actor === input.actor,
-      );
-
-      if (existing) {
-        existing.selected_options = input.selectedOptions ?? existing.selected_options;
-        existing.short_text =
-          input.shortText !== undefined ? input.shortText : existing.short_text;
-        existing.explanation =
-          input.explanation !== undefined
-            ? input.explanation
-            : existing.explanation;
-        existing.scale =
-          input.scale !== undefined ? input.scale : existing.scale;
-        existing.updated_at = ts;
-        Object.assign(existing, qaTags);
-      } else {
-        store.conversation_quick_answers!.push({
-          id: id("cqans"),
-          family_id: store.family.id,
-          session_id: input.sessionId,
-          session_item_id: input.itemId,
-          prompt_id: item.prompt_id,
-          actor: input.actor,
-          selected_options: input.selectedOptions ?? [],
-          short_text: input.shortText ?? null,
-          explanation: input.explanation ?? null,
-          scale: input.scale ?? null,
-          created_at: ts,
-          updated_at: ts,
-          ...qaTags,
-        });
+      for (const answer of input.answers) {
+        const existing = store.conversation_quick_answers!.find(
+          (a) =>
+            a.session_item_id === input.itemId && a.actor === answer.actor,
+        );
+        if (existing) {
+          existing.selected_options =
+            answer.selectedOptions ?? existing.selected_options;
+          existing.short_text =
+            answer.shortText !== undefined
+              ? answer.shortText
+              : existing.short_text;
+          existing.explanation =
+            answer.explanation !== undefined
+              ? answer.explanation
+              : existing.explanation;
+          existing.scale =
+            answer.scale !== undefined ? answer.scale : existing.scale;
+          existing.updated_at = ts;
+          Object.assign(existing, qaTags);
+        } else {
+          store.conversation_quick_answers!.push({
+            id: id("cqans"),
+            family_id: store.family.id,
+            session_id: input.sessionId,
+            session_item_id: input.itemId,
+            prompt_id: item.prompt_id,
+            actor: answer.actor,
+            selected_options: answer.selectedOptions ?? [],
+            short_text: answer.shortText ?? null,
+            explanation: answer.explanation ?? null,
+            scale: answer.scale ?? null,
+            created_at: ts,
+            updated_at: ts,
+            ...qaTags,
+          });
+        }
       }
 
       const sam = store.conversation_quick_answers!.find(
@@ -281,8 +347,7 @@ export async function saveConversationQuickAnswer(input: {
         (a) => a.session_item_id === input.itemId && a.actor === "shared",
       );
 
-      let status: ConversationItemStatus =
-        input.status ?? item.status;
+      let status: ConversationItemStatus = input.status ?? item.status;
       if (input.status) {
         status = input.status;
       } else if (shared && snapshotAnswer(shared)) {
@@ -348,10 +413,22 @@ export async function saveConversationQuickAnswer(input: {
           (sum, i) => sum + i.actual_time_seconds,
           0,
         );
+        if (input.advance) {
+          const ordered = items.sort(
+            (a, b) => a.display_order - b.display_order,
+          );
+          const idx = ordered.findIndex((i) => i.id === input.itemId);
+          if (idx >= 0 && idx < ordered.length - 1) {
+            session.current_item_index = ordered[idx + 1]!.display_order;
+          }
+        }
       }
       return store;
     },
-    { operation: "saveConversationQuickAnswer" },
+    {
+      operation: "saveConversationQuickAnswersBatch",
+      mutationId: input.mutationId,
+    },
   );
 }
 

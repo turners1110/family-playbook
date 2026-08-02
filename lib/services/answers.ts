@@ -14,6 +14,96 @@ export async function getAnswerHistory(answerId: string) {
     .sort((a, b) => a.version - b.version);
 }
 
+function applyAnswerWrite(
+  store: Awaited<ReturnType<typeof readStore>>,
+  data: SaveAnswerInput,
+  actorId: string | undefined,
+  timestamp: string,
+) {
+  const changedBy = actorId ?? store.current_user_id;
+  const existing = store.answers.find((a) => {
+    if (a.question_id !== data.question_id) return false;
+    if (data.is_shared) return a.is_shared;
+    return !a.is_shared && a.member_id === data.member_id;
+  });
+
+  if (existing) {
+    const nextVersion = existing.version + 1;
+    const version: AnswerVersion = {
+      id: id("av"),
+      answer_id: existing.id,
+      version: nextVersion,
+      payload: data.payload,
+      status: data.status,
+      confidence: data.confidence,
+      changed_by: changedBy,
+      change_reason: data.change_reason ?? "Updated answer",
+      created_at: timestamp,
+    };
+    store.answer_versions.push(version);
+    existing.payload = data.payload;
+    existing.status = data.status;
+    existing.confidence = data.confidence;
+    existing.needs_research = data.needs_research ?? existing.needs_research;
+    existing.review_date =
+      data.review_date !== undefined ? data.review_date : existing.review_date;
+    existing.bookmarked =
+      data.bookmarked !== undefined ? data.bookmarked : existing.bookmarked;
+    existing.version = nextVersion;
+    existing.updated_at = timestamp;
+    store.activity_log.unshift({
+      id: id("act"),
+      family_id: store.family.id,
+      actor_id: changedBy,
+      event_type: "answer_updated",
+      entity_type: "answer",
+      entity_id: existing.id,
+      metadata: { question_id: data.question_id, version: nextVersion },
+      created_at: timestamp,
+    });
+    return;
+  }
+
+  const answer: Answer = {
+    id: id("answer"),
+    family_id: store.family.id,
+    question_id: data.question_id,
+    member_id: data.is_shared ? null : (data.member_id ?? null),
+    is_shared: data.is_shared,
+    payload: data.payload,
+    status: data.status,
+    confidence: data.confidence,
+    bookmarked: data.bookmarked ?? false,
+    needs_research: data.needs_research ?? false,
+    review_date: data.review_date ?? null,
+    version: 1,
+    created_at: timestamp,
+    updated_at: timestamp,
+  };
+  store.answers.push(answer);
+  store.answer_versions.push({
+    id: id("av"),
+    answer_id: answer.id,
+    version: 1,
+    payload: data.payload,
+    status: data.status,
+    confidence: data.confidence,
+    changed_by: changedBy,
+    change_reason: data.change_reason ?? "Initial answer",
+    created_at: timestamp,
+  });
+  store.activity_log.unshift({
+    id: id("act"),
+    family_id: store.family.id,
+    actor_id: changedBy,
+    event_type: "answer_created",
+    entity_type: "answer",
+    entity_id: answer.id,
+    metadata: { question_id: data.question_id },
+    created_at: timestamp,
+  });
+}
+
 export async function saveAnswer(input: SaveAnswerInput, actorId?: string) {
   const data = saveAnswerSchema.parse(input);
   const timestamp = nowIso();
@@ -21,91 +111,32 @@ export async function saveAnswer(input: SaveAnswerInput, actorId?: string) {
 
   return updateStore(
     (store) => {
-    const changedBy = actorId ?? store.current_user_id;
-    const existing = store.answers.find((a) => {
-      if (a.question_id !== data.question_id) return false;
-      if (data.is_shared) return a.is_shared;
-      return !a.is_shared && a.member_id === data.member_id;
-    });
-
-    if (existing) {
-      const nextVersion = existing.version + 1;
-      const version: AnswerVersion = {
-        id: id("av"),
-        answer_id: existing.id,
-        version: nextVersion,
-        payload: data.payload,
-        status: data.status,
-        confidence: data.confidence,
-        changed_by: changedBy,
-        change_reason: data.change_reason ?? "Updated answer",
-        created_at: timestamp,
-      };
-      store.answer_versions.push(version);
-      existing.payload = data.payload;
-      existing.status = data.status;
-      existing.confidence = data.confidence;
-      existing.needs_research = data.needs_research ?? existing.needs_research;
-      existing.review_date =
-        data.review_date !== undefined ? data.review_date : existing.review_date;
-      existing.bookmarked =
-        data.bookmarked !== undefined ? data.bookmarked : existing.bookmarked;
-      existing.version = nextVersion;
-      existing.updated_at = timestamp;
-      store.activity_log.unshift({
-        id: id("act"),
-        family_id: store.family.id,
-        actor_id: changedBy,
-        event_type: "answer_updated",
-        entity_type: "answer",
-        entity_id: existing.id,
-        metadata: { question_id: data.question_id, version: nextVersion },
-        created_at: timestamp,
-      });
+      applyAnswerWrite(store, data, actorId, timestamp);
       return store;
-    }
-
-    const answer: Answer = {
-      id: id("answer"),
-      family_id: store.family.id,
-      question_id: data.question_id,
-      member_id: data.is_shared ? null : (data.member_id ?? null),
-      is_shared: data.is_shared,
-      payload: data.payload,
-      status: data.status,
-      confidence: data.confidence,
-      bookmarked: data.bookmarked ?? false,
-      needs_research: data.needs_research ?? false,
-      review_date: data.review_date ?? null,
-      version: 1,
-      created_at: timestamp,
-      updated_at: timestamp,
-    };
-    store.answers.push(answer);
-    store.answer_versions.push({
-      id: id("av"),
-      answer_id: answer.id,
-      version: 1,
-      payload: data.payload,
-      status: data.status,
-      confidence: data.confidence,
-      changed_by: changedBy,
-      change_reason: data.change_reason ?? "Initial answer",
-      created_at: timestamp,
-    });
-    store.activity_log.unshift({
-      id: id("act"),
-      family_id: store.family.id,
-      actor_id: changedBy,
-      event_type: "answer_created",
-      entity_type: "answer",
-      entity_id: answer.id,
-      metadata: { question_id: data.question_id },
-      created_at: timestamp,
-    });
-    return store;
-  },
+    },
     { operation: "saveAnswer", mutationId },
+  );
+}
+
+/** Persist multiple answer writes in a single store mutation. */
+export async function saveAnswersBatch(
+  inputs: SaveAnswerInput[],
+  actorId?: string,
+  mutationId?: string,
+) {
+  if (!inputs.length) return;
+  const parsed = inputs.map((input) => saveAnswerSchema.parse(input));
+  const timestamp = nowIso();
+  const mid = mutationId ?? parsed[0]?.mutation_id ?? id("mut");
+
+  return updateStore(
+    (store) => {
+      for (const data of parsed) {
+        applyAnswerWrite(store, data, actorId, timestamp);
+      }
+      return store;
+    },
+    { operation: "saveAnswersBatch", mutationId: mid },
   );
 }
 

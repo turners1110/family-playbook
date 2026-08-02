@@ -16,6 +16,12 @@ import {
   actionSeedQaAnswers,
   actionUpdateQaPhase,
 } from "@/lib/actions/qa-lab";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import {
+  RetrySavePanel,
+  SaveButton,
+  SlowSaveNotice,
+} from "@/components/ui/save-feedback";
 
 export function TestLabClient({
   runs,
@@ -30,6 +36,7 @@ export function TestLabClient({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const taskSave = useSaveFeedback();
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [integrity, setIntegrity] = useState<IntegrityReport | null>(null);
@@ -56,6 +63,8 @@ export function TestLabClient({
     });
   }
 
+  const busy = pending || taskSave.isBusy;
+
   return (
     <div className="space-y-5">
       <section className="surface border-warning/40 bg-warning-soft/40 p-5">
@@ -77,7 +86,7 @@ export function TestLabClient({
           <button
             type="button"
             className="btn btn-primary"
-            disabled={pending}
+            disabled={busy}
             onClick={() =>
               run(async () => {
                 const result = await actionCreateQaTestPack();
@@ -99,7 +108,7 @@ export function TestLabClient({
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={pending}
+                disabled={busy}
                 onClick={() =>
                   run(async () => {
                     const report = await actionRunQaIntegrity(
@@ -117,7 +126,7 @@ export function TestLabClient({
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={pending}
+                disabled={busy}
                 onClick={() =>
                   run(async () => {
                     await actionSeedQaAnswers(selectedRun.test_run_id);
@@ -130,7 +139,7 @@ export function TestLabClient({
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={pending}
+                disabled={busy}
                 onClick={() =>
                   run(async () => {
                     const exported = await actionExportQaReport(
@@ -151,7 +160,7 @@ export function TestLabClient({
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={pending}
+                disabled={busy}
                 onClick={() =>
                   run(async () => {
                     await actionCompleteQaSession(selectedRun.test_run_id);
@@ -242,22 +251,40 @@ export function TestLabClient({
                 </li>
               ))}
             </ul>
-            <button
-              type="button"
-              className="btn btn-primary mt-3"
-              disabled={pending}
-              onClick={() =>
-                run(async () => {
-                  await actionConfirmQaTasks(
-                    selectedRun.test_run_id,
-                    taskSelection,
-                  );
-                  setMessage("Confirmed selected QA tasks (idempotent).");
-                })
-              }
-            >
-              Confirm selected tasks
-            </button>
+            <div className="mt-3 space-y-2">
+              <SlowSaveNotice tier={taskSave.slowTier} />
+              <RetrySavePanel
+                state={taskSave.state}
+                message={taskSave.statusMessage}
+                onRetry={() => void taskSave.retry()}
+                disabled={taskSave.isBusy}
+              />
+              <p className="sr-only" aria-live="polite">
+                {taskSave.statusMessage}
+              </p>
+              <SaveButton
+                state={taskSave.state}
+                idleLabel="Confirm selected tasks"
+                className="mt-1"
+                onClick={() =>
+                  void taskSave.runSave(
+                    async () => {
+                      await actionConfirmQaTasks(
+                        selectedRun.test_run_id,
+                        taskSelection,
+                      );
+                      setMessage("Confirmed selected QA tasks (idempotent).");
+                    },
+                    {
+                      operation: "confirm_qa_tasks",
+                      route: "/settings/test-lab",
+                      testRunId: selectedRun.test_run_id,
+                      onSuccess: async () => router.refresh(),
+                    },
+                  )
+                }
+              />
+            </div>
           </section>
 
           <section className="surface p-5">
@@ -293,7 +320,7 @@ export function TestLabClient({
                             ? "btn btn-primary"
                             : "btn btn-secondary"
                         }
-                        disabled={pending}
+                        disabled={busy}
                         onClick={() =>
                           run(async () => {
                             await actionUpdateQaPhase(
@@ -362,7 +389,7 @@ export function TestLabClient({
             <button
               type="button"
               className="btn btn-secondary mt-3"
-              disabled={pending}
+              disabled={busy}
               onClick={() =>
                 run(async () => {
                   const preview = await actionPreviewQaCleanup(
@@ -398,7 +425,7 @@ export function TestLabClient({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={pending}
+                  disabled={busy}
                   onClick={() =>
                     run(async () => {
                       await actionCleanupQaData(

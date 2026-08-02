@@ -3,9 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
-import { saveAnswer } from "@/lib/services/answers";
+import { saveAnswer, saveAnswersBatch } from "@/lib/services/answers";
 import { readStore, updateStore } from "@/lib/db/store";
-import { logStoreError, publicRemoteStoreMessage } from "@/lib/db/store-errors";
+import {
+  logStoreError,
+  publicRemoteStoreMessage,
+  RemoteStoreError,
+} from "@/lib/db/store-errors";
 import type { SaveAnswerInput } from "@/lib/validation/schemas";
 import {
   buildSuggestedChecklistTasks,
@@ -31,14 +35,78 @@ function revalidateEssentials() {
 }
 
 export async function actionSaveEssentialsAnswer(input: SaveAnswerInput) {
+  const started = Date.now();
   await requireIdentity();
   try {
     await saveAnswer(input);
-    revalidateEssentials();
+    // Light revalidation — skip dashboard/history churn on every answer write.
+    revalidatePath("/questions/before-birth");
+    console.info("[save_timing]", {
+      operation: "actionSaveEssentialsAnswer",
+      questionId: input.question_id,
+      durationMs: Date.now() - started,
+      result: "success",
+      retryCount: 0,
+      conflict: false,
+      stage: "server_action",
+    });
     return { ok: true as const };
   } catch (error) {
     logStoreError("essentials_save", error);
-    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+    const conflict =
+      error instanceof RemoteStoreError && error.code === "version_conflict";
+    console.info("[save_timing]", {
+      operation: "actionSaveEssentialsAnswer",
+      questionId: input.question_id,
+      durationMs: Date.now() - started,
+      result: conflict ? "conflict" : "failed",
+      retryCount: 0,
+      conflict,
+      stage: "server_action",
+    });
+    return {
+      ok: false as const,
+      error: publicRemoteStoreMessage(error),
+      code: conflict ? ("version_conflict" as const) : ("failed" as const),
+    };
+  }
+}
+
+export async function actionSaveEssentialsAnswersBatch(input: {
+  answers: SaveAnswerInput[];
+  mutationId?: string;
+}) {
+  const started = Date.now();
+  await requireIdentity();
+  try {
+    await saveAnswersBatch(input.answers, undefined, input.mutationId);
+    revalidatePath("/questions/before-birth");
+    console.info("[save_timing]", {
+      operation: "actionSaveEssentialsAnswersBatch",
+      questionId: input.answers[0]?.question_id ?? null,
+      durationMs: Date.now() - started,
+      result: "success",
+      retryCount: 0,
+      conflict: false,
+      stage: "server_action",
+    });
+    return { ok: true as const };
+  } catch (error) {
+    logStoreError("essentials_save_batch", error);
+    const conflict =
+      error instanceof RemoteStoreError && error.code === "version_conflict";
+    console.info("[save_timing]", {
+      operation: "actionSaveEssentialsAnswersBatch",
+      questionId: input.answers[0]?.question_id ?? null,
+      durationMs: Date.now() - started,
+      result: conflict ? "conflict" : "failed",
+      retryCount: 0,
+      conflict,
+      stage: "server_action",
+    });
+    const err = new Error(publicRemoteStoreMessage(error));
+    if (conflict) (err as Error & { code: string }).code = "version_conflict";
+    throw err;
   }
 }
 

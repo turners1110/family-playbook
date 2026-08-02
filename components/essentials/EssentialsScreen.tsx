@@ -1,13 +1,21 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import type { Answer, FamilyMember, Question } from "@/lib/types/models";
 import type { EssentialsScreenDef } from "@/lib/essentials/pathway";
-import { actionSaveEssentialsAnswer } from "@/lib/actions/essentials";
+import { actionSaveEssentialsAnswersBatch } from "@/lib/actions/essentials";
 import type { DecisionStatus } from "@/lib/constants/enums";
+import type { SaveAnswerInput } from "@/lib/validation/schemas";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import {
+  PendingNavigationGuard,
+  RetrySavePanel,
+  SaveButton,
+  SlowSaveNotice,
+} from "@/components/ui/save-feedback";
 
 type SaveMode =
   | "continue"
@@ -41,9 +49,10 @@ export function EssentialsScreenView({
   sessionMode?: boolean;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const saveFb = useSaveFeedback();
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const pending = saveFb.isBusy;
 
   const sam = members.find((m) => m.display_name === "Sam");
   const michelle = members.find((m) => m.display_name === "Michelle");
@@ -163,128 +172,130 @@ export function EssentialsScreenView({
     return { notes: notesValue, text: sharedText };
   }
 
-  function save(mode: SaveMode) {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      const status = statusFor(mode);
-      const needs_research = mode === "needs_research";
+  function buildWrites(mode: SaveMode): SaveAnswerInput[] {
+    const status = statusFor(mode);
+    const needs_research = mode === "needs_research";
+    const writes: SaveAnswerInput[] = [];
 
-      if (screen.separate_answers || screen.response_type === "separate_then_shared") {
-        if (sam?.id && samText.trim()) {
-          const r = await actionSaveEssentialsAnswer({
-            question_id: screen.question_id,
-            member_id: sam.id,
-            is_shared: false,
-            payload: { text: samText, notes: notes || undefined },
-            status,
-            confidence: 3,
-            needs_research,
-            change_reason: "Essentials separate answer",
-          });
-          if (!r.ok) {
-            setError(r.error);
-            return;
-          }
-        }
-        if (michelle?.id && michelleText.trim()) {
-          const r = await actionSaveEssentialsAnswer({
-            question_id: screen.question_id,
-            member_id: michelle.id,
-            is_shared: false,
-            payload: { text: michelleText, notes: notes || undefined },
-            status,
-            confidence: 3,
-            needs_research,
-            change_reason: "Essentials separate answer",
-          });
-          if (!r.ok) {
-            setError(r.error);
-            return;
-          }
-        }
+    if (screen.separate_answers || screen.response_type === "separate_then_shared") {
+      if (sam?.id && samText.trim()) {
+        writes.push({
+          question_id: screen.question_id,
+          member_id: sam.id,
+          is_shared: false,
+          payload: { text: samText, notes: notes || undefined },
+          status,
+          confidence: 3,
+          needs_research,
+          change_reason: "Essentials separate answer",
+        });
       }
+      if (michelle?.id && michelleText.trim()) {
+        writes.push({
+          question_id: screen.question_id,
+          member_id: michelle.id,
+          is_shared: false,
+          payload: { text: michelleText, notes: notes || undefined },
+          status,
+          confidence: 3,
+          needs_research,
+          change_reason: "Essentials separate answer",
+        });
+      }
+    }
 
-      if (screen.response_type === "paired_text" && pairedQuestions[0]) {
-        const pairedId = pairedQuestions[0].id;
+    if (screen.response_type === "paired_text" && pairedQuestions[0]) {
+      const pairedId = pairedQuestions[0].id;
+      if (sam?.id) {
+        writes.push({
+          question_id: pairedId,
+          member_id: sam.id,
+          is_shared: false,
+          payload: { text: pairedSam },
+          status,
+          confidence: 3,
+          change_reason: "Essentials paired answer",
+        });
+      }
+      if (michelle?.id) {
+        writes.push({
+          question_id: pairedId,
+          member_id: michelle.id,
+          is_shared: false,
+          payload: { text: pairedMichelle },
+          status,
+          confidence: 3,
+          change_reason: "Essentials paired answer",
+        });
+      }
+      if (screen.id === "f3_childhood") {
         if (sam?.id) {
-          await actionSaveEssentialsAnswer({
-            question_id: pairedId,
+          writes.push({
+            question_id: screen.question_id,
             member_id: sam.id,
             is_shared: false,
-            payload: { text: pairedSam },
+            payload: { text: samText },
             status,
             confidence: 3,
-            change_reason: "Essentials paired answer",
+            change_reason: "Essentials childhood repeat",
           });
         }
         if (michelle?.id) {
-          await actionSaveEssentialsAnswer({
-            question_id: pairedId,
+          writes.push({
+            question_id: screen.question_id,
             member_id: michelle.id,
             is_shared: false,
-            payload: { text: pairedMichelle },
+            payload: { text: michelleText },
             status,
             confidence: 3,
-            change_reason: "Essentials paired answer",
+            change_reason: "Essentials childhood repeat",
           });
         }
-        // Also save primary question separate texts for "repeat"
-        if (screen.id === "f3_childhood") {
-          if (sam?.id) {
-            await actionSaveEssentialsAnswer({
-              question_id: screen.question_id,
-              member_id: sam.id,
-              is_shared: false,
-              payload: { text: samText },
-              status,
-              confidence: 3,
-              change_reason: "Essentials childhood repeat",
-            });
-          }
-          if (michelle?.id) {
-            await actionSaveEssentialsAnswer({
-              question_id: screen.question_id,
-              member_id: michelle.id,
-              is_shared: false,
-              payload: { text: michelleText },
-              status,
-              confidence: 3,
-              change_reason: "Essentials childhood repeat",
-            });
-          }
-        }
       }
+    }
 
-      const sharedResult = await actionSaveEssentialsAnswer({
-        question_id: screen.question_id,
-        member_id: null,
-        is_shared: true,
-        payload: buildSharedPayload(),
-        status,
-        confidence: 3,
-        needs_research,
-        change_reason: "Essentials shared answer",
-      });
-      if (!sharedResult.ok) {
-        setError(sharedResult.error);
-        return;
-      }
-
-      if (mode === "pause") {
-        setMessage("Saved. You can resume anytime.");
-        router.push("/questions/before-birth");
-        router.refresh();
-        return;
-      }
-      if (mode === "continue" && nextHref) {
-        router.push(nextHref);
-        router.refresh();
-        return;
-      }
-      setMessage("Saved.");
-      router.refresh();
+    writes.push({
+      question_id: screen.question_id,
+      member_id: null,
+      is_shared: true,
+      payload: buildSharedPayload(),
+      status,
+      confidence: 3,
+      needs_research,
+      change_reason: "Essentials shared answer",
     });
+    return writes;
+  }
+
+  function save(mode: SaveMode) {
+    setMessage(null);
+    void saveFb.runSave(
+      async () => {
+        await actionSaveEssentialsAnswersBatch({
+          answers: buildWrites(mode),
+          mutationId: saveFb.mutationId(),
+        });
+      },
+      {
+        operation: `essentials_${mode}`,
+        route: "/questions/before-birth",
+        questionId: screen.question_id,
+        advanceAfterSave: mode === "continue" && Boolean(nextHref),
+        onSuccess: async () => {
+          if (mode === "pause") {
+            setMessage("Saved. You can resume anytime.");
+            router.push("/questions/before-birth");
+            return;
+          }
+          if (mode === "continue" && nextHref) {
+            router.push(nextHref);
+            return;
+          }
+          setMessage("Saved.");
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -293,7 +304,11 @@ export function EssentialsScreenView({
         {moduleTitle} · {progressLabel}
       </div>
       <header className="space-y-2">
-        <h1 className="font-display text-2xl leading-snug text-ink sm:text-3xl">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="font-display text-2xl leading-snug text-ink outline-none sm:text-3xl"
+        >
           {screen.title}
         </h1>
         <p className="text-sm text-ink-muted">{screen.purpose}</p>
@@ -520,11 +535,18 @@ export function EssentialsScreenView({
       </p>
 
       {message ? <p className="text-sm text-accent-strong">{message}</p> : null}
-      {error ? (
-        <p className="text-sm text-danger" role="alert">
-          {error}
+      <div className="space-y-2">
+        <SlowSaveNotice tier={saveFb.slowTier} />
+        <RetrySavePanel
+          state={saveFb.state}
+          message={saveFb.statusMessage}
+          onRetry={() => void saveFb.retry()}
+          disabled={saveFb.isBusy}
+        />
+        <p className="sr-only" aria-live="polite">
+          {saveFb.statusMessage}
         </p>
-      ) : null}
+      </div>
 
       <div
         className={clsx(
@@ -533,21 +555,19 @@ export function EssentialsScreenView({
             "fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg/95 p-3 backdrop-blur",
         )}
       >
-        <button
-          type="button"
-          className="btn btn-primary min-h-12"
-          disabled={pending}
+        <SaveButton
+          state={saveFb.state}
+          idleLabel="Save and continue"
+          className="min-h-12"
           onClick={() => save("continue")}
-        >
-          Save and continue
-        </button>
+        />
         <button
           type="button"
           className="btn btn-secondary min-h-12"
           disabled={pending}
           onClick={() => save("pause")}
         >
-          Save and pause
+          {saveFb.state === "saving" ? "Saving…" : "Save and pause"}
         </button>
         <button
           type="button"
@@ -571,7 +591,7 @@ export function EssentialsScreenView({
           disabled={pending}
           onClick={() => save("needs_research")}
         >
-          Need outside information
+          Waiting for provider
         </button>
         <button
           type="button"
@@ -582,6 +602,12 @@ export function EssentialsScreenView({
           Waiting for spouse
         </button>
       </div>
+
+      <PendingNavigationGuard
+        open={saveFb.showLeaveGuard}
+        onStay={saveFb.confirmStay}
+        onLeave={saveFb.confirmLeave}
+      />
     </div>
   );
 }

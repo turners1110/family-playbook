@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { SuggestedTaskPreview } from "@/lib/essentials/task-suggestions";
 import { actionApplyEssentialsTaskSuggestions } from "@/lib/actions/essentials";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import {
+  RetrySavePanel,
+  SaveButton,
+  SlowSaveNotice,
+} from "@/components/ui/save-feedback";
 
 export function TaskSuggestionPreview({
   suggestions,
@@ -16,7 +22,7 @@ export function TaskSuggestionPreview({
     return next;
   });
   const [message, setMessage] = useState("");
-  const [pending, startTransition] = useTransition();
+  const save = useSaveFeedback();
 
   if (!suggestions.length) return null;
 
@@ -33,7 +39,7 @@ export function TaskSuggestionPreview({
               <input
                 type="checkbox"
                 className="mt-1"
-                disabled={s.already_present}
+                disabled={s.already_present || save.isBusy}
                 checked={s.already_present ? false : Boolean(selected[s.id])}
                 onChange={(e) =>
                   setSelected((prev) => ({ ...prev, [s.id]: e.target.checked }))
@@ -50,27 +56,45 @@ export function TaskSuggestionPreview({
           </li>
         ))}
       </ul>
+      <SlowSaveNotice tier={save.slowTier} />
+      <RetrySavePanel
+        state={save.state}
+        message={save.statusMessage}
+        onRetry={() => void save.retry()}
+        disabled={save.isBusy}
+      />
+      <p className="sr-only" aria-live="polite">
+        {save.statusMessage}
+      </p>
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={pending || open.every((s) => !selected[s.id])}
+        <SaveButton
+          state={save.state}
+          idleLabel="Add selected tasks"
+          disabled={open.every((s) => !selected[s.id])}
           onClick={() =>
-            startTransition(async () => {
-              const ids = Object.entries(selected)
-                .filter(([, on]) => on)
-                .map(([id]) => id);
-              const result = await actionApplyEssentialsTaskSuggestions(ids);
-              if (!result.ok) setMessage(result.error);
-              else setMessage(`Added ${result.added} task(s) to Before Baby.`);
-            })
+            void save.runSave(
+              async () => {
+                const ids = Object.entries(selected)
+                  .filter(([, on]) => on)
+                  .map(([id]) => id);
+                const result = await actionApplyEssentialsTaskSuggestions(ids);
+                if (!result.ok) {
+                  const err = new Error(result.error);
+                  throw err;
+                }
+                setMessage(`Added ${result.added} task(s) to Before Baby.`);
+              },
+              {
+                operation: "confirm_task_suggestions",
+                route: "/questions/before-birth",
+              },
+            )
           }
-        >
-          Add selected tasks
-        </button>
+        />
         <button
           type="button"
           className="btn btn-ghost"
+          disabled={save.isBusy}
           onClick={() => setSelected({})}
         >
           Skip tasks
