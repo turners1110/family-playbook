@@ -548,6 +548,7 @@ async function main() {
     conversation_session_items: [],
     conversation_quick_answers: [],
     conversation_differences: [],
+    qa_runs: [],
   };
 
   // Sample answers and decisions for demo realism

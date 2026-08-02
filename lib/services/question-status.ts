@@ -94,7 +94,11 @@ export function hasAnswerContent(payload: AnswerPayload | null | undefined): boo
 export function isTestQuestion(question: Question): boolean {
   if (!question.active) return true;
   const hay = `${question.id} ${question.slug}`.toLowerCase();
-  return /(^|[_-])test([_-]|$)/.test(hay) || hay.startsWith("q_test");
+  return (
+    /(^|[_-])test([_-]|$)/.test(hay) ||
+    hay.startsWith("q_test") ||
+    hay.startsWith("qa_")
+  );
 }
 
 export function isProgressEligibleQuestion(question: Question): boolean {

@@ -44,12 +44,14 @@ function answersEqual(
   return snapshotAnswer(a) === snapshotAnswer(b) && snapshotAnswer(a) !== "";
 }
 
-export async function listConversationSessions() {
+export async function listConversationSessions(options?: {
+  includeTestData?: boolean;
+}) {
   const store = await readStore();
   ensureCollections(store);
-  return [...(store.conversation_sessions ?? [])].sort((a, b) =>
-    b.started_at.localeCompare(a.started_at),
-  );
+  return [...(store.conversation_sessions ?? [])]
+    .filter((s) => options?.includeTestData || !s.is_test_data)
+    .sort((a, b) => b.started_at.localeCompare(a.started_at));
 }
 
 export async function getConversationSession(sessionId: string) {
@@ -199,6 +201,20 @@ export async function saveConversationQuickAnswer(input: {
   scale?: number | null;
   status?: ConversationItemStatus;
 }) {
+  if (input.shortText) {
+    const { validateShortTextLength } = await import("@/lib/qa/validation");
+    const preview = await readStore();
+    const itemPreview = preview.conversation_session_items?.find(
+      (i) => i.id === input.itemId,
+    );
+    if (itemPreview) {
+      const valid = validateShortTextLength(itemPreview.prompt_id, input.shortText);
+      if (!valid.ok) {
+        throw new Error(valid.message);
+      }
+    }
+  }
+
   const ts = nowIso();
   await updateStore(
     (store) => {
@@ -207,6 +223,18 @@ export async function saveConversationQuickAnswer(input: {
         (i) => i.id === input.itemId && i.session_id === input.sessionId,
       );
       if (!item) return store;
+      const session = store.conversation_sessions!.find(
+        (s) => s.id === input.sessionId,
+      );
+      const qaTags =
+        session?.is_test_data && session.test_run_id
+          ? {
+              is_test_data: true as const,
+              test_run_id: session.test_run_id,
+              test_case_id: item.test_case_id ?? null,
+              source: "qa_test_lab" as const,
+            }
+          : {};
 
       const existing = store.conversation_quick_answers!.find(
         (a) =>
@@ -224,6 +252,7 @@ export async function saveConversationQuickAnswer(input: {
         existing.scale =
           input.scale !== undefined ? input.scale : existing.scale;
         existing.updated_at = ts;
+        Object.assign(existing, qaTags);
       } else {
         store.conversation_quick_answers!.push({
           id: id("cqans"),
@@ -238,6 +267,7 @@ export async function saveConversationQuickAnswer(input: {
           scale: input.scale ?? null,
           created_at: ts,
           updated_at: ts,
+          ...qaTags,
         });
       }
 
@@ -297,13 +327,18 @@ export async function saveConversationQuickAnswer(input: {
             shared_answer_text: null,
             created_at: ts,
             updated_at: ts,
+            ...(session?.is_test_data && session.test_run_id
+              ? {
+                  is_test_data: true as const,
+                  test_run_id: session.test_run_id,
+                  test_case_id: item.test_case_id ?? null,
+                  source: "qa_test_lab" as const,
+                }
+              : {}),
           });
         }
       }
 
-      const session = store.conversation_sessions!.find(
-        (s) => s.id === input.sessionId,
-      );
       if (session) {
         session.updated_at = ts;
         const items = store.conversation_session_items!.filter(

@@ -28,9 +28,9 @@ export function buildConversationReviewMetrics(store: AppStore) {
   const withoutDeep = prompts.filter((p) => !p.follow_up_open_question_id).length;
   const deepWithoutCompanion = ESSENTIALS_COMPANIONS.length; // companions curated
 
-  const sessions = store.conversation_sessions ?? [];
-  const items = store.conversation_session_items ?? [];
-  const diffs = store.conversation_differences ?? [];
+  const sessions = (store.conversation_sessions ?? []).filter((s) => !s.is_test_data);
+  const items = (store.conversation_session_items ?? []).filter((i) => !i.is_test_data);
+  const diffs = (store.conversation_differences ?? []).filter((d) => !d.is_test_data);
 
   const avgActive =
     sessions.length === 0

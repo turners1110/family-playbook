@@ -182,6 +182,10 @@ export interface Answer {
   version: number;
   created_at: string;
   updated_at: string;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export interface AnswerVersion {
@@ -556,6 +560,10 @@ export interface ChecklistTask {
   milestone_id?: string | null;
   /** House-reset style nested checklist steps (title only). */
   subtasks?: Array<{ id: string; title: string; completed: boolean }>;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export type ConversationEnergy = "light" | "medium" | "deep" | "planning";
@@ -566,7 +574,17 @@ export type ConversationModeId =
   | "airport"
   | "deep_dive"
   | "first_month"
-  | "random_mix";
+  | "random_mix"
+  | "qa_integrity";
+
+/** Shared metadata for clearly labeled, removable QA records. */
+export type QaRecordMeta = {
+  is_test_data: true;
+  test_run_id: string;
+  test_case_id: string | null;
+  created_by: string;
+  source: "qa_test_lab";
+};
 export type ConversationItemType =
   | "quick_pick"
   | "either_or"
@@ -613,6 +631,10 @@ export interface ConversationSession {
   summary: ConversationSessionSummary | null;
   created_at: string;
   updated_at: string;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export interface ConversationSessionItem {
@@ -633,6 +655,10 @@ export interface ConversationSessionItem {
   branch_context: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export interface ConversationQuickAnswer {
@@ -648,6 +674,10 @@ export interface ConversationQuickAnswer {
   scale: number | null;
   created_at: string;
   updated_at: string;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export interface ConversationDifference {
@@ -663,6 +693,10 @@ export interface ConversationDifference {
   shared_answer_text: string | null;
   created_at: string;
   updated_at: string;
+  is_test_data?: boolean;
+  test_run_id?: string | null;
+  test_case_id?: string | null;
+  source?: string | null;
 }
 
 export interface ConversationSessionSummary {
@@ -674,6 +708,51 @@ export interface ConversationSessionSummary {
   light_moment: string | null;
   trip_memory: string | null;
   notes: string | null;
+  confirmed_tasks?: string[];
+  kept_separate?: string[];
+  undecided?: string[];
+  waiting_provider?: string[];
+  quick_to_deep?: string[];
+  shared_answers?: string[];
+  matching_answers?: string[];
+}
+
+export type QaManualPhaseStatus = "not_tested" | "passed" | "failed";
+
+export interface QaManualPhase {
+  id: string;
+  title: string;
+  steps: string[];
+  expected: string;
+  status: QaManualPhaseStatus;
+  notes: string;
+}
+
+export interface QaRunRecord {
+  id: string;
+  test_run_id: string;
+  family_id: string;
+  session_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  completed_at: string | null;
+  is_test_data: true;
+  source: "qa_test_lab";
+  status: "active" | "paused" | "completed" | "cleaned";
+  manual_phases: QaManualPhase[];
+  integrity_last_run_at: string | null;
+  integrity_summary: {
+    pass: number;
+    fail: number;
+    warning: number;
+  } | null;
+  suggested_tasks: Array<{
+    id: string;
+    title: string;
+    confirmed: boolean;
+    checklist_task_id: string | null;
+  }>;
 }
 
 export interface AppStore {
@@ -709,6 +788,7 @@ export interface AppStore {
   conversation_session_items?: ConversationSessionItem[];
   conversation_quick_answers?: ConversationQuickAnswer[];
   conversation_differences?: ConversationDifference[];
+  qa_runs?: QaRunRecord[];
   current_user_id: string;
   demo_mode: boolean;
 }

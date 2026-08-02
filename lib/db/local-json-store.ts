@@ -49,8 +49,19 @@ export async function writeStore(store: AppStore): Promise<void> {
   writeQueue = writeQueue.then(async () => {
     await ensureDataDir();
     const tmp = `${STORE_PATH}.tmp`;
-    await fs.writeFile(tmp, JSON.stringify(store, null, 2), "utf8");
-    await fs.rename(tmp, STORE_PATH);
+    const payload = JSON.stringify(store, null, 2);
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      try {
+        await fs.writeFile(tmp, payload, "utf8");
+        await fs.rename(tmp, STORE_PATH);
+        return;
+      } catch (error) {
+        lastError = error;
+        await new Promise((r) => setTimeout(r, 20 * (attempt + 1)));
+      }
+    }
+    throw lastError;
   });
   await writeQueue;
 }

@@ -122,6 +122,18 @@ export const CONVERSATION_MODES: ConversationModeDef[] = [
     hide_future_stages: true,
     session_tag: "random_mix",
   },
+  {
+    id: "qa_integrity",
+    title: "QA Integrity Session",
+    description:
+      "Fixed test pack for storage integrity. Not shown in normal Conversation Modes.",
+    expected_minutes_label: "Test run",
+    default_planned_minutes: 45,
+    energy_mix: { lightning: 10, coffee: 4 },
+    topics: ["warm_up"],
+    hide_future_stages: true,
+    session_tag: "qa_integrity",
+  },
 ];
 
 export function getConversationMode(

@@ -105,7 +105,7 @@ export default async function ConversationsPage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-xl">Conversation Modes</h2>
-        {CONVERSATION_MODES.map((mode) => {
+        {CONVERSATION_MODES.filter((mode) => mode.id !== "qa_integrity").map((mode) => {
           const mix = Object.entries(mode.energy_mix)
             .filter(([, n]) => (n ?? 0) > 0)
             .map(

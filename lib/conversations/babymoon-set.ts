@@ -1,5 +1,6 @@
 import type { ConversationPromptDef } from "./response-types";
 import { getQuickPrompt } from "./quick-prompts";
+import { getQaQuestion } from "@/lib/qa/question-pack";
 
 export const BABYMOON_SET_TAG = "babymoon_set_v1";
 export const BABYMOON_SET_VERSION = "babymoon_set_v1";
@@ -298,7 +299,7 @@ rebuildIndex();
 export function resolveConversationPrompt(
   id: string,
 ): ConversationPromptDef | undefined {
-  return getQuickPrompt(id) ?? ALL_PROMPTS_BY_ID.get(id);
+  return getQaQuestion(id) ?? getQuickPrompt(id) ?? ALL_PROMPTS_BY_ID.get(id);
 }
 
 export function getBabymoonRound(round: 1 | 2 | 3): BabymoonRoundDef {
