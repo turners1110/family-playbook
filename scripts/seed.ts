@@ -544,6 +544,10 @@ async function main() {
     playbook_versions: [],
     checklist_instances: [],
     checklist_tasks: [],
+    conversation_sessions: [],
+    conversation_session_items: [],
+    conversation_quick_answers: [],
+    conversation_differences: [],
   };
 
   // Sample answers and decisions for demo realism

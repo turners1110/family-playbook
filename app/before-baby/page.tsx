@@ -14,9 +14,14 @@ export default async function BeforeBabyPage() {
       title="Before Baby"
       subtitle="Due-date timeline for hospital, home, gear, and paperwork prep."
       actions={
-        <Link href="/before-baby/plan" className="btn btn-ghost">
-          Plan
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/conversations" className="btn btn-ghost">
+            Discuss related decisions
+          </Link>
+          <Link href="/before-baby/plan" className="btn btn-ghost">
+            Plan
+          </Link>
+        </div>
       }
     >
       <BeforeBabyScheduler

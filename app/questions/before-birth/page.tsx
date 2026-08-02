@@ -45,9 +45,22 @@ export default async function BeforeBirthEssentialsPage() {
           <Link href="/questions" className="btn btn-ghost">
             Full library
           </Link>
+          <Link href="/conversations" className="btn btn-ghost">
+            Try Babymoon Mode
+          </Link>
         </div>
       }
     >
+      <section className="surface mb-5 space-y-3 p-5">
+        <p className="text-sm text-ink-muted">
+          Prefer a lighter warm-up first?{" "}
+          <Link href="/conversations" className="underline">
+            Start a Conversation Mode
+          </Link>{" "}
+          — quick prompts link back into these Essentials discussions.
+        </p>
+      </section>
+
       <section className="surface mb-5 space-y-3 p-5">
         <ProgressBar
           value={

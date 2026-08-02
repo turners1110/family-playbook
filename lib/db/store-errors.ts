@@ -1,4 +1,5 @@
 import type { AppStore } from "@/lib/types/models";
+import { ensureConversationQuestionOptions } from "@/lib/conversations/ensure-options";
 
 /**
  * Minimal structural validation for AppStore JSON.
@@ -39,6 +40,21 @@ export function assertValidAppStore(data: unknown): asserts data is AppStore {
   if (!Array.isArray(store.checklist_tasks)) {
     (store as { checklist_tasks: unknown[] }).checklist_tasks = [];
   }
+  if (!Array.isArray(store.conversation_sessions)) {
+    (store as { conversation_sessions: unknown[] }).conversation_sessions = [];
+  }
+  if (!Array.isArray(store.conversation_session_items)) {
+    (store as { conversation_session_items: unknown[] }).conversation_session_items =
+      [];
+  }
+  if (!Array.isArray(store.conversation_quick_answers)) {
+    (store as { conversation_quick_answers: unknown[] }).conversation_quick_answers =
+      [];
+  }
+  if (!Array.isArray(store.conversation_differences)) {
+    (store as { conversation_differences: unknown[] }).conversation_differences =
+      [];
+  }
 
   // Soft-normalize Before Baby scheduling settings on older stores.
   const settings = store.settings as Record<string, unknown>;
@@ -63,6 +79,11 @@ export function assertValidAppStore(data: unknown): asserts data is AppStore {
   }
   if (!("before_baby_avoid_travel_dates" in settings)) {
     settings.before_baby_avoid_travel_dates = [];
+  }
+
+  // Idempotent option backfill for known empty choice questions.
+  if (Array.isArray(store.questions) && Array.isArray(store.question_options)) {
+    ensureConversationQuestionOptions(store as unknown as AppStore);
   }
 }
 

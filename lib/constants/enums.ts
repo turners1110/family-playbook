@@ -266,6 +266,7 @@ export const BABYMOON_WEIGHT_CATEGORIES = [
 
 export const NAV_ITEMS = [
   { href: "/home", label: "Home" },
+  { href: "/conversations", label: "Conversations" },
   { href: "/questions/before-birth", label: "Essentials" },
   { href: "/before-baby", label: "Before Baby" },
   { href: "/discuss", label: "Discuss" },

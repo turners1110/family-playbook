@@ -103,6 +103,12 @@ export default async function QuestionsPage({
         <StatCard label="Needs review" value={progress.needsReview} />
       </div>
 
+      <div className="mb-4">
+        <Link href="/conversations" className="btn btn-secondary">
+          Start a related conversation
+        </Link>
+      </div>
+
       <div className="mb-4 flex flex-wrap gap-2">
         {STATUS_FILTERS.map((filter) => {
           const href = buildHref(params, { answer_status: filter.key === "all" ? undefined : filter.key });

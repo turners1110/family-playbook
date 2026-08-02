@@ -558,6 +558,124 @@ export interface ChecklistTask {
   subtasks?: Array<{ id: string; title: string; completed: boolean }>;
 }
 
+export type ConversationEnergy = "light" | "medium" | "deep" | "planning";
+export type ConversationModeId =
+  | "babymoon"
+  | "date_night"
+  | "morning_coffee"
+  | "airport"
+  | "deep_dive"
+  | "first_month"
+  | "random_mix";
+export type ConversationItemType =
+  | "quick_pick"
+  | "either_or"
+  | "short_text"
+  | "open_time_boxed"
+  | "reaction_scale"
+  | "deep_link";
+export type ConversationSessionStatus =
+  | "active"
+  | "paused"
+  | "completed"
+  | "abandoned";
+export type ConversationItemStatus =
+  | "pending"
+  | "opened"
+  | "answered_same"
+  | "answered_different"
+  | "shared_answer_saved"
+  | "undecided"
+  | "discuss_later"
+  | "skipped"
+  | "needs_follow_up";
+export type DifferenceResolution =
+  | "unreviewed"
+  | "shared_answer_created"
+  | "kept_separate"
+  | "discuss_later"
+  | "opened_deep";
+
+export interface ConversationSession {
+  id: string;
+  family_id: string;
+  mode: ConversationModeId;
+  title: string;
+  planned_minutes: number;
+  status: ConversationSessionStatus;
+  started_at: string;
+  paused_at: string | null;
+  completed_at: string | null;
+  active_seconds: number;
+  session_tag: string | null;
+  created_by: string;
+  current_item_index: number;
+  summary: ConversationSessionSummary | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationSessionItem {
+  id: string;
+  session_id: string;
+  /** Quick prompt id or deep question id. */
+  prompt_id: string;
+  source_question_id: string | null;
+  item_type: ConversationItemType;
+  display_order: number;
+  energy: ConversationEnergy;
+  estimated_time_seconds: number;
+  actual_time_seconds: number;
+  status: ConversationItemStatus;
+  opened_at: string | null;
+  answered_at: string | null;
+  paused_duration_seconds: number;
+  branch_context: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationQuickAnswer {
+  id: string;
+  family_id: string;
+  session_id: string;
+  session_item_id: string;
+  prompt_id: string;
+  actor: "sam" | "michelle" | "shared";
+  selected_options: string[];
+  short_text: string | null;
+  explanation: string | null;
+  scale: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationDifference {
+  id: string;
+  family_id: string;
+  session_id: string;
+  prompt_id: string;
+  sam_answer_snapshot: string;
+  michelle_answer_snapshot: string;
+  sam_reason: string | null;
+  michelle_reason: string | null;
+  resolution_status: DifferenceResolution;
+  shared_answer_text: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationSessionSummary {
+  agreed: string[];
+  differed: string[];
+  discuss_later: string[];
+  tasks_suggested: string[];
+  provider_questions: string[];
+  light_moment: string | null;
+  trip_memory: string | null;
+  notes: string | null;
+}
+
 export interface AppStore {
   family: Family;
   users: UserProfile[];
@@ -587,6 +705,10 @@ export interface AppStore {
   playbook_versions: PlaybookVersion[];
   checklist_instances: ChecklistInstance[];
   checklist_tasks: ChecklistTask[];
+  conversation_sessions?: ConversationSession[];
+  conversation_session_items?: ConversationSessionItem[];
+  conversation_quick_answers?: ConversationQuickAnswer[];
+  conversation_differences?: ConversationDifference[];
   current_user_id: string;
   demo_mode: boolean;
 }

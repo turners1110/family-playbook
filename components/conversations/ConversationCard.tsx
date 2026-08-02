@@ -1,0 +1,775 @@
+"use client";
+
+import { useEffect, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { clsx } from "clsx";
+import type {
+  ConversationDifference,
+  ConversationQuickAnswer,
+  ConversationSession,
+  ConversationSessionItem,
+  FamilyMember,
+} from "@/lib/types/models";
+import type { ConversationPromptDef } from "@/lib/conversations/response-types";
+import {
+  ENERGY_LABELS,
+  storeEnergyToLevel,
+} from "@/lib/conversations/response-types";
+import type { MomentumSuggestion } from "@/lib/conversations/momentum";
+import {
+  actionAdvanceConversation,
+  actionAppendMomentum,
+  actionCompleteConversation,
+  actionOpenConversationItem,
+  actionPauseConversation,
+  actionResolveDifference,
+  actionSaveConversationAnswer,
+  actionSkipConversationItem,
+} from "@/lib/actions/conversations";
+
+function answerSnapshot(a?: ConversationQuickAnswer | null): string {
+  if (!a) return "";
+  if (a.short_text) return a.short_text;
+  if (a.selected_options.length) return a.selected_options.join(", ");
+  if (a.scale != null) return String(a.scale);
+  return "";
+}
+
+export function ConversationCard({
+  session,
+  item,
+  prompt,
+  answers,
+  difference: _difference,
+  members,
+  itemIndex,
+  itemCount,
+  momentum,
+  modeTitle,
+}: {
+  session: ConversationSession;
+  item: ConversationSessionItem;
+  prompt: ConversationPromptDef;
+  answers: ConversationQuickAnswer[];
+  difference: ConversationDifference | null;
+  members: FamilyMember[];
+  itemIndex: number;
+  itemCount: number;
+  momentum: MomentumSuggestion[];
+  modeTitle: string;
+}) {
+  void _difference;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [showMomentum, setShowMomentum] = useState(false);
+
+  const samMember = members.find((m) => m.display_name === "Sam");
+  const michelleMember = members.find((m) => m.display_name === "Michelle");
+
+  const samAns = answers.find((a) => a.actor === "sam");
+  const michelleAns = answers.find((a) => a.actor === "michelle");
+
+  const [samChoices, setSamChoices] = useState<string[]>(
+    samAns?.selected_options ?? [],
+  );
+  const [michelleChoices, setMichelleChoices] = useState<string[]>(
+    michelleAns?.selected_options ?? [],
+  );
+  const [samText, setSamText] = useState(samAns?.short_text ?? "");
+  const [michelleText, setMichelleText] = useState(
+    michelleAns?.short_text ?? "",
+  );
+  const [samExplain, setSamExplain] = useState(samAns?.explanation ?? "");
+  const [michelleExplain, setMichelleExplain] = useState(
+    michelleAns?.explanation ?? "",
+  );
+  const [samScale, setSamScale] = useState<number | null>(samAns?.scale ?? null);
+  const [michelleScale, setMichelleScale] = useState<number | null>(
+    michelleAns?.scale ?? null,
+  );
+  const [customSam, setCustomSam] = useState("");
+  const [customMichelle, setCustomMichelle] = useState("");
+  const [sharedText, setSharedText] = useState("");
+  const [keepGoing, setKeepGoing] = useState(false);
+
+  useEffect(() => {
+    startTransition(async () => {
+      await actionOpenConversationItem(session.id, item.id);
+    });
+  }, [item.id, session.id]);
+
+  const energyLabel = ENERGY_LABELS[storeEnergyToLevel(item.energy)];
+  const differs =
+    item.status === "answered_different" ||
+    (Boolean(answerSnapshot(samAns)) &&
+      Boolean(answerSnapshot(michelleAns)) &&
+      answerSnapshot(samAns) !== answerSnapshot(michelleAns));
+
+  const essentialsDeepHref = prompt.follow_up_open_question_id
+    ? `/questions/before-birth/deep/${prompt.follow_up_open_question_id}?fromSession=${session.id}&quick=${encodeURIComponent(prompt.id)}`
+    : null;
+
+  const progressPct = Math.round(((itemIndex + 1) / Math.max(itemCount, 1)) * 100);
+
+  function toggleChoice(
+    actor: "sam" | "michelle",
+    value: string,
+    multi: boolean,
+  ) {
+    const setter = actor === "sam" ? setSamChoices : setMichelleChoices;
+    setter((prev) => {
+      if (multi) {
+        return prev.includes(value)
+          ? prev.filter((v) => v !== value)
+          : [...prev, value];
+      }
+      return [value];
+    });
+  }
+
+  function run(fn: () => Promise<unknown>, then?: () => void) {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await fn();
+        then?.();
+        router.refresh();
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+      }
+    });
+  }
+
+  function saveActor(actor: "sam" | "michelle") {
+    const choices = actor === "sam" ? samChoices : michelleChoices;
+    const custom = actor === "sam" ? customSam : customMichelle;
+    const text = actor === "sam" ? samText : michelleText;
+    const explain = actor === "sam" ? samExplain : michelleExplain;
+    const scale = actor === "sam" ? samScale : michelleScale;
+    const selected =
+      prompt.allow_custom_answer && custom.trim()
+        ? [...choices, custom.trim()]
+        : choices;
+
+    run(() =>
+      actionSaveConversationAnswer({
+        sessionId: session.id,
+        itemId: item.id,
+        actor,
+        selectedOptions:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? []
+            : selected,
+        shortText:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? text
+            : prompt.response_type === "either_or" &&
+                prompt.short_text_max_length
+              ? explain
+              : null,
+        explanation: explain || null,
+        scale: prompt.response_type === "reaction_scale" ? scale : null,
+      }),
+    );
+  }
+
+  function saveAndNext() {
+    run(async () => {
+      await actionSaveConversationAnswer({
+        sessionId: session.id,
+        itemId: item.id,
+        actor: "sam",
+        selectedOptions:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? []
+            : prompt.allow_custom_answer && customSam.trim()
+              ? [...samChoices, customSam.trim()]
+              : samChoices,
+        shortText:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? samText
+            : null,
+        explanation: samExplain || null,
+        scale: prompt.response_type === "reaction_scale" ? samScale : null,
+      });
+      await actionSaveConversationAnswer({
+        sessionId: session.id,
+        itemId: item.id,
+        actor: "michelle",
+        selectedOptions:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? []
+            : prompt.allow_custom_answer && customMichelle.trim()
+              ? [...michelleChoices, customMichelle.trim()]
+              : michelleChoices,
+        shortText:
+          prompt.response_type === "short_text" ||
+          prompt.response_type === "open_time_boxed"
+            ? michelleText
+            : null,
+        explanation: michelleExplain || null,
+        scale: prompt.response_type === "reaction_scale" ? michelleScale : null,
+      });
+      if (itemIndex >= itemCount - 1) {
+        setShowMomentum(true);
+      } else {
+        await actionAdvanceConversation(session.id, "next");
+      }
+    });
+  }
+
+  const scalePoints = useMemo(() => {
+    const min = prompt.scale_min ?? 1;
+    const max = prompt.scale_max ?? 5;
+    return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+  }, [prompt.scale_max, prompt.scale_min]);
+
+  return (
+    <div className="mx-auto w-full max-w-lg overflow-x-hidden px-3 pb-28 pt-3">
+      <header className="mb-4">
+        <div className="flex items-center justify-between gap-2 text-xs text-ink-muted">
+          <span>{modeTitle}</span>
+          <span>{energyLabel}</span>
+        </div>
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-bg-muted">
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-300"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <p className="mt-2 text-sm text-ink-muted">
+          {itemIndex + 1} of {itemCount}
+        </p>
+      </header>
+
+      <article
+        className="surface animate-[fadeUp_280ms_ease-out] p-5"
+        key={item.id}
+      >
+        <h1 className="font-display text-2xl leading-snug text-ink">
+          {prompt.prompt}
+        </h1>
+        {prompt.suggested_discussion_minutes ? (
+          <p className="mt-2 text-sm text-ink-muted">
+            Suggested discussion: about {prompt.suggested_discussion_minutes}{" "}
+            minutes. No timer — wrap up when you are ready.
+          </p>
+        ) : null}
+
+        <div className="mt-6 space-y-6">
+          <ParentBlock
+            name="Sam"
+            memberHint={samMember?.display_name}
+            prompt={prompt}
+            choices={samChoices}
+            text={samText}
+            explain={samExplain}
+            scale={samScale}
+            custom={customSam}
+            scalePoints={scalePoints}
+            onToggle={(v) =>
+              toggleChoice("sam", v, prompt.allow_multiple_selections)
+            }
+            onText={setSamText}
+            onExplain={setSamExplain}
+            onScale={setSamScale}
+            onCustom={setCustomSam}
+            onSave={() => saveActor("sam")}
+            pending={pending}
+          />
+          <ParentBlock
+            name="Michelle"
+            memberHint={michelleMember?.display_name}
+            prompt={prompt}
+            choices={michelleChoices}
+            text={michelleText}
+            explain={michelleExplain}
+            scale={michelleScale}
+            custom={customMichelle}
+            scalePoints={scalePoints}
+            onToggle={(v) =>
+              toggleChoice("michelle", v, prompt.allow_multiple_selections)
+            }
+            onText={setMichelleText}
+            onExplain={setMichelleExplain}
+            onScale={setMichelleScale}
+            onCustom={setCustomMichelle}
+            onSave={() => saveActor("michelle")}
+            pending={pending}
+          />
+        </div>
+
+        {prompt.response_type === "either_or" ||
+        prompt.response_type === "quick_pick" ? (
+          <div className="mt-4">
+            <label className="text-sm text-ink-muted">
+              Optional short explanation
+            </label>
+            <textarea
+              className="mt-1 w-full rounded-xl border border-border bg-bg-elevated p-3 text-base"
+              rows={2}
+              value={samExplain}
+              onChange={(e) => setSamExplain(e.target.value)}
+              placeholder="What matters most behind your answer?"
+            />
+          </div>
+        ) : null}
+
+        {prompt.response_type === "open_time_boxed" ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending}
+              onClick={() => setKeepGoing(true)}
+            >
+              Keep going
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending}
+              onClick={saveAndNext}
+            >
+              Wrap up
+            </button>
+            {keepGoing ? (
+              <p className="w-full text-sm text-ink-muted">
+                Take the time you need. Save when you are ready.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {differs ? (
+          <DifferencePanel
+            sam={answerSnapshot(samAns) || samChoices.join(", ") || samText}
+            michelle={
+              answerSnapshot(michelleAns) ||
+              michelleChoices.join(", ") ||
+              michelleText
+            }
+            samReason={samExplain}
+            michelleReason={michelleExplain}
+            onSamReason={setSamExplain}
+            onMichelleReason={setMichelleExplain}
+            sharedText={sharedText}
+            onSharedText={setSharedText}
+            pending={pending}
+            onResolve={(resolution) =>
+              run(() =>
+                actionResolveDifference({
+                  sessionId: session.id,
+                  promptId: prompt.id,
+                  resolution,
+                  samReason: samExplain || null,
+                  michelleReason: michelleExplain || null,
+                  sharedAnswerText:
+                    resolution === "shared_answer_created"
+                      ? sharedText || null
+                      : null,
+                }),
+              )
+            }
+            deepHref={essentialsDeepHref}
+          />
+        ) : null}
+
+        {essentialsDeepHref ? (
+          <div className="mt-5 rounded-xl bg-accent-soft/60 p-4">
+            <p className="text-sm font-medium text-ink">Talk more about this</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Your quick answers stay as context when you open the deeper
+              discussion.
+            </p>
+            <Link href={essentialsDeepHref} className="btn btn-secondary mt-3">
+              Open deeper question
+            </Link>
+          </div>
+        ) : null}
+
+        {error ? (
+          <p className="mt-3 text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </article>
+
+      {showMomentum || itemIndex >= itemCount - 1 ? (
+        <section className="surface mt-4 p-5">
+          <h2 className="font-display text-xl">You&apos;re on a roll</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Continue this topic, switch topics, or wrap up.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {momentum.map((m) => (
+              <li key={m.prompt_id}>
+                <button
+                  type="button"
+                  className="btn btn-secondary w-full justify-start text-left"
+                  disabled={pending}
+                  onClick={() =>
+                    run(async () => {
+                      await actionAppendMomentum(session.id, m.prompt_id);
+                      setShowMomentum(false);
+                    })
+                  }
+                >
+                  <span>
+                    <span className="block font-medium">{m.label}</span>
+                    <span className="block text-xs text-ink-muted">
+                      {m.reason}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={pending}
+              onClick={() =>
+                run(async () => {
+                  await actionCompleteConversation(session.id);
+                  router.push(`/conversations/session/${session.id}/summary`);
+                })
+              }
+            >
+              Wrap up session
+            </button>
+            {itemIndex < itemCount - 1 ? (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={pending}
+                onClick={() =>
+                  run(() => actionAdvanceConversation(session.id, "next"))
+                }
+              >
+                Continue session
+              </button>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg-elevated/95 px-3 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-lg flex-wrap gap-2">
+          <button
+            type="button"
+            className="btn btn-secondary min-h-11 flex-1"
+            disabled={pending || itemIndex === 0}
+            onClick={() =>
+              run(() => actionAdvanceConversation(session.id, "back"))
+            }
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary min-h-11"
+            disabled={pending}
+            onClick={() =>
+              run(() =>
+                actionSkipConversationItem(session.id, item.id, "skipped"),
+              )
+            }
+          >
+            Skip
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary min-h-11"
+            disabled={pending}
+            onClick={() =>
+              run(() =>
+                actionSkipConversationItem(
+                  session.id,
+                  item.id,
+                  "discuss_later",
+                ),
+              )
+            }
+          >
+            Later
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary min-h-11"
+            disabled={pending}
+            onClick={() =>
+              run(() => actionPauseConversation(session.id), () =>
+                router.push("/conversations"),
+              )
+            }
+          >
+            Pause
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary min-h-11 flex-[1.4]"
+            disabled={pending}
+            onClick={saveAndNext}
+          >
+            Save and next
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ParentBlock({
+  name,
+  prompt,
+  choices,
+  text,
+  explain,
+  scale,
+  custom,
+  scalePoints,
+  onToggle,
+  onText,
+  onExplain,
+  onScale,
+  onCustom,
+  onSave,
+  pending,
+}: {
+  name: string;
+  memberHint?: string;
+  prompt: ConversationPromptDef;
+  choices: string[];
+  text: string;
+  explain: string;
+  scale: number | null;
+  custom: string;
+  scalePoints: number[];
+  onToggle: (v: string) => void;
+  onText: (v: string) => void;
+  onExplain: (v: string) => void;
+  onScale: (v: number) => void;
+  onCustom: (v: string) => void;
+  onSave: () => void;
+  pending: boolean;
+}) {
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="text-sm font-semibold tracking-wide text-ink-muted uppercase">
+          {name}
+        </h2>
+        <button
+          type="button"
+          className="text-sm text-accent underline"
+          disabled={pending}
+          onClick={onSave}
+        >
+          Save {name}
+        </button>
+      </div>
+
+      {(prompt.response_type === "quick_pick" ||
+        prompt.response_type === "either_or") && (
+        <div className="flex flex-col gap-2">
+          {prompt.answer_options.map((opt) => {
+            const selected = choices.includes(opt.value);
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onToggle(opt.value)}
+                className={clsx(
+                  "min-h-12 w-full rounded-xl border px-4 py-3 text-left text-base transition-colors",
+                  selected
+                    ? "border-accent bg-accent-soft text-ink"
+                    : "border-border bg-bg-elevated text-ink",
+                )}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+          {prompt.allow_custom_answer ? (
+            <input
+              className="min-h-12 w-full rounded-xl border border-border bg-bg-elevated px-4 text-base"
+              placeholder="Custom answer"
+              value={custom}
+              onChange={(e) => onCustom(e.target.value)}
+            />
+          ) : null}
+        </div>
+      )}
+
+      {(prompt.response_type === "short_text" ||
+        prompt.response_type === "open_time_boxed") && (
+        <textarea
+          className="min-h-20 w-full rounded-xl border border-border bg-bg-elevated p-3 text-base"
+          rows={prompt.response_type === "open_time_boxed" ? 4 : 2}
+          maxLength={prompt.short_text_max_length ?? undefined}
+          value={text}
+          onChange={(e) => onText(e.target.value)}
+          placeholder="Your answer"
+        />
+      )}
+
+      {prompt.response_type === "reaction_scale" && (
+        <div>
+          <div className="mb-2 flex justify-between text-xs text-ink-muted">
+            <span>{prompt.scale_low_label}</span>
+            <span>{prompt.scale_high_label}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {scalePoints.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => onScale(n)}
+                className={clsx(
+                  "min-h-12 min-w-12 rounded-xl border text-base",
+                  scale === n
+                    ? "border-accent bg-accent-soft"
+                    : "border-border bg-bg-elevated",
+                )}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+          <textarea
+            className="mt-2 w-full rounded-xl border border-border bg-bg-elevated p-3 text-base"
+            rows={2}
+            value={explain}
+            onChange={(e) => onExplain(e.target.value)}
+            placeholder="Optional explanation"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DifferencePanel({
+  sam,
+  michelle,
+  samReason,
+  michelleReason,
+  onSamReason,
+  onMichelleReason,
+  sharedText,
+  onSharedText,
+  onResolve,
+  pending,
+  deepHref,
+}: {
+  sam: string;
+  michelle: string;
+  samReason: string;
+  michelleReason: string;
+  onSamReason: (v: string) => void;
+  onMichelleReason: (v: string) => void;
+  sharedText: string;
+  onSharedText: (v: string) => void;
+  onResolve: (
+    r:
+      | "shared_answer_created"
+      | "kept_separate"
+      | "discuss_later"
+      | "opened_deep",
+  ) => void;
+  pending: boolean;
+  deepHref: string | null;
+}) {
+  return (
+    <section className="mt-6 rounded-xl border border-border bg-info-soft/40 p-4">
+      <h3 className="font-display text-lg">You answered differently</h3>
+      <div className="mt-3 space-y-2 text-sm">
+        <p>
+          <span className="font-medium">Sam selected:</span> {sam || "—"}
+        </p>
+        <p>
+          <span className="font-medium">Michelle selected:</span>{" "}
+          {michelle || "—"}
+        </p>
+      </div>
+      <p className="mt-3 text-sm text-ink-muted">
+        What matters most behind your answer?
+      </p>
+      <label className="mt-2 block text-xs text-ink-muted">Sam</label>
+      <textarea
+        className="mt-1 w-full rounded-xl border border-border bg-bg-elevated p-3 text-base"
+        rows={2}
+        value={samReason}
+        onChange={(e) => onSamReason(e.target.value)}
+      />
+      <label className="mt-2 block text-xs text-ink-muted">Michelle</label>
+      <textarea
+        className="mt-1 w-full rounded-xl border border-border bg-bg-elevated p-3 text-base"
+        rows={2}
+        value={michelleReason}
+        onChange={(e) => onMichelleReason(e.target.value)}
+      />
+      <label className="mt-3 block text-xs text-ink-muted">
+        Optional shared answer
+      </label>
+      <input
+        className="mt-1 w-full rounded-xl border border-border bg-bg-elevated px-3 py-3 text-base"
+        value={sharedText}
+        onChange={(e) => onSharedText(e.target.value)}
+        placeholder="Only if you want one shared note"
+      />
+      <div className="mt-3 flex flex-col gap-2">
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11"
+          disabled={pending || !sharedText.trim()}
+          onClick={() => onResolve("shared_answer_created")}
+        >
+          Create shared answer
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11"
+          disabled={pending}
+          onClick={() => onResolve("kept_separate")}
+        >
+          Keep both answers
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11"
+          disabled={pending}
+          onClick={() => onResolve("discuss_later")}
+        >
+          Discuss later
+        </button>
+        {deepHref ? (
+          <Link
+            href={deepHref}
+            className="btn btn-secondary min-h-11"
+            onClick={() => onResolve("opened_deep")}
+          >
+            Open deeper question
+          </Link>
+        ) : null}
+        <button
+          type="button"
+          className="btn btn-secondary min-h-11"
+          disabled={pending}
+          onClick={() => onResolve("discuss_later")}
+        >
+          Add to review list
+        </button>
+      </div>
+    </section>
+  );
+}

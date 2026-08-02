@@ -33,6 +33,7 @@ export const contentReviewPackageSchema = z.object({
       pre_birth_coverage: z.array(z.record(z.string(), z.unknown())),
     })
     .nullable(),
+  conversation_metrics: z.record(z.string(), z.unknown()).optional(),
   family_answers: z
     .object({
       mode: z.enum(["excluded", "statuses_only", "full"]),

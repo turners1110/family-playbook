@@ -1214,6 +1214,14 @@ export function getEssentialsScreen(screenId: string) {
   return ESSENTIALS_SCREENS.find((s) => s.id === screenId) ?? null;
 }
 
+export function getEssentialsScreenByQuestionId(questionId: string) {
+  return (
+    ESSENTIALS_SCREENS.find((s) => s.question_id === questionId) ??
+    ESSENTIALS_SCREENS.find((s) => s.paired_question_ids?.includes(questionId)) ??
+    null
+  );
+}
+
 export function listPrimaryScreens() {
   return ESSENTIALS_SCREENS.filter((s) => s.is_primary).sort(
     (a, b) => a.display_order - b.display_order,

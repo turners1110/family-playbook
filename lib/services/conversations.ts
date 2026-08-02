@@ -1,0 +1,619 @@
+import { id, nowIso, readStore, updateStore } from "@/lib/db/store";
+import type {
+  AppStore,
+  ConversationItemStatus,
+  ConversationModeId,
+  ConversationQuickAnswer,
+  ConversationSession,
+  ConversationSessionItem,
+  ConversationSessionSummary,
+  DifferenceResolution,
+} from "@/lib/types/models";
+import {
+  buildConversationSession,
+  describeEnergyMix,
+  type SessionBuilderInput,
+} from "@/lib/conversations/session-builder";
+import { getConversationMode } from "@/lib/conversations/modes";
+import { getBabymoonRound } from "@/lib/conversations/babymoon-set";
+import { promptForItem } from "@/lib/conversations/session-builder";
+import { buildSessionSummary } from "@/lib/conversations/summary";
+import { measureActiveSeconds } from "@/lib/conversations/timing";
+import { ensureConversationQuestionOptions } from "@/lib/conversations/ensure-options";
+
+function ensureCollections(store: AppStore) {
+  if (!store.conversation_sessions) store.conversation_sessions = [];
+  if (!store.conversation_session_items) store.conversation_session_items = [];
+  if (!store.conversation_quick_answers) store.conversation_quick_answers = [];
+  if (!store.conversation_differences) store.conversation_differences = [];
+  ensureConversationQuestionOptions(store);
+}
+
+function snapshotAnswer(a: ConversationQuickAnswer): string {
+  if (a.short_text) return a.short_text;
+  if (a.selected_options.length) return a.selected_options.join(", ");
+  if (a.scale != null) return String(a.scale);
+  return "";
+}
+
+function answersEqual(
+  a: ConversationQuickAnswer | undefined,
+  b: ConversationQuickAnswer | undefined,
+): boolean {
+  if (!a || !b) return false;
+  return snapshotAnswer(a) === snapshotAnswer(b) && snapshotAnswer(a) !== "";
+}
+
+export async function listConversationSessions() {
+  const store = await readStore();
+  ensureCollections(store);
+  return [...(store.conversation_sessions ?? [])].sort((a, b) =>
+    b.started_at.localeCompare(a.started_at),
+  );
+}
+
+export async function getConversationSession(sessionId: string) {
+  const store = await readStore();
+  ensureCollections(store);
+  const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+  if (!session) return null;
+  const items = store
+    .conversation_session_items!.filter((i) => i.session_id === sessionId)
+    .sort((a, b) => a.display_order - b.display_order);
+  const answers = store.conversation_quick_answers!.filter(
+    (a) => a.session_id === sessionId,
+  );
+  const differences = store.conversation_differences!.filter(
+    (d) => d.session_id === sessionId,
+  );
+  return { session, items, answers, differences, members: store.members };
+}
+
+export async function startConversationSession(input: {
+  mode: ConversationModeId;
+  plannedMinutes: number;
+  createdBy: string;
+  babymoonRound?: 1 | 2 | 3;
+  title?: string;
+  builder?: Partial<SessionBuilderInput>;
+}) {
+  const mode = getConversationMode(input.mode);
+  const builderInput: SessionBuilderInput = {
+    mode: input.mode,
+    plannedMinutes: input.plannedMinutes,
+    babymoonRound: input.babymoonRound,
+    avoidRecentlyAnswered: true,
+    ...input.builder,
+  };
+
+  // Load recent answers for avoidance.
+  const prior = await readStore();
+  ensureCollections(prior);
+  builderInput.recentlyAnsweredIds = (prior.conversation_quick_answers ?? [])
+    .slice(-80)
+    .map((a) => a.prompt_id);
+
+  const built = buildConversationSession(builderInput);
+  const ts = nowIso();
+  const sessionId = id("csess");
+
+  let title = input.title;
+  if (!title && input.babymoonRound) {
+    const round = getBabymoonRound(input.babymoonRound);
+    title = `Babymoon · ${round.title}`;
+  }
+  if (!title) title = `${mode.title} conversation`;
+
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const session: ConversationSession = {
+        id: sessionId,
+        family_id: store.family.id,
+        mode: input.mode,
+        title,
+        planned_minutes: input.plannedMinutes,
+        status: "active",
+        started_at: ts,
+        paused_at: null,
+        completed_at: null,
+        active_seconds: 0,
+        session_tag: input.babymoonRound
+          ? `babymoon_set_v1_round_${input.babymoonRound}`
+          : mode.session_tag,
+        created_by: input.createdBy,
+        current_item_index: 0,
+        summary: null,
+        created_at: ts,
+        updated_at: ts,
+      };
+      store.conversation_sessions!.push(session);
+
+      for (const item of built) {
+        const row: ConversationSessionItem = {
+          id: id("citem"),
+          session_id: sessionId,
+          prompt_id: item.prompt_id,
+          source_question_id: item.source_question_id,
+          item_type: item.item_type,
+          display_order: item.display_order,
+          energy: item.energy,
+          estimated_time_seconds: item.estimated_time_seconds,
+          actual_time_seconds: 0,
+          status: "pending",
+          opened_at: null,
+          answered_at: null,
+          paused_duration_seconds: 0,
+          branch_context: null,
+          created_at: ts,
+          updated_at: ts,
+        };
+        store.conversation_session_items!.push(row);
+      }
+      return store;
+    },
+    { operation: "startConversationSession" },
+  );
+
+  return {
+    sessionId,
+    energyMix: describeEnergyMix(built),
+    itemCount: built.length,
+  };
+}
+
+export async function openConversationItem(sessionId: string, itemId: string) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const item = store.conversation_session_items!.find(
+        (i) => i.id === itemId && i.session_id === sessionId,
+      );
+      if (!item) return store;
+      if (!item.opened_at) item.opened_at = ts;
+      if (item.status === "pending") item.status = "opened";
+      item.updated_at = ts;
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (session) {
+        session.current_item_index = item.display_order;
+        session.updated_at = ts;
+        if (session.status === "paused") {
+          session.status = "active";
+          session.paused_at = null;
+        }
+      }
+      return store;
+    },
+    { operation: "openConversationItem" },
+  );
+}
+
+export async function saveConversationQuickAnswer(input: {
+  sessionId: string;
+  itemId: string;
+  actor: "sam" | "michelle" | "shared";
+  selectedOptions?: string[];
+  shortText?: string | null;
+  explanation?: string | null;
+  scale?: number | null;
+  status?: ConversationItemStatus;
+}) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const item = store.conversation_session_items!.find(
+        (i) => i.id === input.itemId && i.session_id === input.sessionId,
+      );
+      if (!item) return store;
+
+      const existing = store.conversation_quick_answers!.find(
+        (a) =>
+          a.session_item_id === input.itemId && a.actor === input.actor,
+      );
+
+      if (existing) {
+        existing.selected_options = input.selectedOptions ?? existing.selected_options;
+        existing.short_text =
+          input.shortText !== undefined ? input.shortText : existing.short_text;
+        existing.explanation =
+          input.explanation !== undefined
+            ? input.explanation
+            : existing.explanation;
+        existing.scale =
+          input.scale !== undefined ? input.scale : existing.scale;
+        existing.updated_at = ts;
+      } else {
+        store.conversation_quick_answers!.push({
+          id: id("cqans"),
+          family_id: store.family.id,
+          session_id: input.sessionId,
+          session_item_id: input.itemId,
+          prompt_id: item.prompt_id,
+          actor: input.actor,
+          selected_options: input.selectedOptions ?? [],
+          short_text: input.shortText ?? null,
+          explanation: input.explanation ?? null,
+          scale: input.scale ?? null,
+          created_at: ts,
+          updated_at: ts,
+        });
+      }
+
+      const sam = store.conversation_quick_answers!.find(
+        (a) => a.session_item_id === input.itemId && a.actor === "sam",
+      );
+      const michelle = store.conversation_quick_answers!.find(
+        (a) => a.session_item_id === input.itemId && a.actor === "michelle",
+      );
+      const shared = store.conversation_quick_answers!.find(
+        (a) => a.session_item_id === input.itemId && a.actor === "shared",
+      );
+
+      let status: ConversationItemStatus =
+        input.status ?? item.status;
+      if (input.status) {
+        status = input.status;
+      } else if (shared && snapshotAnswer(shared)) {
+        status = "shared_answer_saved";
+      } else if (sam && michelle) {
+        status = answersEqual(sam, michelle)
+          ? "answered_same"
+          : "answered_different";
+      } else if (sam || michelle) {
+        status = "opened";
+      }
+
+      item.status = status;
+      item.answered_at = ts;
+      item.actual_time_seconds = measureActiveSeconds({
+        openedAt: item.opened_at,
+        answeredAt: ts,
+        pausedDurationSeconds: item.paused_duration_seconds,
+      });
+      item.updated_at = ts;
+
+      if (status === "answered_different" && sam && michelle) {
+        const existingDiff = store.conversation_differences!.find(
+          (d) =>
+            d.session_id === input.sessionId && d.prompt_id === item.prompt_id,
+        );
+        if (existingDiff) {
+          existingDiff.sam_answer_snapshot = snapshotAnswer(sam);
+          existingDiff.michelle_answer_snapshot = snapshotAnswer(michelle);
+          existingDiff.updated_at = ts;
+        } else {
+          store.conversation_differences!.push({
+            id: id("cdiff"),
+            family_id: store.family.id,
+            session_id: input.sessionId,
+            prompt_id: item.prompt_id,
+            sam_answer_snapshot: snapshotAnswer(sam),
+            michelle_answer_snapshot: snapshotAnswer(michelle),
+            sam_reason: sam.explanation,
+            michelle_reason: michelle.explanation,
+            resolution_status: "unreviewed",
+            shared_answer_text: null,
+            created_at: ts,
+            updated_at: ts,
+          });
+        }
+      }
+
+      const session = store.conversation_sessions!.find(
+        (s) => s.id === input.sessionId,
+      );
+      if (session) {
+        session.updated_at = ts;
+        const items = store.conversation_session_items!.filter(
+          (i) => i.session_id === input.sessionId,
+        );
+        session.active_seconds = items.reduce(
+          (sum, i) => sum + i.actual_time_seconds,
+          0,
+        );
+      }
+      return store;
+    },
+    { operation: "saveConversationQuickAnswer" },
+  );
+}
+
+export async function advanceConversationItem(
+  sessionId: string,
+  direction: "next" | "back" | "goto",
+  index?: number,
+) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (!session) return store;
+      const items = store
+        .conversation_session_items!.filter((i) => i.session_id === sessionId)
+        .sort((a, b) => a.display_order - b.display_order);
+      if (!items.length) return store;
+
+      let next = session.current_item_index;
+      if (direction === "next") next = Math.min(next + 1, items.length - 1);
+      if (direction === "back") next = Math.max(next - 1, 0);
+      if (direction === "goto" && typeof index === "number") {
+        next = Math.max(0, Math.min(index, items.length - 1));
+      }
+      session.current_item_index = next;
+      session.updated_at = ts;
+      return store;
+    },
+    { operation: "advanceConversationItem" },
+  );
+}
+
+export async function pauseConversationSession(sessionId: string) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (!session) return store;
+      session.status = "paused";
+      session.paused_at = ts;
+      session.updated_at = ts;
+      return store;
+    },
+    { operation: "pauseConversationSession" },
+  );
+}
+
+export async function skipConversationItem(
+  sessionId: string,
+  itemId: string,
+  status: "skipped" | "discuss_later" | "undecided",
+) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const item = store.conversation_session_items!.find(
+        (i) => i.id === itemId && i.session_id === sessionId,
+      );
+      if (!item) return store;
+      item.status = status;
+      item.answered_at = ts;
+      item.updated_at = ts;
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (session) {
+        const items = store
+          .conversation_session_items!.filter((i) => i.session_id === sessionId)
+          .sort((a, b) => a.display_order - b.display_order);
+        const idx = items.findIndex((i) => i.id === itemId);
+        if (idx >= 0 && idx < items.length - 1) {
+          session.current_item_index = idx + 1;
+        }
+        session.updated_at = ts;
+      }
+      return store;
+    },
+    { operation: "skipConversationItem" },
+  );
+}
+
+export async function resolveConversationDifference(input: {
+  sessionId: string;
+  promptId: string;
+  resolution: DifferenceResolution;
+  samReason?: string | null;
+  michelleReason?: string | null;
+  sharedAnswerText?: string | null;
+}) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const diff = store.conversation_differences!.find(
+        (d) =>
+          d.session_id === input.sessionId && d.prompt_id === input.promptId,
+      );
+      if (!diff) return store;
+      diff.resolution_status = input.resolution;
+      if (input.samReason !== undefined) diff.sam_reason = input.samReason;
+      if (input.michelleReason !== undefined) {
+        diff.michelle_reason = input.michelleReason;
+      }
+      if (input.sharedAnswerText !== undefined) {
+        diff.shared_answer_text = input.sharedAnswerText;
+      }
+      diff.updated_at = ts;
+
+      const item = store.conversation_session_items!.find(
+        (i) =>
+          i.session_id === input.sessionId && i.prompt_id === input.promptId,
+      );
+      if (item) {
+        if (input.resolution === "shared_answer_created") {
+          item.status = "shared_answer_saved";
+        } else if (input.resolution === "kept_separate") {
+          item.status = "answered_different";
+        } else if (input.resolution === "discuss_later") {
+          item.status = "discuss_later";
+        } else if (input.resolution === "opened_deep") {
+          item.status = "needs_follow_up";
+        }
+        item.updated_at = ts;
+      }
+
+      if (
+        input.resolution === "shared_answer_created" &&
+        input.sharedAnswerText
+      ) {
+        const existingShared = store.conversation_quick_answers!.find(
+          (a) =>
+            a.session_id === input.sessionId &&
+            a.prompt_id === input.promptId &&
+            a.actor === "shared",
+        );
+        if (existingShared) {
+          existingShared.short_text = input.sharedAnswerText;
+          existingShared.updated_at = ts;
+        } else if (item) {
+          store.conversation_quick_answers!.push({
+            id: id("cqans"),
+            family_id: store.family.id,
+            session_id: input.sessionId,
+            session_item_id: item.id,
+            prompt_id: input.promptId,
+            actor: "shared",
+            selected_options: [],
+            short_text: input.sharedAnswerText,
+            explanation: null,
+            scale: null,
+            created_at: ts,
+            updated_at: ts,
+          });
+        }
+      }
+      return store;
+    },
+    { operation: "resolveConversationDifference" },
+  );
+}
+
+export async function completeConversationSession(sessionId: string) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (!session) return store;
+      const items = store.conversation_session_items!.filter(
+        (i) => i.session_id === sessionId,
+      );
+      const answers = store.conversation_quick_answers!.filter(
+        (a) => a.session_id === sessionId,
+      );
+      const differences = store.conversation_differences!.filter(
+        (d) => d.session_id === sessionId,
+      );
+      session.summary = buildSessionSummary({
+        session,
+        items,
+        answers,
+        differences,
+      });
+      session.status = "completed";
+      session.completed_at = ts;
+      session.active_seconds = items.reduce(
+        (sum, i) => sum + i.actual_time_seconds,
+        0,
+      );
+      session.updated_at = ts;
+      return store;
+    },
+    { operation: "completeConversationSession" },
+  );
+}
+
+export async function updateConversationSummary(
+  sessionId: string,
+  summary: ConversationSessionSummary,
+) {
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (!session) return store;
+      session.summary = summary;
+      session.updated_at = ts;
+      return store;
+    },
+    { operation: "updateConversationSummary" },
+  );
+}
+
+export async function appendMomentumPrompt(
+  sessionId: string,
+  promptId: string,
+) {
+  const prompt = promptForItem(promptId);
+  if (!prompt) throw new Error("Unknown prompt");
+  const ts = nowIso();
+  await updateStore(
+    (store) => {
+      ensureCollections(store);
+      const items = store
+        .conversation_session_items!.filter((i) => i.session_id === sessionId)
+        .sort((a, b) => a.display_order - b.display_order);
+      if (items.some((i) => i.prompt_id === promptId)) return store;
+      const order = items.length;
+      store.conversation_session_items!.push({
+        id: id("citem"),
+        session_id: sessionId,
+        prompt_id: promptId,
+        source_question_id: prompt.follow_up_open_question_id,
+        item_type: prompt.response_type,
+        display_order: order,
+        energy:
+          prompt.conversation_energy === "lightning"
+            ? "light"
+            : prompt.conversation_energy === "coffee"
+              ? "medium"
+              : prompt.conversation_energy === "planning"
+                ? "planning"
+                : "deep",
+        estimated_time_seconds: prompt.estimated_time_seconds,
+        actual_time_seconds: 0,
+        status: "pending",
+        opened_at: null,
+        answered_at: null,
+        paused_duration_seconds: 0,
+        branch_context: { momentum: true },
+        created_at: ts,
+        updated_at: ts,
+      });
+      const session = store.conversation_sessions!.find((s) => s.id === sessionId);
+      if (session) {
+        session.current_item_index = order;
+        session.updated_at = ts;
+      }
+      return store;
+    },
+    { operation: "appendMomentumPrompt" },
+  );
+}
+
+export function getQuickContextForDeep(
+  store: AppStore,
+  deepQuestionId: string,
+): {
+  promptId: string;
+  prompt: string;
+  sam?: string;
+  michelle?: string;
+} | null {
+  ensureCollections(store);
+  const answers = (store.conversation_quick_answers ?? []).filter((a) => {
+    const prompt = promptForItem(a.prompt_id);
+    return prompt?.follow_up_open_question_id === deepQuestionId;
+  });
+  if (!answers.length) return null;
+  const latestSession = answers
+    .map((a) => a.session_id)
+    .sort()
+    .at(-1);
+  const scoped = answers.filter((a) => a.session_id === latestSession);
+  const promptId = scoped[0]?.prompt_id;
+  const prompt = promptId ? promptForItem(promptId) : undefined;
+  if (!prompt) return null;
+  return {
+    promptId: prompt.id,
+    prompt: prompt.prompt,
+    sam: scoped.find((a) => a.actor === "sam")
+      ? snapshotAnswer(scoped.find((a) => a.actor === "sam")!)
+      : undefined,
+    michelle: scoped.find((a) => a.actor === "michelle")
+      ? snapshotAnswer(scoped.find((a) => a.actor === "michelle")!)
+      : undefined,
+  };
+}

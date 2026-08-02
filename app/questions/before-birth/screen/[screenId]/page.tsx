@@ -9,6 +9,9 @@ import {
   getEssentialsScreen,
 } from "@/lib/essentials/pathway";
 import { nextScreenId } from "@/lib/essentials/progress";
+import { getQuickContextForDeep } from "@/lib/services/conversations";
+import { companionForDeepQuestion } from "@/lib/conversations/companions";
+import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +20,15 @@ export default async function EssentialsScreenPage({
   searchParams,
 }: {
   params: Promise<{ screenId: string }>;
-  searchParams: Promise<{ session?: string }>;
+  searchParams: Promise<{
+    session?: string;
+    fromSession?: string;
+    quick?: string;
+  }>;
 }) {
   await requireFamilyContext();
   const { screenId } = await params;
-  const { session } = await searchParams;
+  const { session, fromSession, quick } = await searchParams;
   const store = await readStore();
   const screen = getEssentialsScreen(screenId);
   if (!screen) notFound();
@@ -40,12 +47,21 @@ export default async function EssentialsScreenPage({
   }
 
   const nextId = nextScreenId(screen.id, store);
-  const nextHref = nextId
-    ? `/questions/before-birth/screen/${nextId}${session ? "?session=1" : ""}`
-    : "/questions/before-birth/review";
+  const nextHref = fromSession
+    ? `/conversations/session/${fromSession}`
+    : nextId
+      ? `/questions/before-birth/screen/${nextId}${session ? "?session=1" : ""}`
+      : "/questions/before-birth/review";
 
   const mod = getEssentialsModule(screen.module_id);
   const sessionMode = session === "1";
+  const quickContext = getQuickContextForDeep(store, screen.question_id);
+  const companion = companionForDeepQuestion(screen.question_id);
+  const quickPrompt = quick
+    ? resolveConversationPrompt(quick)
+    : companion
+      ? resolveConversationPrompt(companion.companion_prompt_id)
+      : null;
 
   return (
     <AppShell
@@ -53,11 +69,43 @@ export default async function EssentialsScreenPage({
       subtitle={mod?.title}
       focusMode={sessionMode}
       actions={
-        <Link href="/questions/before-birth" className="btn btn-ghost">
-          Exit to dashboard
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {companion ? (
+            <Link
+              href={`/conversations?warmUp=${companion.companion_prompt_id}`}
+              className="btn btn-ghost"
+            >
+              Try a lighter warm-up
+            </Link>
+          ) : null}
+          <Link href="/questions/before-birth" className="btn btn-ghost">
+            Exit to dashboard
+          </Link>
+        </div>
       }
     >
+      {(quickContext || quickPrompt) && (
+        <section className="surface mb-4 p-5">
+          <h2 className="font-display text-lg">From your quick prompt</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            {quickPrompt?.prompt ?? quickContext?.prompt}
+          </p>
+          <div className="mt-3 space-y-1 text-sm">
+            {quickContext?.sam ? (
+              <p>
+                <span className="font-medium">Sam chose</span> {quickContext.sam}.
+              </p>
+            ) : null}
+            {quickContext?.michelle ? (
+              <p>
+                <span className="font-medium">Michelle chose</span>{" "}
+                {quickContext.michelle}.
+              </p>
+            ) : null}
+          </div>
+        </section>
+      )}
+
       <EssentialsScreenView
         screen={screen}
         question={question}

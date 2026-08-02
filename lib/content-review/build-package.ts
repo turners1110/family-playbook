@@ -4,6 +4,7 @@ import {
   type ContentReviewOptions,
 } from "@/lib/content-review/options";
 import { validateContentReviewPackage } from "@/lib/content-review/schema";
+import { buildConversationReviewMetrics } from "@/lib/content-review/conversation-metrics";
 import {
   DISCUSSION_TOPICS,
   classifyTopics,
@@ -860,6 +861,8 @@ export function buildContentReviewPackage(input: BuildContentReviewInput) {
     coverage ?? [],
   );
 
+  const conversation_metrics = buildConversationReviewMetrics(store);
+
   const pkg = {
     schema_version: CONTENT_REVIEW_SCHEMA_VERSION,
     generated_at: now.toISOString(),
@@ -881,6 +884,7 @@ export function buildContentReviewPackage(input: BuildContentReviewInput) {
           pre_birth_coverage: coverage,
         }
       : null,
+    conversation_metrics,
     family_answers: familyAnswers,
     recommendations_seed: recommendations,
     privacy: {
