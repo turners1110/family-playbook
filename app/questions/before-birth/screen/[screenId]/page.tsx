@@ -12,6 +12,7 @@ import { nextScreenId } from "@/lib/essentials/progress";
 import { getQuickContextForDeep } from "@/lib/services/conversations";
 import { companionForDeepQuestion } from "@/lib/conversations/companions";
 import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
+import { conversationReturnHref } from "@/lib/conversations/deep-link";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +25,17 @@ export default async function EssentialsScreenPage({
     session?: string;
     fromSession?: string;
     quick?: string;
+    returnTo?: string;
+    sessionId?: string;
+    sessionItemId?: string;
+    testRunId?: string;
+    source?: string;
   }>;
 }) {
   await requireFamilyContext();
   const { screenId } = await params;
-  const { session, fromSession, quick } = await searchParams;
+  const sp = await searchParams;
+  const { session, fromSession, quick, returnTo, sessionId, testRunId } = sp;
   const store = await readStore();
   const screen = getEssentialsScreen(screenId);
   if (!screen) notFound();
@@ -47,8 +54,16 @@ export default async function EssentialsScreenPage({
   }
 
   const nextId = nextScreenId(screen.id, store);
-  const nextHref = fromSession
-    ? `/conversations/session/${fromSession}`
+  const conversationReturn = conversationReturnHref({
+    returnTo,
+    sessionId: sessionId ?? fromSession,
+    testRunId,
+  });
+  const fromConversation = Boolean(
+    returnTo || fromSession || sessionId || testRunId,
+  );
+  const nextHref = fromConversation
+    ? conversationReturn
     : nextId
       ? `/questions/before-birth/screen/${nextId}${session ? "?session=1" : ""}`
       : "/questions/before-birth/review";

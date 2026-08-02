@@ -12,6 +12,10 @@ import type {
 import type { MomentumSuggestion } from "@/lib/conversations/momentum";
 import { getQaQuestion, QA_EXPECTED } from "@/lib/qa/question-pack";
 import type { ConversationPromptDef } from "@/lib/conversations/response-types";
+import {
+  resolveDeepQuestionTarget,
+  type DeepQuestionTarget,
+} from "@/lib/conversations/deep-link";
 
 export function QaSessionView({
   testRunId,
@@ -24,6 +28,7 @@ export function QaSessionView({
   itemIndex,
   itemCount,
   modeTitle,
+  deepTarget: deepTargetProp,
 }: {
   testRunId: string;
   session: ConversationSession;
@@ -35,10 +40,20 @@ export function QaSessionView({
   itemIndex: number;
   itemCount: number;
   modeTitle: string;
+  deepTarget?: DeepQuestionTarget | null;
 }) {
   const qa = getQaQuestion(prompt.id);
   // Disable momentum replacement for QA — empty list.
   const momentum: MomentumSuggestion[] = [];
+  const deepTarget =
+    deepTargetProp ??
+    resolveDeepQuestionTarget({
+      questionId: prompt.follow_up_open_question_id,
+      sessionId: session.id,
+      sessionItemId: item.id,
+      testRunId,
+      returnTo: `/conversations/test/${testRunId}`,
+    });
 
   return (
     <div className="mx-auto w-full max-w-lg overflow-x-hidden">
@@ -89,6 +104,18 @@ export function QaSessionView({
         </p>
       ) : null}
 
+      {prompt.follow_up_open_question_id ? (
+        <aside className="mx-3 mb-3 rounded-xl border border-border bg-bg-elevated p-3 text-xs">
+          <div className="font-medium">Quick → deep diagnostic</div>
+          <dl className="mt-2 space-y-1 font-mono text-[11px] text-ink-muted">
+            <div>linked: {prompt.follow_up_open_question_id}</div>
+            <div>type: {deepTarget.type}</div>
+            <div>exists: {deepTarget.exists ? "yes" : "no"}</div>
+            <div className="break-all">route: {deepTarget.href ?? "(none)"}</div>
+          </dl>
+        </aside>
+      ) : null}
+
       <ConversationCard
         session={session}
         item={item}
@@ -100,6 +127,8 @@ export function QaSessionView({
         itemCount={itemCount}
         momentum={momentum}
         modeTitle={modeTitle}
+        deepTarget={deepTarget}
+        sessionBaseHref={`/conversations/test/${testRunId}`}
       />
     </div>
   );

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ConversationCard } from "@/components/conversations/ConversationCard";
@@ -6,6 +6,8 @@ import { getConversationSession } from "@/lib/services/conversations";
 import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
 import { getConversationMode } from "@/lib/conversations/modes";
 import { suggestMomentum } from "@/lib/conversations/momentum";
+import { resolveDeepQuestionTarget } from "@/lib/conversations/deep-link";
+import { readStore } from "@/lib/db/store";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,9 @@ export default async function ConversationSessionPage({
   if (!data) notFound();
 
   const { session, items, answers, differences, members } = data;
+  if (session.is_test_data && session.test_run_id) {
+    redirect(`/conversations/test/${session.test_run_id}`);
+  }
   if (!items.length) {
     return (
       <AppShell title="Conversation" subtitle="This session has no prompts.">
@@ -68,6 +73,16 @@ export default async function ConversationSessionPage({
     sessionPromptIds: items.map((i) => i.prompt_id),
   });
 
+  const store = await readStore();
+  const deepTarget = resolveDeepQuestionTarget({
+    questionId: prompt.follow_up_open_question_id,
+    sessionId: session.id,
+    sessionItemId: item.id,
+    testRunId: session.test_run_id,
+    returnTo: `/conversations/session/${session.id}`,
+    questions: store.questions.map((q) => ({ id: q.id, slug: q.slug })),
+  });
+
   return (
     <AppShell title={session.title} subtitle={`${mode.title} · card view`}>
       <ConversationCard
@@ -81,6 +96,8 @@ export default async function ConversationSessionPage({
         itemCount={items.length}
         momentum={momentum}
         modeTitle={mode.title}
+        deepTarget={deepTarget}
+        sessionBaseHref={`/conversations/session/${session.id}`}
       />
     </AppShell>
   );

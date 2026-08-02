@@ -22,17 +22,20 @@ import {
   SaveButton,
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
+import type { QuickToDeepAuditReport } from "@/lib/conversations/deep-link";
 
 export function TestLabClient({
   runs,
   selectedRun,
   actorName,
   authMode,
+  deepLinkAudit,
 }: {
   runs: QaRunRecord[];
   selectedRun: QaRunRecord | null;
   actorName: string;
   authMode: string;
+  deepLinkAudit: QuickToDeepAuditReport;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -179,6 +182,57 @@ export function TestLabClient({
             {error}
           </p>
         ) : null}
+      </section>
+
+      <section className="surface p-5">
+        <h2 className="font-display text-xl">Quick → deep link audit</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          {deepLinkAudit.total} links · {deepLinkAudit.valid_essentials}{" "}
+          Essentials · {deepLinkAudit.valid_essentials_grouped} grouped ·{" "}
+          {deepLinkAudit.valid_normal} normal · {deepLinkAudit.valid_qa} QA ·{" "}
+          {deepLinkAudit.unavailable} unavailable
+        </p>
+        {deepLinkAudit.invalid_routes.length ? (
+          <p className="mt-2 text-sm text-danger" role="alert">
+            Invalid: {deepLinkAudit.invalid_routes.join(", ")}
+          </p>
+        ) : (
+          <p className="mt-2 text-sm text-accent">All quick→deep targets resolve.</p>
+        )}
+        <ul className="mt-3 max-h-72 space-y-2 overflow-y-auto text-xs">
+          {deepLinkAudit.rows
+            .filter(
+              (r) =>
+                r.promptSource === "qa" ||
+                r.promptId === "qa_quick_to_deep" ||
+                r.type === "unavailable",
+            )
+            .concat(
+              deepLinkAudit.rows.filter(
+                (r) =>
+                  r.promptSource !== "qa" &&
+                  r.promptId !== "qa_quick_to_deep" &&
+                  r.type !== "unavailable",
+              ),
+            )
+            .slice(0, 60)
+            .map((r) => (
+              <li
+                key={`${r.promptId}-${r.deepQuestionId}`}
+                className="rounded-lg border border-border p-2 font-mono"
+              >
+                <div>
+                  {r.promptId} → {r.deepQuestionId}
+                </div>
+                <div className="text-ink-muted">
+                  type={r.type} · exists={r.exists ? "yes" : "no"}
+                </div>
+                <div className="break-all text-ink-subtle">
+                  {r.href ?? r.reason ?? "(none)"}
+                </div>
+              </li>
+            ))}
+        </ul>
       </section>
 
       <section className="surface p-5">

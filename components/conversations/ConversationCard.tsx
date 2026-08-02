@@ -35,6 +35,7 @@ import {
   SaveButton,
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
+import type { DeepQuestionTarget } from "@/lib/conversations/deep-link";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -55,6 +56,8 @@ export function ConversationCard({
   itemCount,
   momentum,
   modeTitle,
+  deepTarget = null,
+  sessionBaseHref,
 }: {
   session: ConversationSession;
   item: ConversationSessionItem;
@@ -66,6 +69,10 @@ export function ConversationCard({
   itemCount: number;
   momentum: MomentumSuggestion[];
   modeTitle: string;
+  /** Pre-resolved by server via resolveDeepQuestionTarget — never build deep hrefs here. */
+  deepTarget?: DeepQuestionTarget | null;
+  /** After save/advance, navigate here instead of refreshing a deep URL. */
+  sessionBaseHref?: string;
 }) {
   void _difference;
   const router = useRouter();
@@ -73,6 +80,11 @@ export function ConversationCard({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [showMomentum, setShowMomentum] = useState(false);
   const pending = save.isBusy;
+  const baseHref =
+    sessionBaseHref ??
+    (session.test_run_id
+      ? `/conversations/test/${session.test_run_id}`
+      : `/conversations/session/${session.id}`);
 
   const samMember = members.find((m) => m.display_name === "Sam");
   const michelleMember = members.find((m) => m.display_name === "Michelle");
@@ -106,14 +118,19 @@ export function ConversationCard({
   useEffect(() => {
     void actionOpenConversationItem(session.id, item.id);
     headingRef.current?.focus();
-    // Prefetch next session route so Save and next can advance without a blank screen.
     if (itemIndex < itemCount - 1) {
-      router.prefetch(`/conversations/session/${session.id}`);
-      if (session.test_run_id) {
-        router.prefetch(`/conversations/test/${session.test_run_id}`);
-      }
+      router.prefetch(baseHref);
+      if (deepTarget?.href) router.prefetch(deepTarget.href);
     }
-  }, [item.id, session.id, session.test_run_id, itemIndex, itemCount, router]);
+  }, [
+    item.id,
+    session.id,
+    itemIndex,
+    itemCount,
+    router,
+    baseHref,
+    deepTarget?.href,
+  ]);
 
   const energyLabel = ENERGY_LABELS[storeEnergyToLevel(item.energy)];
   const differs =
@@ -122,9 +139,11 @@ export function ConversationCard({
       Boolean(answerSnapshot(michelleAns)) &&
       answerSnapshot(samAns) !== answerSnapshot(michelleAns));
 
-  const essentialsDeepHref = prompt.follow_up_open_question_id
-    ? `/questions/before-birth/deep/${prompt.follow_up_open_question_id}?fromSession=${session.id}&quick=${encodeURIComponent(prompt.id)}`
-    : null;
+  const deepHref =
+    deepTarget?.exists && deepTarget.href ? deepTarget.href : null;
+  const deepUnavailable =
+    Boolean(prompt.follow_up_open_question_id) &&
+    (!deepTarget || deepTarget.type === "unavailable" || !deepTarget.href);
 
   const progressPct = Math.round(((itemIndex + 1) / Math.max(itemCount, 1)) * 100);
 
@@ -217,9 +236,11 @@ export function ConversationCard({
         onSuccess: async () => {
           if (itemIndex >= itemCount - 1) {
             setShowMomentum(true);
+            router.push(baseHref);
             router.refresh();
             return;
           }
+          router.push(baseHref);
           router.refresh();
         },
       },
@@ -394,30 +415,37 @@ export function ConversationCard({
                 }),
               )
             }
-            deepHref={essentialsDeepHref}
+            deepHref={deepHref}
+            deepUnavailable={deepUnavailable}
           />
         ) : null}
 
-        {essentialsDeepHref ? (
+        {prompt.follow_up_open_question_id ? (
           <div className="mt-5 rounded-xl bg-accent-soft/60 p-4">
             <p className="text-sm font-medium text-ink">Talk more about this</p>
             <p className="mt-1 text-sm text-ink-muted">
               Your quick answers stay as context when you open the deeper
               discussion.
             </p>
-            <Link
-              href={essentialsDeepHref}
-              className="btn btn-secondary mt-3"
-              onClick={async (e) => {
-                if (save.isBusy) {
-                  e.preventDefault();
-                  const leave = await save.requestLeave();
-                  if (leave) router.push(essentialsDeepHref);
-                }
-              }}
-            >
-              Open deeper question
-            </Link>
+            {deepHref ? (
+              <Link
+                href={deepHref}
+                className="btn btn-secondary mt-3"
+                onClick={async (e) => {
+                  if (save.isBusy) {
+                    e.preventDefault();
+                    const leave = await save.requestLeave();
+                    if (leave) router.push(deepHref);
+                  }
+                }}
+              >
+                Open deeper question
+              </Link>
+            ) : (
+              <p className="mt-3 text-sm text-ink-muted" role="status">
+                Deeper discussion is not available yet.
+              </p>
+            )}
           </div>
         ) : null}
 
@@ -732,6 +760,7 @@ function DifferencePanel({
   onResolve,
   pending,
   deepHref,
+  deepUnavailable,
 }: {
   sam: string;
   michelle: string;
@@ -750,6 +779,7 @@ function DifferencePanel({
   ) => void;
   pending: boolean;
   deepHref: string | null;
+  deepUnavailable?: boolean;
 }) {
   return (
     <section className="mt-6 rounded-xl border border-border bg-info-soft/40 p-4">
@@ -822,6 +852,10 @@ function DifferencePanel({
           >
             Open deeper question
           </Link>
+        ) : deepUnavailable ? (
+          <p className="text-sm text-ink-muted" role="status">
+            Deeper discussion is not available yet.
+          </p>
         ) : null}
         <button
           type="button"

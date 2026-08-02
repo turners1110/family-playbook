@@ -2,34 +2,81 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { EssentialsScreenView } from "@/components/essentials/EssentialsScreen";
-import { getEssentialsScreenByQuestionId } from "@/lib/essentials/pathway";
 import { readStore } from "@/lib/db/store";
 import { getQuickContextForDeep } from "@/lib/services/conversations";
 import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
+import {
+  conversationReturnHref,
+  resolveDeepQuestionTarget,
+} from "@/lib/conversations/deep-link";
+import { isQaQuestionId } from "@/lib/qa/question-pack";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Legacy entry — redirects to the canonical target from resolveDeepQuestionTarget.
+ * QA IDs must never resolve here.
+ */
 export default async function QuickToDeepPage({
   params,
   searchParams,
 }: {
   params: Promise<{ questionId: string }>;
-  searchParams: Promise<{ fromSession?: string; quick?: string }>;
+  searchParams: Promise<{
+    fromSession?: string;
+    quick?: string;
+    returnTo?: string;
+    sessionId?: string;
+    sessionItemId?: string;
+    testRunId?: string;
+    source?: string;
+  }>;
 }) {
   const { questionId } = await params;
   const sp = await searchParams;
-  const screen = getEssentialsScreenByQuestionId(questionId);
-  if (screen) {
-    const q = new URLSearchParams();
-    if (sp.fromSession) q.set("fromSession", sp.fromSession);
-    if (sp.quick) q.set("quick", sp.quick);
-    const qs = q.toString();
-    redirect(
-      `/questions/before-birth/screen/${screen.id}${qs ? `?${qs}` : ""}`,
-    );
+
+  if (isQaQuestionId(questionId)) {
+    if (sp.testRunId) {
+      const target = resolveDeepQuestionTarget({
+        questionId,
+        sessionId: sp.sessionId ?? sp.fromSession,
+        sessionItemId: sp.sessionItemId,
+        testRunId: sp.testRunId,
+        returnTo: sp.returnTo,
+      });
+      if (target.href) redirect(target.href);
+    }
+    notFound();
   }
 
   const store = await readStore();
+  const target = resolveDeepQuestionTarget({
+    questionId,
+    sessionId: sp.sessionId ?? sp.fromSession,
+    sessionItemId: sp.sessionItemId,
+    testRunId: sp.testRunId,
+    returnTo: sp.returnTo,
+    questions: store.questions.map((q) => ({ id: q.id, slug: q.slug })),
+  });
+
+  // Essentials screens — canonical path
+  if (
+    (target.type === "essentials_screen" ||
+      target.type === "essentials_grouped") &&
+    target.href
+  ) {
+    redirect(target.href);
+  }
+
+  if (target.type === "normal_question" && target.href) {
+    // Prefer slug route; keep a conversation-aware fallback below only if needed.
+    redirect(target.href);
+  }
+
+  if (target.type === "unavailable" || !target.exists) {
+    notFound();
+  }
+
   const question = store.questions.find((q) => q.id === questionId);
   if (!question) notFound();
 
@@ -40,6 +87,12 @@ export default async function QuickToDeepPage({
     : quickContext
       ? resolveConversationPrompt(quickContext.promptId)
       : null;
+
+  const returnHref = conversationReturnHref({
+    returnTo: sp.returnTo,
+    sessionId: sp.sessionId ?? sp.fromSession,
+    testRunId: sp.testRunId,
+  });
 
   return (
     <AppShell
@@ -94,26 +147,17 @@ export default async function QuickToDeepPage({
         answers={answers}
         pairedAnswers={{}}
         members={store.members}
-        nextHref={
-          sp.fromSession
-            ? `/conversations/session/${sp.fromSession}`
-            : "/conversations"
-        }
+        nextHref={returnHref}
         moduleTitle="Conversation follow-up"
         progressLabel="Quick → deep"
         sessionMode
       />
 
-      {sp.fromSession ? (
-        <div className="mt-4">
-          <Link
-            href={`/conversations/session/${sp.fromSession}`}
-            className="btn btn-secondary"
-          >
-            Return to conversation
-          </Link>
-        </div>
-      ) : null}
+      <div className="mt-4">
+        <Link href={returnHref} className="btn btn-secondary">
+          Return to conversation
+        </Link>
+      </div>
     </AppShell>
   );
 }

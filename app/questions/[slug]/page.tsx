@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
+import { conversationReturnHref } from "@/lib/conversations/deep-link";
 import { PriorityBadge } from "@/components/shared/ui";
 import {
   AnswerStatusBadge,
@@ -25,14 +25,51 @@ export const dynamic = "force-dynamic";
 
 export default async function QuestionDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{
+    returnTo?: string;
+    sessionId?: string;
+    sessionItemId?: string;
+    testRunId?: string;
+    source?: string;
+  }>;
 }) {
   const ctx = await requireFamilyContext();
   const { slug } = await params;
+  const sp = await searchParams;
   const store = await readStore();
   const question = store.questions.find((q) => q.slug === slug);
-  if (!question) notFound();
+  if (!question) {
+    const byId = store.questions.find((q) => q.id === slug);
+    // Never treat a raw question ID as a slug.
+    return (
+      <AppShell title="Question not found" subtitle="Unknown slug">
+        <div className="surface space-y-3 p-5">
+          <p className="text-sm text-ink-muted">
+            No question uses the slug <code>{slug}</code>.
+          </p>
+          {byId ? (
+            <p className="text-sm">
+              That value matches question ID <code>{byId.id}</code>. Open it with
+              its slug instead:{" "}
+              <Link
+                href={`/questions/${byId.slug}`}
+                className="font-medium underline"
+              >
+                /questions/{byId.slug}
+              </Link>
+              .
+            </p>
+          ) : null}
+          <Link href="/questions" className="btn btn-secondary">
+            Back to questions
+          </Link>
+        </div>
+      </AppShell>
+    );
+  }
   const helpers = helperForQuestion(question);
 
   const answers = store.answers.filter((a) => a.question_id === question.id);
@@ -49,17 +86,45 @@ export default async function QuestionDetailPage({
   );
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
   const research = await getResearchForQuestion(question.id, ctx);
+  const returnHref =
+    sp.source === "conversation" || sp.returnTo || sp.sessionId || sp.testRunId
+      ? conversationReturnHref({
+          returnTo: sp.returnTo,
+          sessionId: sp.sessionId,
+          testRunId: sp.testRunId,
+        })
+      : null;
 
   return (
     <AppShell
       title={question.short_title}
       subtitle="Question detail, perspectives, and history"
       actions={
-        <Link href={`/discuss?category=${question.categories[0]}`} className="btn btn-primary">
-          Discuss related topic
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {returnHref ? (
+            <Link href={returnHref} className="btn btn-secondary">
+              Return to conversation
+            </Link>
+          ) : null}
+          <Link href={`/discuss?category=${question.categories[0]}`} className="btn btn-primary">
+            Discuss related topic
+          </Link>
+        </div>
       }
     >
+      {returnHref ? (
+        <section className="surface mb-4 p-4 text-sm">
+          <p className="font-medium">From a conversation</p>
+          <p className="mt-1 text-ink-muted">
+            Your quick answers stay in that session. After you save here, return
+            to continue.
+          </p>
+          <Link href={returnHref} className="btn btn-secondary mt-3">
+            Return to conversation
+          </Link>
+        </section>
+      ) : null}
+
       <section className="mb-5">
         <AnswerStatusHeader status={status} />
       </section>
