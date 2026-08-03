@@ -134,16 +134,16 @@ export default async function ConversationHistoryPage({
                       {isCompleted ? (
                         <>
                           <Link
-                            href={`/conversations/session/${s.id}/summary`}
+                            href={`/conversations/session/${s.id}/review`}
                             className="btn btn-primary"
                           >
-                            View summary
+                            Review conversation
                           </Link>
                           <Link
-                            href={`/conversations/session/${s.id}`}
+                            href={`/conversations/session/${s.id}/summary`}
                             className="btn btn-secondary"
                           >
-                            Review answers
+                            View summary
                           </Link>
                         </>
                       ) : (

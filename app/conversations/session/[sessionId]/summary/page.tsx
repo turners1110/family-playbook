@@ -70,11 +70,19 @@ export default async function ConversationSummaryPage({
           History
         </Link>
         <Link
-          href={`/conversations/session/${sessionId}`}
+          href={`/conversations/session/${sessionId}/review`}
           className="btn btn-secondary"
         >
-          Review cards
+          Review conversation
         </Link>
+        {(session.status === "active" || session.status === "paused") ? (
+          <Link
+            href={`/conversations/session/${sessionId}`}
+            className="btn btn-ghost"
+          >
+            Resume answering
+          </Link>
+        ) : null}
       </div>
     </AppShell>
   );

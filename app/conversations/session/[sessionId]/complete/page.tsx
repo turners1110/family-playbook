@@ -119,7 +119,7 @@ export default async function SessionCompletePage({
             View summary
           </Link>
           <Link
-            href={`/conversations/session/${sessionId}`}
+            href={`/conversations/session/${sessionId}/review`}
             className="btn btn-secondary"
           >
             Review answers

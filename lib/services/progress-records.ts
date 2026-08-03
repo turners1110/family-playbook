@@ -185,7 +185,10 @@ export function listConversationPromptRecords(
       lastUpdated: item.updated_at,
       sessionId: session.id,
       deepQuestionId: prompt?.follow_up_open_question_id ?? null,
-      href: `/conversations/session/${session.id}`,
+      href:
+        session.status === "active" || session.status === "paused"
+          ? `/conversations/session/${session.id}`
+          : `/conversations/session/${session.id}/review`,
     });
   }
 
