@@ -39,6 +39,24 @@ export type ResolveDeepQuestionInput = {
   questions?: ReadonlyArray<{ id: string; slug: string }>;
 };
 
+/**
+ * Prompt catalogs sometimes store a fuller ID than the truncated bank ID.
+ * Prefer exact match; otherwise a unique prefix/extension match.
+ */
+export function resolveLibraryQuestionId(
+  candidateId: string | null | undefined,
+  questions: ReadonlyArray<{ id: string; slug?: string }> | undefined,
+): string | null {
+  const id = candidateId?.trim() || null;
+  if (!id || !questions?.length) return id;
+  if (questions.some((q) => q.id === id)) return id;
+  const fuzzy = questions.filter(
+    (q) => q.id.startsWith(id) || id.startsWith(q.id),
+  );
+  if (fuzzy.length === 1) return fuzzy[0]!.id;
+  return id;
+}
+
 function buildReturnQuery(input: ResolveDeepQuestionInput): string {
   const q = new URLSearchParams();
   q.set("source", "conversation");
@@ -76,7 +94,8 @@ function essentialsType(
 export function resolveDeepQuestionTarget(
   input: ResolveDeepQuestionInput,
 ): DeepQuestionTarget {
-  const questionId = input.questionId?.trim() || null;
+  const rawId = input.questionId?.trim() || null;
+  const questionId = resolveLibraryQuestionId(rawId, input.questions);
   if (!questionId) {
     return {
       type: "unavailable",
@@ -143,20 +162,21 @@ export function resolveDeepQuestionTarget(
     };
   }
 
-  const question = input.questions?.find((q) => q.id === questionId);
+  const resolvedId = resolveLibraryQuestionId(questionId, input.questions);
+  const question = input.questions?.find((q) => q.id === resolvedId);
   if (question?.slug) {
     // Never put a raw question ID into the slug route.
-    if (question.slug === questionId && questionId.startsWith("q_")) {
+    if (question.slug === question.id && question.id.startsWith("q_")) {
       console.info("[deep_link]", {
         operation: "resolveDeepQuestionTarget",
-        questionId,
+        questionId: resolvedId,
         result: "unavailable",
         reason: "slug_equals_raw_id",
       });
       return {
         type: "unavailable",
         href: null,
-        questionId,
+        questionId: resolvedId,
         exists: true,
         reason: "Question slug is missing; cannot open library route.",
       };
@@ -164,7 +184,7 @@ export function resolveDeepQuestionTarget(
     return {
       type: "normal_question",
       href: `/questions/${question.slug}${qs}`,
-      questionId,
+      questionId: resolvedId,
       slug: question.slug,
       exists: true,
     };
@@ -173,6 +193,7 @@ export function resolveDeepQuestionTarget(
   console.info("[deep_link]", {
     operation: "resolveDeepQuestionTarget",
     questionId,
+    resolvedId,
     result: "unavailable",
     reason: "missing_question",
     sessionId: input.sessionId ?? null,
@@ -181,7 +202,7 @@ export function resolveDeepQuestionTarget(
   return {
     type: "unavailable",
     href: null,
-    questionId,
+    questionId: resolvedId ?? questionId,
     exists: false,
     reason: "Deeper discussion is not available yet.",
   };

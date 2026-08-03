@@ -51,22 +51,69 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="surface mb-6 p-5 sm:p-6">
+        <h2 className="font-display text-2xl text-ink">Your progress</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Deep discussions, conversation prompts, and Essentials are counted
+          separately — Quick Picks do not automatically complete a library
+          question.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            label="Deep discussions answered"
+            value={stats.progress.canonicalQuestionsAnswered}
+            hint={`${stats.progress.canonicalQuestionsPartial} partial · ${stats.progress.canonicalQuestionsTotal} total`}
+          />
+          <StatCard
+            label="Conversation prompts completed"
+            value={stats.progress.conversationPromptsCompleted}
+            hint={`${stats.progress.conversationQuickAnswers} quick answers saved`}
+          />
+          <StatCard
+            label="Essentials screens"
+            value={`${stats.progress.essentialsScreensCompleted} of ${stats.progress.essentialsScreensVisible}`}
+            hint="Before Birth Essentials"
+          />
+          <StatCard
+            label="Shared decisions"
+            value={stats.progress.sharedDecisions}
+          />
+          <StatCard
+            label="Open follow-ups"
+            value={stats.progress.openFollowUps}
+            hint="Partial, undecided, research, cooling-off"
+          />
+          <StatCard
+            label="Overall completion"
+            value={`${stats.completion}%`}
+            hint="Based on deep discussions only"
+          />
+        </div>
+      </section>
+
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Overall completion" value={`${stats.completion}%`} />
-        <StatCard
-          label="Questions answered"
-          value={stats.questionsAnswered}
-          hint={`${stats.questionsRemaining} remaining`}
-        />
         <StatCard label="Decisions reached" value={stats.decisionsReached} />
         <StatCard label="Active disagreements" value={stats.disagreements} />
+        <StatCard label="Undecided items" value={stats.undecided} />
+        <StatCard label="Cooling-off" value={stats.coolingOff} />
       </div>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Undecided items" value={stats.undecided} />
-        <StatCard label="Cooling-off" value={stats.coolingOff} />
         <StatCard label="Research needed" value={stats.researchNeeded} />
         <StatCard label="Low confidence" value={stats.lowConfidence} />
+        <StatCard
+          label="Legacy unique answer IDs"
+          value={stats.progress.legacyUniqueAnsweredQuestionIds}
+          hint="Old “questions answered” definition"
+        />
+        <StatCard
+          label="Active session cards"
+          value={
+            stats.progress.activeSessionId
+              ? `${stats.progress.activeSessionAnswered}/${stats.progress.activeSessionItemCount}`
+              : "—"
+          }
+        />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">

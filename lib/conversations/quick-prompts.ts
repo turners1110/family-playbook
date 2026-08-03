@@ -296,7 +296,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
     conversation_energy: "lightning",
     conversation_tags: ["visitors", "family"],
     session_tags: ["babymoon_set_v1", "companion_visitors"],
@@ -327,7 +327,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_should_family_members_receive_updates_during_labor_and_bir",
+      "q_how_should_family_members_receive_updates_during_labor_an",
     conversation_energy: "lightning",
     conversation_tags: ["birth", "family"],
     session_tags: [],
@@ -418,7 +418,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+      "q_what_does_a_calm_postpartum_home_environment_require_from",
     conversation_energy: "lightning",
     conversation_tags: ["visitors", "family"],
     session_tags: [],
@@ -447,7 +447,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
     conversation_energy: "lightning",
     conversation_tags: ["visitors", "privacy"],
     session_tags: [],
@@ -477,7 +477,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["privacy", "birth"],
     session_tags: [],
@@ -948,7 +948,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["privacy"],
     session_tags: ["babymoon_set_v1", "companion_social"],
@@ -977,7 +977,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["privacy", "birth"],
     session_tags: [],
@@ -1006,7 +1006,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["privacy", "family"],
     session_tags: [],
@@ -1036,7 +1036,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["privacy", "family"],
     session_tags: [],
@@ -1065,7 +1065,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
     conversation_energy: "lightning",
     conversation_tags: ["visitors"],
     session_tags: [],
@@ -1094,7 +1094,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+      "q_what_does_a_calm_postpartum_home_environment_require_from",
     conversation_energy: "lightning",
     conversation_tags: ["visitors"],
     session_tags: [],
@@ -1549,7 +1549,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
     conversation_energy: "lightning",
     conversation_tags: ["visitors"],
     session_tags: [],

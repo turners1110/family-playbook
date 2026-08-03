@@ -1,16 +1,33 @@
 import { readStore } from "@/lib/db/local-store";
 import { BABYMOON_WEIGHT_CATEGORIES, LIFE_STAGE_LABELS } from "@/lib/constants/enums";
 import type { LifeStage } from "@/lib/constants/enums";
+import { buildFamilyProgressMetrics } from "@/lib/services/answered-status";
+import {
+  buildQuestionStatusIndex,
+  isProgressEligibleQuestion,
+} from "@/lib/services/question-status";
 
 export async function getDashboardStats() {
   const store = await readStore();
-  const totalQuestions = store.questions.filter((q) => q.active).length;
-  const answeredQuestionIds = new Set(store.answers.map((a) => a.question_id));
-  const questionsAnswered = answeredQuestionIds.size;
+  const metrics = buildFamilyProgressMetrics(store);
+  const statusIndex = buildQuestionStatusIndex(store);
+
+  const totalQuestions = metrics.canonicalQuestionsTotal;
+  const questionsAnswered = metrics.canonicalQuestionsAnswered;
   const questionsRemaining = Math.max(totalQuestions - questionsAnswered, 0);
   const completion = totalQuestions
     ? Math.round((questionsAnswered / totalQuestions) * 100)
     : 0;
+
+  const answeredQuestionIds = new Set(
+    store.questions
+      .filter(isProgressEligibleQuestion)
+      .filter((q) => {
+        const st = statusIndex.get(q.id);
+        return Boolean(st?.fullyAnswered || st?.primary === "shared_answer_saved");
+      })
+      .map((q) => q.id),
+  );
 
   const decisionsReached = store.decisions.filter((d) =>
     ["decided", "tentatively_decided"].includes(d.status),
@@ -117,6 +134,8 @@ export async function getDashboardStats() {
     questionsAnswered,
     questionsRemaining,
     completion,
+    /** Clear multi-metric progress (preferred over questionsAnswered alone). */
+    progress: metrics,
     decisionsReached,
     undecided,
     disagreements,

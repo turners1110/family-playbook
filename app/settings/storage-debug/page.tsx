@@ -12,7 +12,7 @@ import {
   storageBackupLabel,
 } from "@/lib/db/durable-save";
 import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
-import { buildProgressSnapshot } from "@/lib/services/answered-status";
+import { buildFamilyProgressMetrics, buildProgressSnapshot } from "@/lib/services/answered-status";
 import { getConversationSessionProgress } from "@/lib/services/conversations";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +48,7 @@ export default async function StorageDebugPage() {
       .filter((s) => s.status === "active" || s.status === "paused")
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null;
   const snapshot = buildProgressSnapshot(store, activeSession);
+  const familyProgress = buildFamilyProgressMetrics(store, activeSession);
   const resumeProgress = activeSession
     ? getConversationSessionProgress(store, activeSession.id)
     : null;
@@ -56,10 +57,18 @@ export default async function StorageDebugPage() {
     b.updated_at.localeCompare(a.updated_at),
   )[0];
 
+  const remoteCanonical = familyProgress.canonicalQuestionsAnswered;
+  const remoteQuick = familyProgress.conversationQuickAnswers;
+  const remoteSessionAnswered = familyProgress.conversationPromptsCompleted;
+  const homeCanonical = familyProgress.canonicalQuestionsAnswered;
+  const homeConversation = familyProgress.conversationPromptsCompleted;
+  const essentialsDisplayed = familyProgress.essentialsScreensCompleted;
+
   const countMismatch =
-    resumeProgress &&
-    (resumeProgress.answeredCount !== snapshot.conversationAnsweredCount ||
-      resumeProgress.itemCount !== snapshot.conversationItemCount);
+    remoteCanonical !== homeCanonical ||
+    remoteSessionAnswered !== homeConversation ||
+    (resumeProgress != null &&
+      resumeProgress.answeredCount !== snapshot.conversationAnsweredCount);
 
   return (
     <AppShell
@@ -144,38 +153,65 @@ export default async function StorageDebugPage() {
       <section className="surface mt-5 p-5">
         <h2 className="font-display text-xl">Compare counts</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Canonical progress vs resume display. Mismatches are flagged.
+          Remote collections vs Home / Essentials / session display. Mismatches
+          are flagged.
         </p>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Homepage / library answered
+              Remote canonical answers (fully answered)
             </dt>
-            <dd>
-              {snapshot.libraryAnsweredCount} / {snapshot.libraryQuestionCount}
+            <dd>{remoteCanonical}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Home canonical count
+            </dt>
+            <dd className={remoteCanonical !== homeCanonical ? "text-danger" : ""}>
+              {homeCanonical}
             </dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Essentials completed screens
+              Remote quick answers (real)
             </dt>
-            <dd>
-              {snapshot.essentialsCompletedScreens} /{" "}
-              {snapshot.essentialsVisibleScreens}
+            <dd>{remoteQuick}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Remote session answered items
+            </dt>
+            <dd>{remoteSessionAnswered}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Home conversation prompts
+            </dt>
+            <dd
+              className={
+                remoteSessionAnswered !== homeConversation ? "text-danger" : ""
+              }
+            >
+              {homeConversation}
             </dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Active session answered (canonical)
+              Essentials completed (displayed)
             </dt>
             <dd>
-              {snapshot.conversationAnsweredCount} /{" "}
-              {snapshot.conversationItemCount}
+              {essentialsDisplayed} / {familyProgress.essentialsScreensVisible}
             </dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Resume card answered
+              Legacy unique answer question IDs
+            </dt>
+            <dd>{familyProgress.legacyUniqueAnsweredQuestionIds}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Active session answered
             </dt>
             <dd>
               {resumeProgress
@@ -205,38 +241,10 @@ export default async function StorageDebugPage() {
             </dt>
             <dd>{health.version ?? "—"}</dd>
           </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Canonical library answered
-            </dt>
-            <dd>{snapshot.libraryAnsweredCount}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Status index size
-            </dt>
-            <dd>{snapshot.statusIndexSize}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Last remote update (cache signal)
-            </dt>
-            <dd>
-              {health.updatedAt
-                ? new Date(health.updatedAt).toLocaleString()
-                : "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Count mismatch flagged
-            </dt>
-            <dd>{countMismatch ? "yes" : "no"}</dd>
-          </div>
         </dl>
         {countMismatch ? (
           <p className="mt-3 text-sm text-danger" role="alert">
-            Count mismatch between canonical snapshot and resume progress.
+            Count mismatch flagged — compare remote vs displayed metrics.
           </p>
         ) : (
           <p className="mt-3 text-sm text-accent">Counts aligned.</p>

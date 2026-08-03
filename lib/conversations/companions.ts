@@ -14,7 +14,7 @@ export const ESSENTIALS_COMPANIONS: Array<{
   {
     companion_prompt_id: "qp_first_week_home",
     deep_question_id:
-      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
     label: "Visitors",
   },
   {
@@ -45,7 +45,7 @@ export const ESSENTIALS_COMPANIONS: Array<{
   {
     companion_prompt_id: "qp_baby_face_online",
     deep_question_id:
-      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
     label: "Social media",
   },
   {
