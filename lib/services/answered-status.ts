@@ -35,12 +35,18 @@ import type {
 } from "@/lib/types/models";
 import {
   buildQuestionStatusIndex,
-  hasAnswerContent,
-  isProgressEligibleQuestion,
   type QuestionAnswerStatus,
 } from "@/lib/services/question-status";
 import { getConversationSessionProgress } from "@/lib/services/conversations";
+import {
+  listConversationPromptRecords,
+  listDeepDiscussionRecords,
+  listEssentialsCompletedRecords,
+  listOpenFollowUpRecords,
+  listSharedDecisionRecords,
+} from "@/lib/services/progress-records";
 import { buildEssentialsDashboard } from "@/lib/essentials/progress";
+import { isProgressEligibleQuestion } from "@/lib/services/question-status";
 
 export const CONVERSATION_ITEM_STATUS_LABELS = {
   unanswered: "Unanswered",
@@ -145,16 +151,13 @@ export function buildFamilyProgressMetrics(
   const index = buildQuestionStatusIndex(store);
   const eligible = store.questions.filter(isProgressEligibleQuestion);
 
-  let canonicalQuestionsAnswered = 0;
   let canonicalQuestionsPartial = 0;
   let undecidedLibrary = 0;
   for (const q of eligible) {
     const st = index.get(q.id);
     if (!st) continue;
-    if (st.fullyAnswered || st.primary === "shared_answer_saved") {
-      canonicalQuestionsAnswered += 1;
-    } else if (st.partiallyAnswered) {
-      canonicalQuestionsPartial += 1;
+    if (!(st.fullyAnswered || st.primary === "shared_answer_saved")) {
+      if (st.partiallyAnswered) canonicalQuestionsPartial += 1;
     }
     if (st.undecided || st.primary === "undecided") undecidedLibrary += 1;
   }
@@ -165,60 +168,23 @@ export function buildFamilyProgressMetrics(
       .map((a) => a.question_id),
   ).size;
 
+  const deepRecords = listDeepDiscussionRecords(store);
+  const promptRecords = listConversationPromptRecords(store);
+  const essentialsRecords = listEssentialsCompletedRecords(store);
+  const sharedRecords = listSharedDecisionRecords(store);
+  const followUpRecords = listOpenFollowUpRecords(store);
+  const essentials = buildEssentialsDashboard(store);
+
   const realSessions = new Set(
     (store.conversation_sessions ?? [])
       .filter((s) => !isQaRecord(s))
       .map((s) => s.id),
   );
-  const realItems = (store.conversation_session_items ?? []).filter((i) =>
-    realSessions.has(i.session_id),
-  );
-  const conversationPromptsCompleted = realItems.filter((i) =>
-    conversationItemIsComplete(i.status),
-  ).length;
-  const conversationPromptsTotal = realItems.length;
   const conversationQuickAnswers = (store.conversation_quick_answers ?? [])
     .filter((a) => !isQaRecord(a) && realSessions.has(a.session_id)).length;
-
-  const essentials = buildEssentialsDashboard(store);
-
-  const sharedAnswerQuestionIds = new Set(
-    (store.answers ?? [])
-      .filter(
-        (a) =>
-          !isQaRecord(a) &&
-          a.is_shared &&
-          hasAnswerContent(a.payload) &&
-          eligible.some((q) => q.id === a.question_id),
-      )
-      .map((a) => a.question_id),
-  );
-  const approvedDecisionCount = (store.decisions ?? []).filter((d) =>
-    ["decided", "tentatively_decided"].includes(d.status),
+  const discussLaterItems = followUpRecords.filter(
+    (r) => r.group === "discuss_later",
   ).length;
-  const sharedDecisions = sharedAnswerQuestionIds.size + approvedDecisionCount;
-
-  const discussLaterItems = realItems.filter(
-    (i) => i.status === "discuss_later",
-  ).length;
-  const waitingProviderAnswers = (store.answers ?? []).filter(
-    (a) => !isQaRecord(a) && a.needs_research,
-  ).length;
-  const waitingProviderItems = realItems.filter(
-    (i) => i.status === "needs_follow_up",
-  ).length;
-  const discussLaterAnswers = (store.answers ?? []).filter(
-    (a) => !isQaRecord(a) && a.status === "review_scheduled",
-  ).length;
-
-  const openFollowUps =
-    canonicalQuestionsPartial +
-    undecidedLibrary +
-    discussLaterItems +
-    discussLaterAnswers +
-    waitingProviderAnswers +
-    waitingProviderItems +
-    (store.cooling_off_items ?? []).filter((c) => c.active).length;
 
   const progress = session
     ? getConversationSessionProgress(store, session.id)
@@ -230,17 +196,19 @@ export function buildFamilyProgressMetrics(
       };
 
   return {
-    canonicalQuestionsAnswered,
+    canonicalQuestionsAnswered: deepRecords.length,
     canonicalQuestionsTotal: eligible.length,
     canonicalQuestionsPartial,
     legacyUniqueAnsweredQuestionIds,
-    conversationPromptsCompleted,
-    conversationPromptsTotal,
+    conversationPromptsCompleted: promptRecords.length,
+    conversationPromptsTotal: (store.conversation_session_items ?? []).filter(
+      (i) => realSessions.has(i.session_id),
+    ).length,
     conversationQuickAnswers,
-    essentialsScreensCompleted: essentials.completed,
+    essentialsScreensCompleted: essentialsRecords.length,
     essentialsScreensVisible: essentials.visible_primary,
-    sharedDecisions,
-    openFollowUps,
+    sharedDecisions: sharedRecords.length,
+    openFollowUps: followUpRecords.length,
     undecidedLibrary,
     discussLaterItems,
     activeSessionId: session?.id ?? null,

@@ -1,14 +1,15 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ModeStarter } from "@/components/conversations/ModeStarter";
+import { BabymoonRoundCard } from "@/components/conversations/BabymoonRoundCard";
 import { CONVERSATION_MODES } from "@/lib/conversations/modes";
-import { BABYMOON_ROUNDS, estimateRoundSeconds } from "@/lib/conversations/babymoon-set";
+import { BABYMOON_ROUNDS } from "@/lib/conversations/babymoon-set";
 import { ENERGY_LABELS } from "@/lib/conversations/response-types";
 import {
-  findResumableConversationSession,
   getConversationSessionProgress,
   listConversationSessions,
 } from "@/lib/services/conversations";
+import { evaluateBabymoonRoundStatus } from "@/lib/services/round-status";
 import { formatApproximateActiveTime } from "@/lib/conversations/timing";
 import { getActiveQuickPrompts, countQuickToDeepLinks } from "@/lib/conversations/quick-prompts";
 import { readStore } from "@/lib/db/store";
@@ -23,21 +24,9 @@ export default async function ConversationsPage() {
   );
   const prompts = getActiveQuickPrompts();
 
-  const roundResume = await Promise.all(
-    BABYMOON_ROUNDS.map(async (round) => ({
-      round: round.round,
-      resume: await findResumableConversationSession({
-        mode: "babymoon",
-        babymoonRound: round.round,
-      }),
-    })),
+  const roundViews = BABYMOON_ROUNDS.map((round) =>
+    evaluateBabymoonRoundStatus(store, round.round),
   );
-  const resumeByRound = Object.fromEntries(
-    roundResume.map((r) => [r.round, r.resume]),
-  ) as Record<
-    number,
-    Awaited<ReturnType<typeof findResumableConversationSession>>
-  >;
 
   return (
     <AppShell
@@ -65,13 +54,24 @@ export default async function ConversationsPage() {
         <section className="surface mb-5 border-accent/30 p-5">
           <h2 className="font-display text-xl">Resume saved progress</h2>
           <p className="mt-1 text-sm text-ink-muted">
-            Your answers are kept with each session. Open Resume — do not start a
-            new round if you want the same cards back.
+            Your answers are kept with each session. Prefer Continue on a session
+            with answered cards — empty sessions stay secondary.
           </p>
           <ul className="mt-3 space-y-3">
-            {unfinished.map((s) => {
-              const progress = getConversationSessionProgress(store, s.id);
-              return (
+            {[...unfinished]
+              .map((s) => ({
+                session: s,
+                progress: getConversationSessionProgress(store, s.id),
+              }))
+              .sort((a, b) => {
+                if (a.progress.hasProgress !== b.progress.hasProgress) {
+                  return a.progress.hasProgress ? -1 : 1;
+                }
+                return (
+                  b.progress.answeredCount - a.progress.answeredCount
+                );
+              })
+              .map(({ session: s, progress }) => (
                 <li
                   key={s.id}
                   className="flex flex-wrap items-center justify-between gap-3"
@@ -85,21 +85,25 @@ export default async function ConversationsPage() {
                     </div>
                     {!progress.hasProgress ? (
                       <div className="text-xs text-ink-subtle">
-                        Empty session — prefer a session with answered cards.
+                        Empty session — Not started. Prefer a session with
+                        answered cards.
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="text-xs text-ink-subtle">In progress</div>
+                    )}
                   </div>
                   <Link
                     href={`/conversations/session/${s.id}`}
                     className={
-                      progress.hasProgress ? "btn btn-primary" : "btn btn-secondary"
+                      progress.hasProgress
+                        ? "btn btn-primary"
+                        : "btn btn-secondary"
                     }
                   >
-                    Resume
+                    {progress.hasProgress ? "Continue" : "Open"}
                   </Link>
                 </li>
-              );
-            })}
+              ))}
           </ul>
         </section>
       ) : null}
@@ -111,88 +115,66 @@ export default async function ConversationsPage() {
           values and wrap-up.
         </p>
         <div className="mt-4 space-y-4">
-          {BABYMOON_ROUNDS.map((round) => {
-            const secs = estimateRoundSeconds(round.round);
-            const resume = resumeByRound[round.round];
-            return (
-              <div
-                key={round.id}
-                className="rounded-xl border border-border bg-bg-elevated p-4"
-              >
-                <div className="font-medium">
-                  Round {round.round}: {round.title}
-                </div>
-                <p className="mt-1 text-sm text-ink-muted">
-                  {round.prompt_ids.length} prompts · About{" "}
-                  {Math.round(secs / 60)} minutes
-                  {resume
-                    ? ` · ${resume.answeredCount} of ${resume.itemCount} saved`
-                    : ""}
-                </p>
-                <ModeStarter
-                  mode="babymoon"
-                  defaultMinutes={15}
-                  babymoonRound={round.round}
-                  buttonLabel={`Start round ${round.round}`}
-                  resumeSessionId={resume?.sessionId}
-                  resumeLabel={
-                    resume
-                      ? `Continue round ${round.round} (${resume.answeredCount}/${resume.itemCount})`
-                      : undefined
-                  }
-                />
-              </div>
-            );
-          })}
+          {BABYMOON_ROUNDS.map((round, i) => (
+            <BabymoonRoundCard
+              key={round.id}
+              round={round.round}
+              title={round.title}
+              promptCount={round.prompt_ids.length}
+              view={roundViews[i]!}
+            />
+          ))}
         </div>
       </section>
 
       <section className="space-y-4">
         <h2 className="font-display text-xl">Conversation Modes</h2>
-        {CONVERSATION_MODES.filter((mode) => mode.id !== "qa_integrity").map((mode) => {
-          const mix = Object.entries(mode.energy_mix)
-            .filter(([, n]) => (n ?? 0) > 0)
-            .map(
-              ([k, n]) =>
-                `${n} ${ENERGY_LABELS[k as keyof typeof ENERGY_LABELS]}`,
-            )
-            .join(" · ");
-          const last = sessions.find((s) => s.mode === mode.id);
-          return (
-            <article key={mode.id} className="surface p-5">
-              <h3 className="font-display text-lg">{mode.title}</h3>
-              <p className="mt-1 text-sm text-ink-muted">{mode.description}</p>
-              <dl className="mt-3 grid gap-1 text-sm text-ink-muted">
-                <div>
-                  <span className="text-ink">Expected time:</span>{" "}
-                  {mode.expected_minutes_label}
-                </div>
-                <div>
-                  <span className="text-ink">Energy mix:</span> {mix}
-                </div>
-                <div>
-                  <span className="text-ink">Topics:</span>{" "}
-                  {mode.topics.map((t) => t.replace(/_/g, " ")).join(", ")}
-                </div>
-                {last ? (
+        {CONVERSATION_MODES.filter((mode) => mode.id !== "qa_integrity").map(
+          (mode) => {
+            const mix = Object.entries(mode.energy_mix)
+              .filter(([, n]) => (n ?? 0) > 0)
+              .map(
+                ([k, n]) =>
+                  `${n} ${ENERGY_LABELS[k as keyof typeof ENERGY_LABELS]}`,
+              )
+              .join(" · ");
+            const last = sessions.find((s) => s.mode === mode.id);
+            return (
+              <article key={mode.id} className="surface p-5">
+                <h3 className="font-display text-lg">{mode.title}</h3>
+                <p className="mt-1 text-sm text-ink-muted">{mode.description}</p>
+                <dl className="mt-3 grid gap-1 text-sm text-ink-muted">
                   <div>
-                    <span className="text-ink">Last session:</span>{" "}
-                    {new Date(last.started_at).toLocaleDateString()} ·{" "}
-                    {last.status}
+                    <span className="text-ink">Expected time:</span>{" "}
+                    {mode.expected_minutes_label}
                   </div>
-                ) : (
                   <div>
-                    <span className="text-ink">Progress:</span> Not started yet
+                    <span className="text-ink">Energy mix:</span> {mix}
                   </div>
-                )}
-              </dl>
-              <ModeStarter
-                mode={mode.id}
-                defaultMinutes={mode.default_planned_minutes}
-              />
-            </article>
-          );
-        })}
+                  <div>
+                    <span className="text-ink">Topics:</span>{" "}
+                    {mode.topics.map((t) => t.replace(/_/g, " ")).join(", ")}
+                  </div>
+                  {last ? (
+                    <div>
+                      <span className="text-ink">Last session:</span>{" "}
+                      {new Date(last.started_at).toLocaleDateString()} ·{" "}
+                      {last.status}
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-ink">Progress:</span> Not started yet
+                    </div>
+                  )}
+                </dl>
+                <ModeStarter
+                  mode={mode.id}
+                  defaultMinutes={mode.default_planned_minutes}
+                />
+              </article>
+            );
+          },
+        )}
       </section>
     </AppShell>
   );

@@ -647,7 +647,16 @@ export type ConversationSessionStatus =
   | "active"
   | "paused"
   | "completed"
+  | "completed_with_followups"
   | "abandoned";
+
+/** Round-level status for curated Babymoon (and similar) sets. */
+export type ConversationRoundStatus =
+  | "not_started"
+  | "in_progress"
+  | "completed"
+  | "completed_with_followups";
+
 export type ConversationItemStatus =
   | "pending"
   | "opened"
@@ -680,6 +689,13 @@ export interface ConversationSession {
   created_by: string;
   current_item_index: number;
   summary: ConversationSessionSummary | null;
+  /** Persisted when the session completes (idempotent). */
+  completed_item_count?: number | null;
+  eligible_item_count?: number | null;
+  open_followup_count?: number | null;
+  /** True when this session is a Start-again repeat of a prior completed round. */
+  is_repeat?: boolean;
+  repeats_session_id?: string | null;
   created_at: string;
   updated_at: string;
   is_test_data?: boolean;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProgressBar, StatCard } from "@/components/shared/ui";
+import { ProgressTile } from "@/components/home/ProgressTile";
 import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDashboardStats } from "@/lib/services/stats";
 import { readStore } from "@/lib/db/store";
@@ -54,34 +55,41 @@ export default async function HomePage() {
       <section className="surface mb-6 p-5 sm:p-6">
         <h2 className="font-display text-2xl text-ink">Your progress</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Deep discussions, conversation prompts, and Essentials are counted
-          separately — Quick Picks do not automatically complete a library
-          question.
+          Tap a tile to see the exact records behind each count. Quick Picks do
+          not automatically complete a library question.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            label="Deep discussions answered"
+          <ProgressTile
+            href="/progress/deep-discussions"
+            label="Deep discussions"
             value={stats.progress.canonicalQuestionsAnswered}
+            explanation="Canonical questions with a saved deep answer"
             hint={`${stats.progress.canonicalQuestionsPartial} partial · ${stats.progress.canonicalQuestionsTotal} total`}
           />
-          <StatCard
-            label="Conversation prompts completed"
+          <ProgressTile
+            href="/progress/conversation-prompts"
+            label="Conversation prompts"
             value={stats.progress.conversationPromptsCompleted}
+            explanation="Quick and short prompts completed in Conversations"
             hint={`${stats.progress.conversationQuickAnswers} quick answers saved`}
           />
-          <StatCard
-            label="Essentials screens"
+          <ProgressTile
+            href="/questions/before-birth?filter=completed"
+            label="Essentials"
             value={`${stats.progress.essentialsScreensCompleted} of ${stats.progress.essentialsScreensVisible}`}
-            hint="Before Birth Essentials"
+            explanation="Completed Before Birth Essentials screens"
           />
-          <StatCard
+          <ProgressTile
+            href="/progress/shared-decisions"
             label="Shared decisions"
             value={stats.progress.sharedDecisions}
+            explanation="Agreed shared answers saved by both parents"
           />
-          <StatCard
+          <ProgressTile
+            href="/progress/open-followups"
             label="Open follow-ups"
             value={stats.progress.openFollowUps}
-            hint="Partial, undecided, research, cooling-off"
+            explanation="Items marked for later, provider input, research, or review"
           />
           <StatCard
             label="Overall completion"

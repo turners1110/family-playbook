@@ -62,6 +62,8 @@ export async function actionStartConversation(input: {
   babymoonRound?: 1 | 2 | 3;
   title?: string;
   forceNew?: boolean;
+  isRepeat?: boolean;
+  repeatsSessionId?: string | null;
 }) {
   const ctx = await requireIdentity();
   const { assertDurableStorageForProductWrites } = await import(
@@ -353,6 +355,11 @@ export async function actionCompleteConversation(sessionId: string) {
   await requireIdentity();
   await completeConversationSession(sessionId);
   revalidateConversationPaths(sessionId);
+  revalidatePath(`/conversations/session/${sessionId}/complete`);
+  revalidatePath("/progress/deep-discussions");
+  revalidatePath("/progress/conversation-prompts");
+  revalidatePath("/progress/shared-decisions");
+  revalidatePath("/progress/open-followups");
   return { ok: true as const };
 }
 

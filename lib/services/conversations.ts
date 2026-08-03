@@ -161,6 +161,9 @@ export async function startConversationSession(input: {
   builder?: Partial<SessionBuilderInput>;
   /** When true, never resume — always create (tests / explicit restart). */
   forceNew?: boolean;
+  /** Mark Start-again repeats of a completed round. */
+  isRepeat?: boolean;
+  repeatsSessionId?: string | null;
 }) {
   if (!input.forceNew) {
     const resumable = await findResumableConversationSession({
@@ -201,7 +204,9 @@ export async function startConversationSession(input: {
   let title = input.title;
   if (!title && input.babymoonRound) {
     const round = getBabymoonRound(input.babymoonRound);
-    title = `Babymoon · ${round.title}`;
+    title = input.isRepeat
+      ? `Babymoon · ${round.title} (repeat)`
+      : `Babymoon · ${round.title}`;
   }
   if (!title) title = `${mode.title} conversation`;
 
@@ -225,6 +230,11 @@ export async function startConversationSession(input: {
         created_by: input.createdBy,
         current_item_index: 0,
         summary: null,
+        completed_item_count: null,
+        eligible_item_count: null,
+        open_followup_count: null,
+        is_repeat: input.isRepeat ?? false,
+        repeats_session_id: input.repeatsSessionId ?? null,
         created_at: ts,
         updated_at: ts,
       };
@@ -740,11 +750,50 @@ export async function resolveConversationDifference(input: {
 
 export async function completeConversationSession(sessionId: string) {
   const ts = nowIso();
+  const { evaluateSessionCompletion, completionPersistedStatus } = await import(
+    "@/lib/services/round-status"
+  );
+
   await updateStore(
     (store) => {
       ensureCollections(store);
       const session = store.conversation_sessions!.find((s) => s.id === sessionId);
       if (!session) return store;
+
+      const eval_ = evaluateSessionCompletion(store, session);
+      const nextStatus = completionPersistedStatus(eval_);
+
+      // Idempotent: do not duplicate summary or reset index on repeat complete.
+      if (
+        session.status === "completed" ||
+        session.status === "completed_with_followups"
+      ) {
+        session.status = nextStatus;
+        session.completed_item_count = eval_.completedItemCount;
+        session.eligible_item_count = eval_.eligibleItemCount;
+        session.open_followup_count = eval_.openFollowupCount;
+        session.updated_at = ts;
+        if (!session.completed_at) session.completed_at = ts;
+        if (!session.summary) {
+          const items = store.conversation_session_items!.filter(
+            (i) => i.session_id === sessionId,
+          );
+          const answers = store.conversation_quick_answers!.filter(
+            (a) => a.session_id === sessionId,
+          );
+          const differences = store.conversation_differences!.filter(
+            (d) => d.session_id === sessionId,
+          );
+          session.summary = buildSessionSummary({
+            session,
+            items,
+            answers,
+            differences,
+          });
+        }
+        return store;
+      }
+
       const items = store.conversation_session_items!.filter(
         (i) => i.session_id === sessionId,
       );
@@ -760,8 +809,11 @@ export async function completeConversationSession(sessionId: string) {
         answers,
         differences,
       });
-      session.status = "completed";
+      session.status = nextStatus;
       session.completed_at = ts;
+      session.completed_item_count = eval_.completedItemCount;
+      session.eligible_item_count = eval_.eligibleItemCount;
+      session.open_followup_count = eval_.openFollowupCount;
       session.active_seconds = items.reduce(
         (sum, i) => sum + i.actual_time_seconds,
         0,

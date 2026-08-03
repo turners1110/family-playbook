@@ -14,6 +14,7 @@ import {
 import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
 import { buildFamilyProgressMetrics, buildProgressSnapshot } from "@/lib/services/answered-status";
 import { getConversationSessionProgress } from "@/lib/services/conversations";
+import { reconcileProgressTileCounts } from "@/lib/services/progress-records";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,7 @@ export default async function StorageDebugPage() {
   const resumeProgress = activeSession
     ? getConversationSessionProgress(store, activeSession.id)
     : null;
+  const reconciliation = reconcileProgressTileCounts(store, familyProgress);
 
   const latestQuick = [...quick].sort((a, b) =>
     b.updated_at.localeCompare(a.updated_at),
@@ -65,6 +67,7 @@ export default async function StorageDebugPage() {
   const essentialsDisplayed = familyProgress.essentialsScreensCompleted;
 
   const countMismatch =
+    !reconciliation.allMatch ||
     remoteCanonical !== homeCanonical ||
     remoteSessionAnswered !== homeConversation ||
     (resumeProgress != null &&
@@ -153,43 +156,53 @@ export default async function StorageDebugPage() {
       <section className="surface mt-5 p-5">
         <h2 className="font-display text-xl">Compare counts</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Home and Storage Debug both use{" "}
-          <code className="text-xs">buildFamilyProgressMetrics</code>. Mismatches
-          are flagged in red.
+          Home tile, detail list, and remote raw counts. Never hide mismatches.
         </p>
-        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-[28rem] text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-xs uppercase text-ink-subtle">
+                <th className="py-2 pr-3">Metric</th>
+                <th className="py-2 pr-3">Home tile</th>
+                <th className="py-2 pr-3">Detail list</th>
+                <th className="py-2 pr-3">Remote raw</th>
+                <th className="py-2">Match</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reconciliation.rows.map((row) => (
+                <tr key={row.key} className="border-b border-border/60">
+                  <td className="py-2 pr-3">{row.label}</td>
+                  <td className="py-2 pr-3">{row.home}</td>
+                  <td className="py-2 pr-3">{row.detail}</td>
+                  <td className="py-2 pr-3">{row.remoteRaw}</td>
+                  <td
+                    className={
+                      row.match ? "py-2 text-accent" : "py-2 text-danger"
+                    }
+                  >
+                    {row.match ? "yes" : "no"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Deep discussions (Home = Debug)
+              Essentials visible
             </dt>
-            <dd>{familyProgress.canonicalQuestionsAnswered}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Conversation prompts
-            </dt>
-            <dd>{familyProgress.conversationPromptsCompleted}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">Essentials</dt>
             <dd>
-              {familyProgress.essentialsScreensCompleted} of{" "}
+              {essentialsDisplayed} of{" "}
               {familyProgress.essentialsScreensVisible}
             </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">Shared decisions</dt>
-            <dd>{familyProgress.sharedDecisions}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">Open follow-ups</dt>
-            <dd>{familyProgress.openFollowUps}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
               Real quick answers
             </dt>
-            <dd>{familyProgress.conversationQuickAnswers}</dd>
+            <dd>{remoteQuick}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
@@ -233,16 +246,10 @@ export default async function StorageDebugPage() {
         {countMismatch ? (
           <p className="mt-3 text-sm text-danger" role="alert">
             Counts differ
-            {remoteCanonical !== homeCanonical
-              ? " · deep discussions"
-              : ""}
-            {remoteSessionAnswered !== homeConversation
-              ? " · conversation prompts"
-              : ""}
-            {resumeProgress != null &&
-            resumeProgress.answeredCount !== snapshot.conversationAnsweredCount
-              ? " · active session"
-              : ""}
+            {reconciliation.rows
+              .filter((r) => !r.match)
+              .map((r) => ` · ${r.label.toLowerCase()}`)
+              .join("")}
           </p>
         ) : (
           <p className="mt-3 text-sm text-accent" role="status">

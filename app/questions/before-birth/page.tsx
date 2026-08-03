@@ -10,11 +10,20 @@ import { BEFORE_BIRTH_PATHWAY_VERSION } from "@/lib/essentials/pathway";
 
 export const dynamic = "force-dynamic";
 
-export default async function BeforeBirthEssentialsPage() {
+export default async function BeforeBirthEssentialsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
   await requireFamilyContext();
+  const sp = await searchParams;
+  const filterCompleted = sp.filter === "completed";
   const store = await readStore();
   const dash = buildEssentialsDashboard(store);
   const suggestions = collectTaskSuggestions(store);
+  const completedScreens = dash.screens.filter(
+    (s) => s.visible && s.state === "completed",
+  );
 
   return (
     <AppShell
@@ -22,7 +31,10 @@ export default async function BeforeBirthEssentialsPage() {
       subtitle="A focused babymoon path — about 30 discussions, not the full library."
       actions={
         <div className="flex flex-wrap gap-2">
-          {dash.resume_screen_id ? (
+          <Link href="/home" className="btn btn-ghost">
+            Back to Home
+          </Link>
+          {dash.resume_screen_id && !filterCompleted ? (
             <Link
               href={`/questions/before-birth/screen/${dash.resume_screen_id}`}
               className="btn btn-primary"
@@ -79,8 +91,54 @@ export default async function BeforeBirthEssentialsPage() {
           <span>{dash.not_started} not started</span>
           <span>{dash.needs_follow_up} needs follow-up</span>
         </div>
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Link
+            href="/questions/before-birth?filter=completed"
+            className={
+              filterCompleted ? "btn btn-primary" : "btn btn-secondary"
+            }
+          >
+            Completed ({dash.completed})
+          </Link>
+          <Link
+            href="/questions/before-birth"
+            className={!filterCompleted ? "btn btn-primary" : "btn btn-secondary"}
+          >
+            All modules
+          </Link>
+        </div>
       </section>
 
+      {filterCompleted ? (
+        <section className="mb-5 space-y-3">
+          <h2 className="font-display text-xl">
+            Completed Essentials screens
+          </h2>
+          <p className="text-sm text-ink-muted">
+            {completedScreens.length} of {dash.visible_primary} visible screens
+          </p>
+          {completedScreens.length === 0 ? (
+            <p className="text-ink-muted">No completed Essentials screens yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {completedScreens.map((s) => (
+                <li key={s.screen.id} className="surface p-4">
+                  <div className="font-medium">{s.screen.title}</div>
+                  <p className="mt-1 text-sm text-ink-muted">
+                    {s.question?.short_title ?? s.screen.title} · {s.label}
+                  </p>
+                  <Link
+                    href={`/questions/before-birth/screen/${s.screen.id}`}
+                    className="btn btn-secondary mt-3"
+                  >
+                    Open screen
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : (
       <section className="mb-5 grid gap-3 sm:grid-cols-2">
         {dash.modules.map((mod) => (
           <Link
@@ -102,6 +160,7 @@ export default async function BeforeBirthEssentialsPage() {
           </Link>
         ))}
       </section>
+      )}
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2">
         <StatusCard

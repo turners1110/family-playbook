@@ -122,6 +122,13 @@ export type ConversationPromptDef = {
   show_difference_prompt: boolean;
   is_conversation_companion: boolean;
   is_trip_memory?: boolean;
+  /** When true, skipping does not block round completion. */
+  optional?: boolean;
+  /**
+   * When true, a linked deep library answer is required before the round
+   * item counts as fully complete. Default: false (quick-to-deep is optional).
+   */
+  requires_deep_answer?: boolean;
   active: boolean;
   scale_min?: number;
   scale_max?: number;

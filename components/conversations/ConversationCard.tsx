@@ -454,8 +454,8 @@ export function ConversationCard({
         advanceAfterSave: itemIndex < itemCount - 1,
         onSuccess: async () => {
           if (itemIndex >= itemCount - 1) {
-            setShowMomentum(true);
-            router.push(baseHref);
+            await actionCompleteConversation(session.id);
+            router.push(`/conversations/session/${session.id}/complete`);
             router.refresh();
             return;
           }
@@ -752,7 +752,7 @@ export function ConversationCard({
               onClick={() =>
                 runGuarded(async () => {
                   await actionCompleteConversation(session.id);
-                  router.push(`/conversations/session/${session.id}/summary`);
+                  router.push(`/conversations/session/${session.id}/complete`);
                 })
               }
             >
