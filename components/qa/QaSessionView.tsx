@@ -117,6 +117,7 @@ export function QaSessionView({
       ) : null}
 
       <ConversationCard
+        key={`${session.id}:${item.id}:${prompt.id}`}
         session={session}
         item={item}
         prompt={prompt}
@@ -129,6 +130,7 @@ export function QaSessionView({
         modeTitle={modeTitle}
         deepTarget={deepTarget}
         sessionBaseHref={`/conversations/test/${testRunId}`}
+        familyId={session.family_id}
       />
     </div>
   );

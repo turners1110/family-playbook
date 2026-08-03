@@ -61,15 +61,25 @@ export function EssentialsScreenView({
   const samAnswer = answers.find((a) => a.member_id === sam?.id);
   const michelleAnswer = answers.find((a) => a.member_id === michelle?.id);
 
+  const optionList = useMemo(() => screen.options ?? [], [screen.options]);
+  const optionSet = useMemo(() => new Set(optionList), [optionList]);
+
+  function filterSelected(values: string[]): string[] {
+    if (optionSet.size === 0) return values;
+    return values.filter((v) => optionSet.has(v));
+  }
+
   const [selected, setSelected] = useState<string[]>(() => {
     const c = shared?.payload.choice;
-    if (Array.isArray(c)) return c;
-    if (typeof c === "string" && c) return [c];
+    if (Array.isArray(c)) return filterSelected(c);
+    if (typeof c === "string" && c) return filterSelected([c]);
     return [];
   });
-  const [single, setSingle] = useState(
-    typeof shared?.payload.choice === "string" ? shared.payload.choice : "",
-  );
+  const [single, setSingle] = useState(() => {
+    const v =
+      typeof shared?.payload.choice === "string" ? shared.payload.choice : "";
+    return v && (optionSet.size === 0 || optionSet.has(v)) ? v : "";
+  });
   const [samText, setSamText] = useState(samAnswer?.payload.text ?? "");
   const [michelleText, setMichelleText] = useState(
     michelleAnswer?.payload.text ?? "",
@@ -103,8 +113,9 @@ export function EssentialsScreenView({
           )?.payload.text ?? ""
         : "",
   );
+  const [identityError, setIdentityError] = useState<string | null>(null);
+  const mountQuestionIdRef = useRef(screen.question_id);
 
-  const optionList = screen.options ?? [];
   const maxMulti =
     screen.id === "b1_labor_priorities" || screen.id === "f1_success" ? 5 : 99;
 
@@ -267,12 +278,57 @@ export function EssentialsScreenView({
     return writes;
   }
 
+  function assertEssentialsWrites(writes: SaveAnswerInput[]) {
+    if (mountQuestionIdRef.current !== screen.question_id) {
+      return { ok: false as const, reason: "question_mismatch" };
+    }
+    const allowedQuestionIds = new Set([
+      screen.question_id,
+      ...pairedQuestions.map((q) => q.id),
+    ]);
+    for (const w of writes) {
+      if (!allowedQuestionIds.has(w.question_id)) {
+        return { ok: false as const, reason: "question_mismatch" };
+      }
+      const choice = w.payload.choice;
+      if (typeof choice === "string" && choice && optionSet.size > 0) {
+        if (!optionSet.has(choice)) {
+          return { ok: false as const, reason: "stale_option" };
+        }
+      }
+      if (Array.isArray(choice) && optionSet.size > 0) {
+        for (const c of choice) {
+          if (!optionSet.has(c)) {
+            return { ok: false as const, reason: "stale_option" };
+          }
+        }
+      }
+    }
+    return { ok: true as const };
+  }
+
   function save(mode: SaveMode) {
     setMessage(null);
+    setIdentityError(null);
     void saveFb.runSave(
       async () => {
+        const writes = buildWrites(mode);
+        const check = assertEssentialsWrites(writes);
+        if (!check.ok) {
+          setIdentityError(
+            "This answer no longer matches the current question. Reload and retry.",
+          );
+          console.info("[stale_payload]", {
+            reason: check.reason,
+            screenId: screen.id,
+            questionId: screen.question_id,
+          });
+          throw new Error(
+            "This answer no longer matches the current question. Reload and retry.",
+          );
+        }
         await actionSaveEssentialsAnswersBatch({
-          answers: buildWrites(mode),
+          answers: writes,
           mutationId: saveFb.mutationId(),
         });
       },
@@ -315,6 +371,11 @@ export function EssentialsScreenView({
         <p className="rounded-xl bg-bg-elevated px-3 py-2 text-sm text-ink-muted">
           {screen.helper}
         </p>
+        {identityError ? (
+          <p className="text-sm text-danger" role="alert">
+            {identityError}
+          </p>
+        ) : null}
         {screen.provider_label ? (
           <p className="text-xs font-medium text-amber-800">{screen.provider_label}</p>
         ) : null}

@@ -37,6 +37,17 @@ import {
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
 import type { DeepQuestionTarget } from "@/lib/conversations/deep-link";
+import {
+  STALE_PAYLOAD_USER_MESSAGE,
+  assertSaveIdentity,
+  assertSelectedOptionsValid,
+  clearDraft,
+  draftStorageKey,
+  formIdentityKey,
+  readDraft,
+  writeDraft,
+  type ConversationDraftPayload,
+} from "@/lib/ui/form-identity";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -44,6 +55,40 @@ function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (a.selected_options.length) return a.selected_options.join(", ");
   if (a.scale != null) return String(a.scale);
   return "";
+}
+
+function emptyFormState() {
+  return {
+    samChoices: [] as string[],
+    michelleChoices: [] as string[],
+    samText: "",
+    michelleText: "",
+    samExplain: "",
+    michelleExplain: "",
+    samScale: null as number | null,
+    michelleScale: null as number | null,
+    customSam: "",
+    customMichelle: "",
+    sharedText: "",
+    keepGoing: false,
+  };
+}
+
+function stateFromAnswers(
+  samAns?: ConversationQuickAnswer | null,
+  michelleAns?: ConversationQuickAnswer | null,
+) {
+  return {
+    ...emptyFormState(),
+    samChoices: samAns?.selected_options ?? [],
+    michelleChoices: michelleAns?.selected_options ?? [],
+    samText: samAns?.short_text ?? "",
+    michelleText: michelleAns?.short_text ?? "",
+    samExplain: samAns?.explanation ?? "",
+    michelleExplain: michelleAns?.explanation ?? "",
+    samScale: samAns?.scale ?? null,
+    michelleScale: michelleAns?.scale ?? null,
+  };
 }
 
 export function ConversationCard({
@@ -59,6 +104,7 @@ export function ConversationCard({
   modeTitle,
   deepTarget = null,
   sessionBaseHref,
+  familyId = "family",
 }: {
   session: ConversationSession;
   item: ConversationSessionItem;
@@ -70,10 +116,9 @@ export function ConversationCard({
   itemCount: number;
   momentum: MomentumSuggestion[];
   modeTitle: string;
-  /** Pre-resolved by server via resolveDeepQuestionTarget — never build deep hrefs here. */
   deepTarget?: DeepQuestionTarget | null;
-  /** After save/advance, navigate here instead of refreshing a deep URL. */
   sessionBaseHref?: string;
+  familyId?: string;
 }) {
   void _difference;
   const router = useRouter();
@@ -87,34 +132,79 @@ export function ConversationCard({
       ? `/conversations/test/${session.test_run_id}`
       : `/conversations/session/${session.id}`);
 
+  const identity = useMemo(
+    () => ({
+      sessionId: session.id,
+      sessionItemId: item.id,
+      questionId: prompt.id,
+      screenGroup: item.branch_context?.grouped_with
+        ? [prompt.id, ...(item.branch_context.grouped_with as string[])].join("+")
+        : undefined,
+    }),
+    [session.id, item.id, prompt.id, item.branch_context],
+  );
+  const identityKey = formIdentityKey(identity);
+  const draftKey = draftStorageKey(familyId, identity);
+
   const samMember = members.find((m) => m.display_name === "Sam");
   const michelleMember = members.find((m) => m.display_name === "Michelle");
 
   const samAns = answers.find((a) => a.actor === "sam");
   const michelleAns = answers.find((a) => a.actor === "michelle");
 
-  const [samChoices, setSamChoices] = useState<string[]>(
-    samAns?.selected_options ?? [],
+  const validOptionValues = useMemo(
+    () => (prompt.answer_options ?? []).map((o) => o.value),
+    [prompt.answer_options],
   );
-  const [michelleChoices, setMichelleChoices] = useState<string[]>(
-    michelleAns?.selected_options ?? [],
-  );
-  const [samText, setSamText] = useState(samAns?.short_text ?? "");
-  const [michelleText, setMichelleText] = useState(
-    michelleAns?.short_text ?? "",
-  );
-  const [samExplain, setSamExplain] = useState(samAns?.explanation ?? "");
-  const [michelleExplain, setMichelleExplain] = useState(
-    michelleAns?.explanation ?? "",
-  );
-  const [samScale, setSamScale] = useState<number | null>(samAns?.scale ?? null);
-  const [michelleScale, setMichelleScale] = useState<number | null>(
-    michelleAns?.scale ?? null,
-  );
-  const [customSam, setCustomSam] = useState("");
-  const [customMichelle, setCustomMichelle] = useState("");
-  const [sharedText, setSharedText] = useState("");
-  const [keepGoing, setKeepGoing] = useState(false);
+
+  function filterChoices(choices: string[]): string[] {
+    if (validOptionValues.length === 0 || prompt.allow_custom_answer) {
+      return choices;
+    }
+    const allowed = new Set(validOptionValues);
+    return choices.filter((c) => allowed.has(c));
+  }
+
+  const [form, setForm] = useState(() => {
+    if (typeof window !== "undefined") {
+      const draft = readDraft(draftKey);
+      if (draft?.identityKey === identityKey) {
+        return {
+          samChoices: filterChoices(draft.samChoices),
+          michelleChoices: filterChoices(draft.michelleChoices),
+          samText: draft.samText,
+          michelleText: draft.michelleText,
+          samExplain: draft.samExplain,
+          michelleExplain: draft.michelleExplain,
+          samScale: draft.samScale,
+          michelleScale: draft.michelleScale,
+          customSam: draft.customSam,
+          customMichelle: draft.customMichelle,
+          sharedText: draft.sharedText,
+          keepGoing: false,
+        };
+      }
+    }
+    const fromAnswers = stateFromAnswers(samAns, michelleAns);
+    return {
+      ...fromAnswers,
+      samChoices: filterChoices(fromAnswers.samChoices),
+      michelleChoices: filterChoices(fromAnswers.michelleChoices),
+    };
+  });
+  const [draftRestored, setDraftRestored] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const draft = readDraft(draftKey);
+    return Boolean(draft?.identityKey === identityKey);
+  });
+  const [identityError, setIdentityError] = useState<string | null>(null);
+  // Frozen at mount — parent must remount on identity change via key=.
+  // Detects props drift if a key is missing (blocks stale saves).
+  const mountIdentityRef = useRef({
+    sessionId: session.id,
+    sessionItemId: item.id,
+    questionId: prompt.id,
+  });
 
   useEffect(() => {
     void actionOpenConversationItem(session.id, item.id);
@@ -132,6 +222,69 @@ export function ConversationCard({
     baseHref,
     deepTarget?.href,
   ]);
+
+  // Persist unsaved draft for THIS identity only (external sessionStorage).
+  useEffect(() => {
+    const payload: ConversationDraftPayload = {
+      identityKey,
+      samChoices: form.samChoices,
+      michelleChoices: form.michelleChoices,
+      samText: form.samText,
+      michelleText: form.michelleText,
+      samExplain: form.samExplain,
+      michelleExplain: form.michelleExplain,
+      samScale: form.samScale,
+      michelleScale: form.michelleScale,
+      customSam: form.customSam,
+      customMichelle: form.customMichelle,
+      sharedText: form.sharedText,
+      updatedAt: new Date().toISOString(),
+    };
+    writeDraft(draftKey, payload);
+  }, [form, draftKey, identityKey]);
+
+  const {
+    samChoices,
+    michelleChoices,
+    samText,
+    michelleText,
+    samExplain,
+    michelleExplain,
+    samScale,
+    michelleScale,
+    customSam,
+    customMichelle,
+    sharedText,
+    keepGoing,
+  } = form;
+
+  const setSamChoices = (v: string[] | ((p: string[]) => string[])) =>
+    setForm((f) => ({
+      ...f,
+      samChoices: typeof v === "function" ? v(f.samChoices) : v,
+    }));
+  const setMichelleChoices = (v: string[] | ((p: string[]) => string[])) =>
+    setForm((f) => ({
+      ...f,
+      michelleChoices: typeof v === "function" ? v(f.michelleChoices) : v,
+    }));
+  const setSamText = (v: string) => setForm((f) => ({ ...f, samText: v }));
+  const setMichelleText = (v: string) =>
+    setForm((f) => ({ ...f, michelleText: v }));
+  const setSamExplain = (v: string) =>
+    setForm((f) => ({ ...f, samExplain: v }));
+  const setMichelleExplain = (v: string) =>
+    setForm((f) => ({ ...f, michelleExplain: v }));
+  const setSamScale = (v: number | null) =>
+    setForm((f) => ({ ...f, samScale: v }));
+  const setMichelleScale = (v: number | null) =>
+    setForm((f) => ({ ...f, michelleScale: v }));
+  const setCustomSam = (v: string) => setForm((f) => ({ ...f, customSam: v }));
+  const setCustomMichelle = (v: string) =>
+    setForm((f) => ({ ...f, customMichelle: v }));
+  const setSharedText = (v: string) =>
+    setForm((f) => ({ ...f, sharedText: v }));
+  const setKeepGoing = (v: boolean) => setForm((f) => ({ ...f, keepGoing: v }));
 
   const energyLabel = ENERGY_LABELS[storeEnergyToLevel(item.energy)];
   const differs =
@@ -191,16 +344,59 @@ export function ConversationCard({
     };
   }
 
+  function assertCurrentPayload(writes: ReturnType<typeof buildActorWrite>[]) {
+    const mounted = mountIdentityRef.current;
+    const idCheck = assertSaveIdentity({
+      expectedSessionId: mounted.sessionId,
+      expectedSessionItemId: mounted.sessionItemId,
+      expectedQuestionId: mounted.questionId,
+      payloadSessionId: session.id,
+      payloadSessionItemId: item.id,
+      payloadQuestionId: prompt.id,
+    });
+    if (!idCheck.ok) return idCheck;
+    for (const w of writes) {
+      const optCheck = assertSelectedOptionsValid(
+        w.selectedOptions ?? [],
+        validOptionValues,
+        Boolean(prompt.allow_custom_answer),
+      );
+      if (!optCheck.ok) return optCheck;
+    }
+    return { ok: true as const };
+  }
+
   function saveActor(actor: "sam" | "michelle") {
     void save.runSave(
       async () => {
-        await actionSaveConversationAnswersBatch({
+        const writes = [buildActorWrite(actor)];
+        const check = assertCurrentPayload(writes);
+        if (!check.ok) {
+          setIdentityError(STALE_PAYLOAD_USER_MESSAGE);
+          console.info("[stale_payload]", {
+            reason: check.reason,
+            sessionId: session.id,
+            sessionItemId: item.id,
+            questionId: prompt.id,
+          });
+          throw new Error(STALE_PAYLOAD_USER_MESSAGE);
+        }
+        const ack = await actionSaveConversationAnswersBatch({
           sessionId: session.id,
           itemId: item.id,
-          answers: [buildActorWrite(actor)],
+          answers: writes,
           mutationId: save.mutationId(),
           testRunId: session.test_run_id,
+          expectedPromptId: prompt.id,
         });
+        if (!ack.ok || !ack.verified) {
+          throw new Error(
+            "Save could not be verified. Your answer is still on this screen.",
+          );
+        }
+        clearDraft(draftKey);
+        setDraftRestored(false);
+        return ack;
       },
       {
         operation: `save_actor_${actor}`,
@@ -218,12 +414,25 @@ export function ConversationCard({
   function saveAndNext() {
     void save.runSave(
       async () => {
+        const writes = [buildActorWrite("sam"), buildActorWrite("michelle")];
+        const check = assertCurrentPayload(writes);
+        if (!check.ok) {
+          setIdentityError(STALE_PAYLOAD_USER_MESSAGE);
+          console.info("[stale_payload]", {
+            reason: check.reason,
+            sessionId: session.id,
+            sessionItemId: item.id,
+            questionId: prompt.id,
+          });
+          throw new Error(STALE_PAYLOAD_USER_MESSAGE);
+        }
         const ack = await actionSaveConversationAnswersBatch({
           sessionId: session.id,
           itemId: item.id,
-          answers: [buildActorWrite("sam"), buildActorWrite("michelle")],
+          answers: writes,
           mutationId: save.mutationId(),
           testRunId: session.test_run_id,
+          expectedPromptId: prompt.id,
           advance: itemIndex < itemCount - 1,
         });
         if (!ack.ok || !ack.verified) {
@@ -231,6 +440,8 @@ export function ConversationCard({
             "Save could not be verified. Your answer is still on this screen.",
           );
         }
+        clearDraft(draftKey);
+        setDraftRestored(false);
         return ack;
       },
       {
@@ -290,7 +501,7 @@ export function ConversationCard({
 
       <article
         className="surface animate-[fadeUp_280ms_ease-out] p-5"
-        key={item.id}
+        key={identityKey}
       >
         <h1
           ref={headingRef}
@@ -299,6 +510,16 @@ export function ConversationCard({
         >
           {prompt.prompt}
         </h1>
+        {draftRestored ? (
+          <p className="mt-2 text-sm text-accent-strong" role="status">
+            Unsaved draft restored
+          </p>
+        ) : null}
+        {identityError ? (
+          <p className="mt-2 text-sm text-danger" role="alert">
+            {identityError}
+          </p>
+        ) : null}
         {prompt.suggested_discussion_minutes ? (
           <p className="mt-2 text-sm text-ink-muted">
             Suggested discussion: about {prompt.suggested_discussion_minutes}{" "}

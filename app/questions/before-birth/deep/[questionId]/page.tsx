@@ -127,6 +127,7 @@ export default async function QuickToDeepPage({
       )}
 
       <EssentialsScreenView
+        key={`deep_${questionId}`}
         screen={{
           id: `deep_${questionId}`,
           module_id: "conversation",

@@ -86,6 +86,7 @@ export default async function ConversationSessionPage({
   return (
     <AppShell title={session.title} subtitle={`${mode.title} · card view`}>
       <ConversationCard
+        key={`${session.id}:${item.id}:${prompt.id}`}
         session={session}
         item={item}
         prompt={prompt}
@@ -98,6 +99,7 @@ export default async function ConversationSessionPage({
         modeTitle={mode.title}
         deepTarget={deepTarget}
         sessionBaseHref={`/conversations/session/${session.id}`}
+        familyId={store.family.id}
       />
     </AppShell>
   );

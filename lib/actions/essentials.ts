@@ -32,6 +32,8 @@ function revalidateEssentials() {
   revalidatePath("/babymoon");
   revalidatePath("/before-baby");
   revalidatePath("/questions");
+  revalidatePath("/home");
+  revalidatePath("/conversations");
 }
 
 export async function actionSaveEssentialsAnswer(input: SaveAnswerInput) {
@@ -39,8 +41,7 @@ export async function actionSaveEssentialsAnswer(input: SaveAnswerInput) {
   await requireIdentity();
   try {
     await saveAnswer(input);
-    // Light revalidation — skip dashboard/history churn on every answer write.
-    revalidatePath("/questions/before-birth");
+    revalidateEssentials();
     console.info("[save_timing]", {
       operation: "actionSaveEssentialsAnswer",
       questionId: input.question_id,
@@ -80,7 +81,7 @@ export async function actionSaveEssentialsAnswersBatch(input: {
   await requireIdentity();
   try {
     await saveAnswersBatch(input.answers, undefined, input.mutationId);
-    revalidatePath("/questions/before-birth");
+    revalidateEssentials();
     console.info("[save_timing]", {
       operation: "actionSaveEssentialsAnswersBatch",
       questionId: input.answers[0]?.question_id ?? null,

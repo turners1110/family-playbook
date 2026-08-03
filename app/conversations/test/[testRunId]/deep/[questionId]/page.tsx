@@ -114,6 +114,7 @@ export default async function QaDeepQuestionPage({
       </div>
 
       <ConversationCard
+        key={`${session.id}:${item.id}:${prompt.id}`}
         session={{ ...session, current_item_index: itemIndex }}
         item={item}
         prompt={prompt}
@@ -126,6 +127,7 @@ export default async function QaDeepQuestionPage({
         modeTitle={mode.title}
         deepTarget={deepTarget}
         sessionBaseHref={`/conversations/test/${testRunId}`}
+        familyId={session.family_id}
       />
     </AppShell>
   );

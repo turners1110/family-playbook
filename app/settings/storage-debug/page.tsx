@@ -12,6 +12,8 @@ import {
   storageBackupLabel,
 } from "@/lib/db/durable-save";
 import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
+import { buildProgressSnapshot } from "@/lib/services/answered-status";
+import { getConversationSessionProgress } from "@/lib/services/conversations";
 
 export const dynamic = "force-dynamic";
 
@@ -41,9 +43,23 @@ export default async function StorageDebugPage() {
   const answers = store.answers ?? [];
   const tasks = (store.checklist_tasks ?? []).length;
   const qaRuns = store.qa_runs?.length ?? 0;
-  const activeSession = sessions.find(
-    (s) => s.status === "active" || s.status === "paused",
-  );
+  const activeSession =
+    sessions
+      .filter((s) => s.status === "active" || s.status === "paused")
+      .sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0] ?? null;
+  const snapshot = buildProgressSnapshot(store, activeSession);
+  const resumeProgress = activeSession
+    ? getConversationSessionProgress(store, activeSession.id)
+    : null;
+
+  const latestQuick = [...quick].sort((a, b) =>
+    b.updated_at.localeCompare(a.updated_at),
+  )[0];
+
+  const countMismatch =
+    resumeProgress &&
+    (resumeProgress.answeredCount !== snapshot.conversationAnsweredCount ||
+      resumeProgress.itemCount !== snapshot.conversationItemCount);
 
   return (
     <AppShell
@@ -123,6 +139,108 @@ export default async function StorageDebugPage() {
             <dd>{health.backupCount}</dd>
           </div>
         </dl>
+      </section>
+
+      <section className="surface mt-5 p-5">
+        <h2 className="font-display text-xl">Compare counts</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Canonical progress vs resume display. Mismatches are flagged.
+        </p>
+        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Homepage / library answered
+            </dt>
+            <dd>
+              {snapshot.libraryAnsweredCount} / {snapshot.libraryQuestionCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Essentials completed screens
+            </dt>
+            <dd>
+              {snapshot.essentialsCompletedScreens} /{" "}
+              {snapshot.essentialsVisibleScreens}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Active session answered (canonical)
+            </dt>
+            <dd>
+              {snapshot.conversationAnsweredCount} /{" "}
+              {snapshot.conversationItemCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Resume card answered
+            </dt>
+            <dd>
+              {resumeProgress
+                ? `${resumeProgress.answeredCount} / ${resumeProgress.itemCount}`
+                : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Latest saved prompt</dt>
+            <dd className="font-mono text-xs">
+              {latestQuick?.prompt_id ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Latest session item</dt>
+            <dd className="font-mono text-xs">
+              {latestQuick?.session_item_id ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Latest actor</dt>
+            <dd>{latestQuick?.actor ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Latest verified remote version
+            </dt>
+            <dd>{health.version ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Canonical library answered
+            </dt>
+            <dd>{snapshot.libraryAnsweredCount}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Status index size
+            </dt>
+            <dd>{snapshot.statusIndexSize}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Last remote update (cache signal)
+            </dt>
+            <dd>
+              {health.updatedAt
+                ? new Date(health.updatedAt).toLocaleString()
+                : "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Count mismatch flagged
+            </dt>
+            <dd>{countMismatch ? "yes" : "no"}</dd>
+          </div>
+        </dl>
+        {countMismatch ? (
+          <p className="mt-3 text-sm text-danger" role="alert">
+            Count mismatch between canonical snapshot and resume progress.
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-accent">Counts aligned.</p>
+        )}
       </section>
 
       <section className="surface mt-5 p-5">

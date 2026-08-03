@@ -358,6 +358,8 @@ export async function saveConversationQuickAnswersBatch(input: {
   answers: ConversationAnswerWrite[];
   status?: ConversationItemStatus;
   mutationId?: string;
+  /** Client-asserted prompt id — must match the session item. */
+  expectedPromptId?: string;
   /** Persist answers only — do not advance until read-back verification. */
   advance?: boolean;
 }): Promise<{
@@ -400,6 +402,21 @@ export async function saveConversationQuickAnswersBatch(input: {
   if (!previewItem || !previewSession) {
     throw new Error(
       "Conversation item missing — answer was not saved. Stay on this card and retry.",
+    );
+  }
+  if (
+    input.expectedPromptId &&
+    previewItem.prompt_id !== input.expectedPromptId
+  ) {
+    console.info("[stale_payload]", {
+      reason: "question_mismatch",
+      sessionId: input.sessionId,
+      sessionItemId: input.itemId,
+      expectedPromptId: input.expectedPromptId,
+      actualPromptId: previewItem.prompt_id,
+    });
+    throw new Error(
+      "This answer no longer matches the current question. Reload and retry.",
     );
   }
   promptId = previewItem.prompt_id;

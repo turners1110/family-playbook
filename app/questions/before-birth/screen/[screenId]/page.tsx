@@ -122,6 +122,7 @@ export default async function EssentialsScreenPage({
       )}
 
       <EssentialsScreenView
+        key={screen.id}
         screen={screen}
         question={question}
         pairedQuestions={pairedQuestions}

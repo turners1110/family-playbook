@@ -42,8 +42,13 @@ function revalidateConversationPaths(sessionId?: string, light = false) {
     revalidatePath(`/conversations/session/${sessionId}`);
     revalidatePath(`/conversations/test/${sessionId}`);
   }
+  // Progress surfaces must update immediately after verified saves.
+  revalidatePath("/conversations");
+  revalidatePath("/home");
+  revalidatePath("/questions");
+  revalidatePath("/questions/before-birth");
+  revalidatePath("/babymoon");
   if (!light) {
-    revalidatePath("/conversations");
     revalidatePath("/conversations/history");
     if (sessionId) {
       revalidatePath(`/conversations/session/${sessionId}/summary`);
@@ -144,6 +149,8 @@ export async function actionSaveConversationAnswersBatch(input: {
   advance?: boolean;
   mutationId?: string;
   testRunId?: string | null;
+  /** Must match the session item's prompt_id. */
+  expectedPromptId?: string;
 }) {
   const started = Date.now();
   try {
@@ -159,6 +166,7 @@ export async function actionSaveConversationAnswersBatch(input: {
       answers: input.answers,
       status: input.status,
       mutationId: input.mutationId,
+      expectedPromptId: input.expectedPromptId,
       advance: false,
     });
     const mutationMs = Date.now() - mutationStarted;
