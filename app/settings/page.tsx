@@ -36,6 +36,9 @@ export default async function SettingsPage() {
           <Link href="/settings/storage-health" className="btn btn-ghost">
             Storage health
           </Link>
+          <Link href="/settings/storage-debug" className="btn btn-ghost">
+            Storage debug
+          </Link>
           <Link href="/settings/test-lab" className="btn btn-ghost">
             Test Lab
           </Link>

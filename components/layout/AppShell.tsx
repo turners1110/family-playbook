@@ -3,6 +3,7 @@ import { NAV_ITEMS } from "@/lib/constants/enums";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
 import { AuthStatus } from "@/components/layout/AuthStatus";
+import { storageBackupLabel } from "@/lib/db/durable-save";
 
 export async function AppShell({
   children,
@@ -22,6 +23,7 @@ export async function AppShell({
   if (ctx.mode === "supabase" && ctx.profile.email) {
     await syncLocalIdentityFromAuth(ctx.profile.email, ctx.profile.display_name);
   }
+  const backup = storageBackupLabel();
 
   return (
     <div className="min-h-screen">
@@ -39,13 +41,20 @@ export async function AppShell({
             </div>
             <div className="truncate text-xs text-ink-subtle">
               {ctx.family.name}
-              {ctx.mode === "emergency" ? " · Trip Mode · Online Backup Enabled" : ""}
+              {ctx.mode === "emergency" ? ` · ${backup.label}` : ""}
             </div>
           </Link>
           <div className="flex items-center gap-2">
             {ctx.mode === "emergency" && (
-              <span className="hidden rounded-full border border-border bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent-strong sm:inline">
-                Trip Mode · Online Backup Enabled
+              <span
+                className={
+                  backup.remote
+                    ? "hidden rounded-full border border-border bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent-strong sm:inline"
+                    : "hidden rounded-full border border-danger/40 bg-danger-soft px-2.5 py-1 text-xs font-medium text-danger sm:inline"
+                }
+                title={backup.warning ?? undefined}
+              >
+                {backup.label}
               </span>
             )}
             <Link href="/search" className="btn btn-ghost hidden sm:inline-flex">

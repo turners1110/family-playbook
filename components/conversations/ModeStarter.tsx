@@ -11,16 +11,22 @@ export function ModeStarter({
   defaultMinutes,
   babymoonRound,
   buttonLabel = "Start",
+  resumeSessionId,
+  resumeLabel,
 }: {
   mode: ConversationModeId;
   defaultMinutes: number;
   babymoonRound?: 1 | 2 | 3;
   buttonLabel?: string;
+  /** When set, Continue opens this session instead of creating a blank one. */
+  resumeSessionId?: string | null;
+  resumeLabel?: string;
 }) {
   const router = useRouter();
   const [minutes, setMinutes] = useState(defaultMinutes);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const canResume = Boolean(resumeSessionId);
 
   return (
     <div className="mt-3 space-y-3">
@@ -45,9 +51,21 @@ export function ModeStarter({
           {error}
         </p>
       ) : null}
+      {canResume ? (
+        <button
+          type="button"
+          className="btn btn-primary min-h-11 w-full"
+          disabled={pending}
+          onClick={() => {
+            router.push(`/conversations/session/${resumeSessionId}`);
+          }}
+        >
+          {resumeLabel ?? "Continue saved session"}
+        </button>
+      ) : null}
       <button
         type="button"
-        className="btn btn-primary min-h-11 w-full"
+        className={canResume ? "btn btn-secondary min-h-11 w-full" : "btn btn-primary min-h-11 w-full"}
         disabled={pending}
         onClick={() => {
           setError(null);
@@ -57,6 +75,7 @@ export function ModeStarter({
                 mode,
                 plannedMinutes: babymoonRound ? 15 : minutes,
                 babymoonRound,
+                forceNew: canResume,
               });
               router.push(`/conversations/session/${result.sessionId}`);
             } catch (e) {
@@ -65,7 +84,11 @@ export function ModeStarter({
           });
         }}
       >
-        {pending ? "Starting…" : buttonLabel}
+        {pending
+          ? "Starting…"
+          : canResume
+            ? "Start a new session instead"
+            : buttonLabel}
       </button>
     </div>
   );

@@ -7,10 +7,17 @@ import {
   VERY_SLOW_SAVE_MS,
   classifySaveError,
   createIdempotencyKey,
+  durableSaveStatusLabel,
   logSaveTiming,
   type SaveTimingLog,
   type SaveUiState,
 } from "@/lib/ui/save-feedback";
+
+type DurableAck = {
+  ok?: boolean;
+  verified?: boolean;
+  mutationSucceeded?: boolean;
+};
 
 type RunOptions = {
   operation: string;
@@ -18,10 +25,20 @@ type RunOptions = {
   sessionId?: string | null;
   testRunId?: string | null;
   questionId?: string | null;
-  /** When true, after saved flash move to moving_to_next. */
+  /** When true, after verified save flash move to moving_to_next. */
   advanceAfterSave?: boolean;
-  onSuccess?: () => void | Promise<void>;
+  onSuccess?: (ack?: unknown) => void | Promise<void>;
 };
+
+function assertDurableAck(result: unknown): void {
+  if (!result || typeof result !== "object") return;
+  const ack = result as DurableAck;
+  if (ack.ok === false || ack.verified === false || ack.mutationSucceeded === false) {
+    throw new Error(
+      "Save could not be verified. Your answer is still on this screen — tap Retry.",
+    );
+  }
+}
 
 export function useSaveFeedback() {
   const [state, setState] = useState<SaveUiState>("idle");
@@ -45,7 +62,11 @@ export function useSaveFeedback() {
   useEffect(() => () => clearTimers(), [clearTimers]);
 
   const isBusy =
-    state === "saving" || state === "saved" || state === "moving_to_next";
+    state === "saving" ||
+    state === "verifying" ||
+    state === "retrying" ||
+    state === "saved" ||
+    state === "moving_to_next";
 
   const ensureIdempotencyKey = useCallback(() => {
     if (!idempotencyKeyRef.current) {
@@ -67,7 +88,7 @@ export function useSaveFeedback() {
       clearTimers();
       setSlowTier(0);
       setStatusMessage(null);
-      setState("saving");
+      setState(retryCount > 0 ? "retrying" : "saving");
 
       const key = ensureIdempotencyKey();
       const started = performance.now();
@@ -77,7 +98,10 @@ export function useSaveFeedback() {
       );
 
       try {
-        await fn();
+        const result = await fn();
+        setState("verifying");
+        setStatusMessage("Verifying save…");
+        assertDurableAck(result);
         clearTimers();
         const durationMs = performance.now() - started;
         const log: SaveTimingLog = {
@@ -106,14 +130,14 @@ export function useSaveFeedback() {
           setStatusMessage("Loading next question…");
         }
 
-        await options.onSuccess?.();
+        await options.onSuccess?.(result);
         resetIdempotencyKey();
         setState("idle");
         setStatusMessage(null);
         setSlowTier(0);
         setRetryCount(0);
         lockRef.current = false;
-        return { ok: true as const, mutationId: key };
+        return { ok: true as const, mutationId: key, result };
       } catch (error) {
         clearTimers();
         const classified = classifySaveError(error);
@@ -133,9 +157,6 @@ export function useSaveFeedback() {
         setState(classified.state);
         setStatusMessage(classified.message);
         setSlowTier(0);
-        // Keep lock released so Retry works; keep same idempotency key for retry of same attempt
-        // Spec: "Do not create a new idempotency key during automatic rerenders"
-        // On explicit Retry we should mint a new key.
         lockRef.current = false;
         return { ok: false as const, error };
       }
@@ -184,6 +205,7 @@ export function useSaveFeedback() {
   return {
     state,
     statusMessage,
+    statusLabel: durableSaveStatusLabel(state),
     slowTier,
     isBusy,
     showLeaveGuard,

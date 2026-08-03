@@ -21,13 +21,25 @@ export function SaveButton({
   disabled?: boolean;
 }) {
   const busy =
-    state === "saving" || state === "saved" || state === "moving_to_next";
+    state === "saving" ||
+    state === "verifying" ||
+    state === "retrying" ||
+    state === "saved" ||
+    state === "moving_to_next";
   const text = saveButtonIdleLabel(state, idleLabel);
   let label: ReactNode = text;
-  if (state === "saving") {
+  if (state === "saving" || state === "verifying" || state === "retrying") {
     label = (
       <>
-        <InlineSpinner label="Saving" />
+        <InlineSpinner
+          label={
+            state === "verifying"
+              ? "Verifying"
+              : state === "retrying"
+                ? "Retrying"
+                : "Saving"
+          }
+        />
         {text}
       </>
     );

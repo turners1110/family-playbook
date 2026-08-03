@@ -33,6 +33,7 @@ import {
   PendingNavigationGuard,
   RetrySavePanel,
   SaveButton,
+  SaveStatusBanner,
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
 import type { DeepQuestionTarget } from "@/lib/conversations/deep-link";
@@ -217,7 +218,7 @@ export function ConversationCard({
   function saveAndNext() {
     void save.runSave(
       async () => {
-        await actionSaveConversationAnswersBatch({
+        const ack = await actionSaveConversationAnswersBatch({
           sessionId: session.id,
           itemId: item.id,
           answers: [buildActorWrite("sam"), buildActorWrite("michelle")],
@@ -225,6 +226,12 @@ export function ConversationCard({
           testRunId: session.test_run_id,
           advance: itemIndex < itemCount - 1,
         });
+        if (!ack.ok || !ack.verified) {
+          throw new Error(
+            "Save could not be verified. Your answer is still on this screen.",
+          );
+        }
+        return ack;
       },
       {
         operation: "save_and_next",
@@ -533,6 +540,7 @@ export function ConversationCard({
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-bg-elevated/95 px-3 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-lg flex-col gap-2">
+          <SaveStatusBanner state={save.state} message={save.statusMessage} />
           <SlowSaveNotice tier={save.slowTier} />
           <div className="flex flex-wrap gap-2">
             <button

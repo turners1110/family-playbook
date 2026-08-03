@@ -1,10 +1,12 @@
 export type SaveUiState =
   | "idle"
   | "saving"
+  | "verifying"
   | "saved"
   | "moving_to_next"
   | "conflict"
-  | "failed";
+  | "failed"
+  | "retrying";
 
 export type SaveTimingStage =
   | "server_action"
@@ -81,6 +83,10 @@ export function saveButtonIdleLabel(state: SaveUiState, idleLabel: string): stri
   switch (state) {
     case "saving":
       return "Saving…";
+    case "verifying":
+      return "Verifying…";
+    case "retrying":
+      return "Retrying…";
     case "saved":
       return "Saved";
     case "moving_to_next":
@@ -90,6 +96,29 @@ export function saveButtonIdleLabel(state: SaveUiState, idleLabel: string): stri
       return "Couldn’t save";
     default:
       return idleLabel;
+  }
+}
+
+export function durableSaveStatusLabel(state: SaveUiState): string {
+  switch (state) {
+    case "idle":
+      return "All changes saved";
+    case "saving":
+      return "Saving…";
+    case "verifying":
+      return "Verifying save…";
+    case "retrying":
+      return "Retrying…";
+    case "saved":
+      return "All changes saved";
+    case "moving_to_next":
+      return "All changes saved";
+    case "failed":
+      return "Save failed";
+    case "conflict":
+      return "Conflict detected";
+    default:
+      return "All changes saved";
   }
 }
 

@@ -4,18 +4,40 @@ import { ModeStarter } from "@/components/conversations/ModeStarter";
 import { CONVERSATION_MODES } from "@/lib/conversations/modes";
 import { BABYMOON_ROUNDS, estimateRoundSeconds } from "@/lib/conversations/babymoon-set";
 import { ENERGY_LABELS } from "@/lib/conversations/response-types";
-import { listConversationSessions } from "@/lib/services/conversations";
+import {
+  findResumableConversationSession,
+  getConversationSessionProgress,
+  listConversationSessions,
+} from "@/lib/services/conversations";
 import { formatApproximateActiveTime } from "@/lib/conversations/timing";
 import { getActiveQuickPrompts, countQuickToDeepLinks } from "@/lib/conversations/quick-prompts";
+import { readStore } from "@/lib/db/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConversationsPage() {
+  const store = await readStore();
   const sessions = await listConversationSessions();
   const unfinished = sessions.filter(
     (s) => s.status === "active" || s.status === "paused",
   );
   const prompts = getActiveQuickPrompts();
+
+  const roundResume = await Promise.all(
+    BABYMOON_ROUNDS.map(async (round) => ({
+      round: round.round,
+      resume: await findResumableConversationSession({
+        mode: "babymoon",
+        babymoonRound: round.round,
+      }),
+    })),
+  );
+  const resumeByRound = Object.fromEntries(
+    roundResume.map((r) => [r.round, r.resume]),
+  ) as Record<
+    number,
+    Awaited<ReturnType<typeof findResumableConversationSession>>
+  >;
 
   return (
     <AppShell
@@ -40,32 +62,44 @@ export default async function ConversationsPage() {
       </section>
 
       {unfinished.length > 0 ? (
-        <section className="surface mb-5 p-5">
-          <h2 className="font-display text-xl">Resume</h2>
+        <section className="surface mb-5 border-accent/30 p-5">
+          <h2 className="font-display text-xl">Resume saved progress</h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Your answers are kept with each session. Open Resume — do not start a
+            new round if you want the same cards back.
+          </p>
           <ul className="mt-3 space-y-3">
-            {unfinished.map((s) => (
-              <li
-                key={s.id}
-                className="flex flex-wrap items-center justify-between gap-3"
-              >
-                <div>
-                  <div className="font-medium">{s.title}</div>
-                  <div className="text-sm text-ink-muted">
-                    {s.mode.replace(/_/g, " ")} ·{" "}
-                    {s.planned_minutes
-                      ? `${s.planned_minutes} min planned`
-                      : "Open length"}{" "}
-                    · {formatApproximateActiveTime(s.active_seconds)} active
-                  </div>
-                </div>
-                <Link
-                  href={`/conversations/session/${s.id}`}
-                  className="btn btn-primary"
+            {unfinished.map((s) => {
+              const progress = getConversationSessionProgress(store, s.id);
+              return (
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-3"
                 >
-                  Resume
-                </Link>
-              </li>
-            ))}
+                  <div>
+                    <div className="font-medium">{s.title}</div>
+                    <div className="text-sm text-ink-muted">
+                      {progress.answeredCount} of {progress.itemCount} answered ·{" "}
+                      {s.mode.replace(/_/g, " ")} ·{" "}
+                      {formatApproximateActiveTime(s.active_seconds)} active
+                    </div>
+                    {!progress.hasProgress ? (
+                      <div className="text-xs text-ink-subtle">
+                        Empty session — prefer a session with answered cards.
+                      </div>
+                    ) : null}
+                  </div>
+                  <Link
+                    href={`/conversations/session/${s.id}`}
+                    className={
+                      progress.hasProgress ? "btn btn-primary" : "btn btn-secondary"
+                    }
+                  >
+                    Resume
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}
@@ -79,6 +113,7 @@ export default async function ConversationsPage() {
         <div className="mt-4 space-y-4">
           {BABYMOON_ROUNDS.map((round) => {
             const secs = estimateRoundSeconds(round.round);
+            const resume = resumeByRound[round.round];
             return (
               <div
                 key={round.id}
@@ -90,12 +125,21 @@ export default async function ConversationsPage() {
                 <p className="mt-1 text-sm text-ink-muted">
                   {round.prompt_ids.length} prompts · About{" "}
                   {Math.round(secs / 60)} minutes
+                  {resume
+                    ? ` · ${resume.answeredCount} of ${resume.itemCount} saved`
+                    : ""}
                 </p>
                 <ModeStarter
                   mode="babymoon"
                   defaultMinutes={15}
                   babymoonRound={round.round}
                   buttonLabel={`Start round ${round.round}`}
+                  resumeSessionId={resume?.sessionId}
+                  resumeLabel={
+                    resume
+                      ? `Continue round ${round.round} (${resume.answeredCount}/${resume.itemCount})`
+                      : undefined
+                  }
                 />
               </div>
             );
@@ -150,7 +194,6 @@ export default async function ConversationsPage() {
           );
         })}
       </section>
-
     </AppShell>
   );
 }

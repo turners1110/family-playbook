@@ -51,7 +51,88 @@ export async function listConversationSessions(options?: {
   ensureCollections(store);
   return [...(store.conversation_sessions ?? [])]
     .filter((s) => options?.includeTestData || !s.is_test_data)
-    .sort((a, b) => b.started_at.localeCompare(a.started_at));
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+}
+
+/** Progress metadata for resume UI — never includes answer text. */
+export function getConversationSessionProgress(
+  store: Awaited<ReturnType<typeof readStore>>,
+  sessionId: string,
+) {
+  ensureCollections(store);
+  const items = (store.conversation_session_items ?? []).filter(
+    (i) => i.session_id === sessionId,
+  );
+  const answered = items.filter((i) =>
+    [
+      "answered_same",
+      "answered_different",
+      "shared_answer_saved",
+      "skipped",
+      "discuss_later",
+      "undecided",
+    ].includes(i.status),
+  ).length;
+  const quickCount = (store.conversation_quick_answers ?? []).filter(
+    (a) => a.session_id === sessionId,
+  ).length;
+  return {
+    itemCount: items.length,
+    answeredCount: answered,
+    quickAnswerCount: quickCount,
+    hasProgress: answered > 0 || quickCount > 0,
+  };
+}
+
+/**
+ * Prefer continuing an unfinished session over creating a blank one.
+ * This was the production data-loss illusion: answers were saved, but Start
+ * created a new empty session that sorted above the real one.
+ */
+export async function findResumableConversationSession(input: {
+  mode: ConversationModeId;
+  babymoonRound?: 1 | 2 | 3;
+}): Promise<{
+  sessionId: string;
+  answeredCount: number;
+  itemCount: number;
+} | null> {
+  const store = await readStore();
+  ensureCollections(store);
+  const tag = input.babymoonRound
+    ? `babymoon_set_v1_round_${input.babymoonRound}`
+    : getConversationMode(input.mode).session_tag;
+
+  const candidates = (store.conversation_sessions ?? []).filter(
+    (s) =>
+      !s.is_test_data &&
+      (s.status === "active" || s.status === "paused") &&
+      s.mode === input.mode &&
+      (input.babymoonRound ? s.session_tag === tag : true),
+  );
+  if (!candidates.length) return null;
+
+  const ranked = candidates
+    .map((s) => {
+      const progress = getConversationSessionProgress(store, s.id);
+      return { session: s, ...progress };
+    })
+    .sort((a, b) => {
+      if (a.hasProgress !== b.hasProgress) return a.hasProgress ? -1 : 1;
+      if (b.answeredCount !== a.answeredCount) {
+        return b.answeredCount - a.answeredCount;
+      }
+      return b.session.updated_at.localeCompare(a.session.updated_at);
+    });
+
+  const best = ranked[0]!;
+  // Only auto-resume when there is real progress; otherwise allow a fresh start.
+  if (!best.hasProgress) return null;
+  return {
+    sessionId: best.session.id,
+    answeredCount: best.answeredCount,
+    itemCount: best.itemCount,
+  };
 }
 
 export async function getConversationSession(sessionId: string) {
@@ -78,7 +159,25 @@ export async function startConversationSession(input: {
   babymoonRound?: 1 | 2 | 3;
   title?: string;
   builder?: Partial<SessionBuilderInput>;
+  /** When true, never resume — always create (tests / explicit restart). */
+  forceNew?: boolean;
 }) {
+  if (!input.forceNew) {
+    const resumable = await findResumableConversationSession({
+      mode: input.mode,
+      babymoonRound: input.babymoonRound,
+    });
+    if (resumable) {
+      return {
+        sessionId: resumable.sessionId,
+        energyMix: "Continuing saved progress",
+        itemCount: resumable.itemCount,
+        resumed: true as const,
+        answeredCount: resumable.answeredCount,
+      };
+    }
+  }
+
   const mode = getConversationMode(input.mode);
   const builderInput: SessionBuilderInput = {
     mode: input.mode,
@@ -161,6 +260,8 @@ export async function startConversationSession(input: {
     sessionId,
     energyMix: describeEnergyMix(built),
     itemCount: built.length,
+    resumed: false as const,
+    answeredCount: 0,
   };
 }
 
@@ -257,8 +358,14 @@ export async function saveConversationQuickAnswersBatch(input: {
   answers: ConversationAnswerWrite[];
   status?: ConversationItemStatus;
   mutationId?: string;
+  /** Persist answers only — do not advance until read-back verification. */
   advance?: boolean;
-}) {
+}): Promise<{
+  promptId: string;
+  savedAt: string;
+  actors: Array<"sam" | "michelle" | "shared">;
+  previousIndex: number;
+}> {
   if (input.answers.some((a) => a.shortText)) {
     const { validateShortTextLength } = await import("@/lib/qa/validation");
     const preview = await readStore();
@@ -278,18 +385,47 @@ export async function saveConversationQuickAnswersBatch(input: {
   }
 
   const ts = nowIso();
+  let promptId = "";
+  let previousIndex = 0;
+  const actors: Array<"sam" | "michelle" | "shared"> = [];
+
+  const preview = await readStore();
+  ensureCollections(preview);
+  const previewItem = preview.conversation_session_items?.find(
+    (i) => i.id === input.itemId && i.session_id === input.sessionId,
+  );
+  const previewSession = preview.conversation_sessions?.find(
+    (s) => s.id === input.sessionId,
+  );
+  if (!previewItem || !previewSession) {
+    throw new Error(
+      "Conversation item missing — answer was not saved. Stay on this card and retry.",
+    );
+  }
+  promptId = previewItem.prompt_id;
+  previousIndex = previewSession.current_item_index;
+
   await updateStore(
     (store) => {
       ensureCollections(store);
       const item = store.conversation_session_items!.find(
         (i) => i.id === input.itemId && i.session_id === input.sessionId,
       );
-      if (!item) return store;
+      if (!item) {
+        throw new Error(
+          "Conversation item missing — answer was not saved. Stay on this card and retry.",
+        );
+      }
       const session = store.conversation_sessions!.find(
         (s) => s.id === input.sessionId,
       );
+      if (!session) {
+        throw new Error(
+          "Conversation session missing — answer was not saved. Stay on this card and retry.",
+        );
+      }
       const qaTags =
-        session?.is_test_data && session.test_run_id
+        session.is_test_data && session.test_run_id
           ? {
               is_test_data: true as const,
               test_run_id: session.test_run_id,
@@ -299,6 +435,7 @@ export async function saveConversationQuickAnswersBatch(input: {
           : {};
 
       for (const answer of input.answers) {
+        actors.push(answer.actor);
         const existing = store.conversation_quick_answers!.find(
           (a) =>
             a.session_item_id === input.itemId && a.actor === answer.actor,
@@ -392,7 +529,7 @@ export async function saveConversationQuickAnswersBatch(input: {
             shared_answer_text: null,
             created_at: ts,
             updated_at: ts,
-            ...(session?.is_test_data && session.test_run_id
+            ...(session.is_test_data && session.test_run_id
               ? {
                   is_test_data: true as const,
                   test_run_id: session.test_run_id,
@@ -404,25 +541,16 @@ export async function saveConversationQuickAnswersBatch(input: {
         }
       }
 
-      if (session) {
-        session.updated_at = ts;
-        const items = store.conversation_session_items!.filter(
-          (i) => i.session_id === input.sessionId,
-        );
-        session.active_seconds = items.reduce(
-          (sum, i) => sum + i.actual_time_seconds,
-          0,
-        );
-        if (input.advance) {
-          const ordered = items.sort(
-            (a, b) => a.display_order - b.display_order,
-          );
-          const idx = ordered.findIndex((i) => i.id === input.itemId);
-          if (idx >= 0 && idx < ordered.length - 1) {
-            session.current_item_index = ordered[idx + 1]!.display_order;
-          }
-        }
-      }
+      session.updated_at = ts;
+      const items = store.conversation_session_items!.filter(
+        (i) => i.session_id === input.sessionId,
+      );
+      session.active_seconds = items.reduce(
+        (sum, i) => sum + i.actual_time_seconds,
+        0,
+      );
+      // Advance is applied only AFTER read-back verification in the action layer.
+      void input.advance;
       return store;
     },
     {
@@ -430,6 +558,8 @@ export async function saveConversationQuickAnswersBatch(input: {
       mutationId: input.mutationId,
     },
   );
+
+  return { promptId, savedAt: ts, actors, previousIndex };
 }
 
 export async function advanceConversationItem(

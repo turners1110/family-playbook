@@ -17,6 +17,7 @@ import {
   updateConversationSummary,
   type ConversationAnswerWrite,
 } from "@/lib/services/conversations";
+import { readStore } from "@/lib/db/store";
 import type {
   ConversationItemStatus,
   ConversationModeId,
@@ -55,8 +56,13 @@ export async function actionStartConversation(input: {
   plannedMinutes: number;
   babymoonRound?: 1 | 2 | 3;
   title?: string;
+  forceNew?: boolean;
 }) {
   const ctx = await requireIdentity();
+  const { assertDurableStorageForProductWrites } = await import(
+    "@/lib/db/durable-save"
+  );
+  assertDurableStorageForProductWrites();
   const result = await startConversationSession({
     ...input,
     createdBy: ctx.profile.id,
@@ -142,15 +148,98 @@ export async function actionSaveConversationAnswersBatch(input: {
   const started = Date.now();
   try {
     await requireIdentity();
-    await saveConversationQuickAnswersBatch({
+    const { assertDurableStorageForProductWrites, answerContentFingerprint, verifyConversationAnswersInStore, hashFamilyId } =
+      await import("@/lib/db/durable-save");
+    assertDurableStorageForProductWrites();
+
+    const mutationStarted = Date.now();
+    const saved = await saveConversationQuickAnswersBatch({
       sessionId: input.sessionId,
       itemId: input.itemId,
       answers: input.answers,
       status: input.status,
       mutationId: input.mutationId,
-      advance: input.advance,
+      advance: false,
     });
+    const mutationMs = Date.now() - mutationStarted;
+
+    const verifyStarted = Date.now();
+    const store = await readStore();
+    const expectations = input.answers.map((a) => ({
+      actor: a.actor,
+      fingerprint: answerContentFingerprint({
+        selectedOptions: a.selectedOptions,
+        shortText: a.shortText,
+        explanation: a.explanation,
+        scale: a.scale,
+      }),
+    }));
+    const verified = verifyConversationAnswersInStore(store, {
+      sessionId: input.sessionId,
+      itemId: input.itemId,
+      promptId: saved.promptId,
+      expectations,
+    });
+    const verificationMs = Date.now() - verifyStarted;
+
+    if (!verified.ok) {
+      console.info("[save_timing]", {
+        operation: "actionSaveConversationAnswersBatch",
+        sessionId: input.sessionId,
+        testRunId: input.testRunId ?? null,
+        questionId: input.itemId,
+        durationMs: Date.now() - started,
+        result: "failed",
+        retryCount: 0,
+        conflict: false,
+        stage: "verification",
+        verificationReason: verified.reason,
+        familyIdHash: hashFamilyId(store.family.id),
+      });
+      throw new Error(
+        "Save could not be verified. Your answer is still on this screen — tap Retry.",
+      );
+    }
+
+    let advanced = false;
+    let currentItemIndex = verified.currentItemIndex;
+    if (input.advance) {
+      await advanceConversationItem(input.sessionId, "next");
+      advanced = true;
+      const after = await readStore();
+      const session = after.conversation_sessions?.find(
+        (s) => s.id === input.sessionId,
+      );
+      currentItemIndex = session?.current_item_index ?? currentItemIndex;
+      if (
+        typeof saved.previousIndex === "number" &&
+        typeof currentItemIndex === "number" &&
+        currentItemIndex <= saved.previousIndex &&
+        // last card: index may stay
+        true
+      ) {
+        // Allow staying on last card; only fail if we expected mid-session advance
+        const items = (after.conversation_session_items ?? [])
+          .filter((i) => i.session_id === input.sessionId)
+          .sort((a, b) => a.display_order - b.display_order);
+        const idx = items.findIndex((i) => i.id === input.itemId);
+        if (idx >= 0 && idx < items.length - 1 && currentItemIndex <= saved.previousIndex) {
+          throw new Error(
+            "Progress advance could not be verified. Your answer was saved — tap Retry to continue.",
+          );
+        }
+      }
+    }
+
     revalidateConversationPaths(input.sessionId, true);
+    const { getStorageMode, getRemoteStoreHealth, usesRemoteJsonStore } =
+      await import("@/lib/db/store");
+    let version: number | null = null;
+    if (usesRemoteJsonStore()) {
+      const health = await getRemoteStoreHealth();
+      version = health.version;
+    }
+
     console.info("[save_timing]", {
       operation: "actionSaveConversationAnswersBatch",
       sessionId: input.sessionId,
@@ -160,9 +249,33 @@ export async function actionSaveConversationAnswersBatch(input: {
       result: "success",
       retryCount: 0,
       conflict: false,
-      stage: "server_action",
+      stage: "total",
+      mutationMs,
+      verificationMs,
+      verified: true,
+      advanced,
+      familyIdHash: hashFamilyId(store.family.id),
     });
-    return { ok: true as const };
+
+    return {
+      ok: true as const,
+      mutationSucceeded: true as const,
+      verified: true as const,
+      storageMode: getStorageMode(),
+      version,
+      questionId: saved.promptId,
+      sessionId: input.sessionId,
+      itemId: input.itemId,
+      actors: saved.actors,
+      savedAt: saved.savedAt,
+      advanced,
+      currentItemIndex,
+      durationMs: {
+        mutation: mutationMs,
+        verification: verificationMs,
+        total: Date.now() - started,
+      },
+    };
   } catch (error) {
     const conflict =
       error instanceof RemoteStoreError && error.code === "version_conflict";
