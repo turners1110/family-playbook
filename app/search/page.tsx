@@ -79,6 +79,11 @@ export default async function SearchPage({
               ["Notes", results.notes.map((item) => (
                 <li key={item.id}>{item.type}: {item.text.slice(0, 120)}</li>
               ))],
+              ["Checklist", results.checklist_tasks.map((item) => (
+                <li key={item.id}>
+                  <Link href="/before-baby">{item.title}</Link>
+                </li>
+              ))],
             ] as const
           ).map(([title, items]) => (
             <section key={title} className="surface p-4">

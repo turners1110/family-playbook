@@ -20,6 +20,7 @@ import {
 } from "@/lib/research/types";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { helperForQuestion } from "@/lib/content/helper-templates";
+import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
 
 export const dynamic = "force-dynamic";
 
@@ -228,7 +229,18 @@ export default async function QuestionDetailPage({
       </section>
 
       <section className="surface mt-5 p-5">
-        <h3 className="font-display text-xl">Answer this question</h3>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-display text-xl">Answer this question</h3>
+          <CreateChecklistTaskButton
+            label="Create task"
+            defaults={{
+              title: `Research: ${question.short_title}`.slice(0, 120),
+              source: "question",
+              created_from_label: question.short_title,
+              linked_question_ids: [question.id],
+            }}
+          />
+        </div>
         <AnswerEditor
           questionId={question.id}
           members={store.members}

@@ -154,6 +154,7 @@ export async function searchAll(query: string) {
       principles: [],
       knowledge: [],
       notes: [],
+      checklist_tasks: [],
     };
   }
 
@@ -227,7 +228,35 @@ export async function searchAll(query: string) {
       })),
   ].slice(0, 20);
 
-  return { questions, answers, decisions, outcomes, principles, knowledge, notes };
+  const checklist_tasks = (store.checklist_tasks ?? [])
+    .filter((t) => !t.archived)
+    .filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.notes ?? "").toLowerCase().includes(q) ||
+        t.category_label.toLowerCase().includes(q) ||
+        t.owner.toLowerCase().includes(q) ||
+        t.priority.toLowerCase().includes(q) ||
+        (t.relative_timing_label ?? "").toLowerCase().includes(q) ||
+        (t.created_from_label ?? "").toLowerCase().includes(q) ||
+        (t.linked_question_ids ?? []).some((id) => id.toLowerCase().includes(q)) ||
+        (t.linked_conversation_ids ?? []).some((id) =>
+          id.toLowerCase().includes(q),
+        ) ||
+        (t.linked_research_ids ?? []).some((id) => id.toLowerCase().includes(q)),
+    )
+    .slice(0, 20);
+
+  return {
+    questions,
+    answers,
+    decisions,
+    outcomes,
+    principles,
+    knowledge,
+    notes,
+    checklist_tasks,
+  };
 }
 
 export function lifeStageLabel(slug: LifeStage) {

@@ -1,8 +1,8 @@
 import type { ChecklistOwner } from "@/lib/types/models";
 
 export type OwnershipSuggestion = {
-  primary_owner: ChecklistOwner;
-  contributor: ChecklistOwner | null;
+  primary_owner: Exclude<ChecklistOwner, "unassigned">;
+  contributor: Exclude<ChecklistOwner, "unassigned"> | null;
   joint_approval_required: boolean;
   reason: string;
 };

@@ -48,6 +48,7 @@ import {
   writeDraft,
   type ConversationDraftPayload,
 } from "@/lib/ui/form-identity";
+import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -676,6 +677,22 @@ export function ConversationCard({
             )}
           </div>
         ) : null}
+
+        <div className="mt-4">
+          <CreateChecklistTaskButton
+            label="Create follow-up task"
+            className="btn btn-ghost"
+            defaults={{
+              title: `Follow up: ${prompt.prompt.slice(0, 80)}`,
+              source: "conversation",
+              created_from_label: prompt.prompt,
+              linked_conversation_ids: [session.id],
+              linked_question_ids: prompt.follow_up_open_question_id
+                ? [prompt.follow_up_open_question_id]
+                : [prompt.id],
+            }}
+          />
+        </div>
 
         <div className="mt-3 space-y-2">
           <SlowSaveNotice tier={save.slowTier} />

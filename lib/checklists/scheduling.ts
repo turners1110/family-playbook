@@ -761,6 +761,10 @@ export type TimelineView =
   | "final_week"
   | "after_birth"
   | "overdue"
+  | "inbox"
+  | "today"
+  | "completed"
+  | "by_priority"
   | "by_week"
   | "by_month"
   | "by_category"
@@ -779,7 +783,9 @@ export function filterTasksByView(
 ): ChecklistTask[] {
   const today = options?.today ?? todayDateOnly();
   let list = tasks.filter((t) => !t.archived);
-  if (options?.hideCompleted) list = list.filter((t) => !t.completed);
+  if (options?.hideCompleted && view !== "completed") {
+    list = list.filter((t) => !t.completed);
+  }
   if (options?.includePostBirth === false) {
     list = list.filter((t) => t.timing_type !== "after_birth");
   }
@@ -809,6 +815,25 @@ export function filterTasksByView(
       return inGroup("after_birth");
     case "overdue":
       return inGroup("overdue");
+    case "inbox":
+      return list.filter(
+        (t) =>
+          !t.completed &&
+          (t.inbox ||
+            (t.is_custom &&
+              t.owner === "unassigned" &&
+              (!t.due_date || t.date_source === "none") &&
+              (t.category === "inbox" || t.category === "custom"))),
+      );
+    case "today":
+      return list.filter((t) => !t.completed && effectiveDueDate(t) === today);
+    case "completed":
+      return list.filter((t) => t.completed);
+    case "by_priority":
+      return [...list].sort((a, b) => {
+        const order = { critical: 0, high: 1, medium: 2, low: 3 } as const;
+        return (order[a.priority] ?? 9) - (order[b.priority] ?? 9);
+      });
     case "recommended":
     case "all":
     case "by_week":

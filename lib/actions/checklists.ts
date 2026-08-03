@@ -107,20 +107,37 @@ export async function actionAddCustomChecklistTask(input: {
     | { mode: "days_before"; days: number }
     | { mode: "days_after"; days: number }
     | { mode: "none" };
+  relative_timing_preset?: import("@/lib/types/models").ChecklistRelativeTimingPreset | null;
+  choose_date?: string | null;
+  estimated_minutes?: number | null;
+  inbox?: boolean;
+  source?: string | null;
+  created_from_label?: string | null;
+  linked_question_ids?: string[];
+  linked_conversation_ids?: string[];
+  linked_research_ids?: string[];
+  linked_book_ids?: string[];
+  subtasks?: Array<{ title: string; completed?: boolean }>;
+  recurrence?: import("@/lib/types/models").ChecklistRecurrence | null;
 }) {
   const ctx = await requireIdentity();
   try {
     assertCanEdit(ctx);
-    const task = await addCustomChecklistTask(input);
+    const task = await addCustomChecklistTask({
+      ...input,
+      created_by: ctx.profile.id,
+    });
     revalidateChecklist();
-    return { ok: true as const, taskId: task.id };
+    return { ok: true as const, taskId: task.id, task };
   } catch (error) {
     logStoreError("add_checklist_task", error);
     return {
       ok: false as const,
       error:
         error instanceof Error &&
-        (error.message.includes("title") || error.message.includes("Sam"))
+        (error.message.includes("title") ||
+          error.message.includes("Sam") ||
+          error.message.includes("due date"))
           ? error.message
           : publicRemoteStoreMessage(error),
     };
@@ -135,6 +152,13 @@ export async function actionUpdateChecklistTask(
     due_date?: string | null;
     owner?: ChecklistOwner;
     priority?: ChecklistPriority;
+    category?: string;
+    category_label?: string;
+    inbox?: boolean;
+    estimated_minutes?: number | null;
+    relative_timing_preset?: import("@/lib/types/models").ChecklistRelativeTimingPreset | null;
+    choose_date?: string | null;
+    subtasks?: Array<{ id: string; title: string; completed: boolean }>;
     manual_timing?:
       | { mode: "exact"; date: string }
       | { mode: "weeks_before"; weeks: number }
@@ -151,6 +175,29 @@ export async function actionUpdateChecklistTask(
     return { ok: true as const };
   } catch (error) {
     logStoreError("update_checklist_task", error);
+    return { ok: false as const, error: publicRemoteStoreMessage(error) };
+  }
+}
+
+export async function getBeforeBabyChecklistIdAction() {
+  try {
+    await requireIdentity();
+    const { importBeforeBabyTemplate, getBeforeBabyChecklist } = await import(
+      "@/lib/services/checklists"
+    );
+    await importBeforeBabyTemplate();
+    const data = await getBeforeBabyChecklist();
+    if (!data.instance) {
+      return { ok: false as const, error: "Checklist not available yet." };
+    }
+    return {
+      ok: true as const,
+      checklistId: data.instance.id,
+      tasks: data.tasks,
+      dueDate: data.settings.expected_due_date ?? null,
+    };
+  } catch (error) {
+    logStoreError("before_baby_checklist_id", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
   }
 }

@@ -12,6 +12,7 @@ import {
   type ChecklistPriority,
 } from "@/lib/checklists";
 import {
+  actionArchiveChecklistTask,
   actionGenerateBeforeBabySchedule,
   actionImportBeforeBaby,
   actionToggleChecklistTask,
@@ -31,6 +32,11 @@ import {
 import { DueDateHeader } from "@/components/checklists/DueDateHeader";
 import { BeforeBabySchedulingSettings } from "@/components/checklists/BeforeBabySchedulingSettings";
 import { MilestoneBoard } from "@/components/checklists/MilestoneBoard";
+import { QuickAddTaskSheet } from "@/components/checklists/QuickAddTaskSheet";
+import {
+  formatRelativeTimingDisplay,
+  taskOriginBadge,
+} from "@/lib/checklists/manual-tasks";
 
 type BoardMode = "milestones" | "timeline" | "owner" | "category";
 
@@ -42,8 +48,10 @@ const BOARD_MODES: Array<{ id: BoardMode; label: string }> = [
 ];
 
 const VIEWS: Array<{ id: TimelineView; label: string }> = [
+  { id: "inbox", label: "Inbox" },
   { id: "recommended", label: "Recommended timeline" },
   { id: "do_now", label: "Do now" },
+  { id: "today", label: "Today" },
   { id: "this_week", label: "This week" },
   { id: "next_week", label: "Next week" },
   { id: "next_2_weeks", label: "Next 2 weeks" },
@@ -51,8 +59,10 @@ const VIEWS: Array<{ id: TimelineView; label: string }> = [
   { id: "final_week", label: "Final week" },
   { id: "after_birth", label: "After birth" },
   { id: "overdue", label: "Overdue" },
+  { id: "by_priority", label: "Priority" },
   { id: "by_category", label: "By category" },
   { id: "by_owner", label: "By owner" },
+  { id: "completed", label: "Completed" },
   { id: "all", label: "All tasks" },
 ];
 
@@ -91,10 +101,25 @@ export function BeforeBabyScheduler({
   const [showSettings, setShowSettings] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const dueDate = settings.expected_due_date ?? null;
   const dashboard = useMemo(
     () => buildChecklistDashboard(optimisticTasks),
+    [optimisticTasks],
+  );
+  const inboxCount = useMemo(
+    () =>
+      optimisticTasks.filter(
+        (t) =>
+          !t.archived &&
+          !t.completed &&
+          (t.inbox ||
+            (t.is_custom &&
+              t.owner === "unassigned" &&
+              (!t.due_date || t.date_source === "none") &&
+              (t.category === "inbox" || t.category === "custom"))),
+      ).length,
     [optimisticTasks],
   );
 
@@ -109,7 +134,15 @@ export function BeforeBabyScheduler({
         (t) =>
           t.title.toLowerCase().includes(q) ||
           (t.notes ?? "").toLowerCase().includes(q) ||
-          t.category_label.toLowerCase().includes(q),
+          t.category_label.toLowerCase().includes(q) ||
+          CHECKLIST_OWNER_LABELS[t.owner]?.toLowerCase().includes(q) ||
+          CHECKLIST_PRIORITY_LABELS[t.priority]?.toLowerCase().includes(q) ||
+          (t.relative_timing_label ?? "").toLowerCase().includes(q) ||
+          (t.created_from_label ?? "").toLowerCase().includes(q) ||
+          (t.linked_question_ids ?? []).some((id) => id.toLowerCase().includes(q)) ||
+          (t.linked_conversation_ids ?? []).some((id) =>
+            id.toLowerCase().includes(q),
+          ),
       );
     }
     return list;
@@ -244,6 +277,15 @@ export function BeforeBabyScheduler({
             ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
+            {checklistId ? (
+              <button
+                type="button"
+                className="btn btn-primary hidden sm:inline-flex"
+                onClick={() => setAddOpen(true)}
+              >
+                + Add Task
+              </button>
+            ) : null}
             <button
               type="button"
               className="btn btn-secondary"
@@ -288,13 +330,14 @@ export function BeforeBabyScheduler({
 
       {showSettings ? <BeforeBabySchedulingSettings settings={settings} compact /> : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Remaining" value={dashboard.remaining} />
+        <StatCard label="Inbox" value={inboxCount} />
         <StatCard label="Overdue" value={dashboard.overdue.length} />
         <StatCard label="This week" value={dashboard.dueThisWeek.length} />
         <StatCard
           label="High priority open"
-          value={optimisticTasks.filter((t) => !t.completed && t.priority === "high").length}
+          value={optimisticTasks.filter((t) => !t.completed && (t.priority === "high" || t.priority === "critical")).length}
         />
       </div>
 
@@ -402,6 +445,33 @@ export function BeforeBabyScheduler({
       </div>
         </>
       )}
+
+      {checklistId ? (
+        <>
+          <div className="h-20 sm:hidden" aria-hidden />
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-bg/95 p-3 backdrop-blur sm:hidden">
+            <button
+              type="button"
+              className="btn btn-primary min-h-12 w-full"
+              onClick={() => setAddOpen(true)}
+            >
+              + Add Task
+            </button>
+          </div>
+          <QuickAddTaskSheet
+            open={addOpen}
+            onClose={() => setAddOpen(false)}
+            checklistId={checklistId}
+            existingTasks={optimisticTasks}
+            dueDate={dueDate}
+            onCreated={(task) => {
+              setTasks((prev) => [...prev, task]);
+              setMessage(`Added “${task.title}”.`);
+              if (task.inbox) setView("inbox");
+            }}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
@@ -416,6 +486,8 @@ function CompactTaskRow({
   dueDate: string | null;
   onToggle: () => void;
   onSave: (patch: {
+    title?: string;
+    notes?: string | null;
     due_date?: string | null;
     owner?: ChecklistOwner;
     priority?: ChecklistPriority;
@@ -457,14 +529,29 @@ function CompactTaskRow({
             {task.title}
           </button>
           <div className="mt-1 flex flex-wrap gap-1.5">
+            {taskOriginBadge(task) ? (
+              <span
+                className={clsx(
+                  "badge",
+                  taskOriginBadge(task) === "Manual" && "badge-accent",
+                )}
+              >
+                {taskOriginBadge(task)}
+              </span>
+            ) : null}
+            {task.inbox ? <span className="badge badge-warning">Inbox</span> : null}
             <span className="badge">{TIMELINE_BADGE_LABELS[badge]}</span>
             <span className="badge">{CHECKLIST_OWNER_LABELS[task.owner]}</span>
-            {task.priority === "high" ? (
+            {task.priority === "high" || task.priority === "critical" ? (
               <span className="badge badge-warning">
                 {CHECKLIST_PRIORITY_LABELS[task.priority]}
               </span>
             ) : null}
-            {recommended ? <span className="badge">{recommended}</span> : null}
+            {formatRelativeTimingDisplay(task) ? (
+              <span className="badge">{formatRelativeTimingDisplay(task)}</span>
+            ) : recommended ? (
+              <span className="badge">{recommended}</span>
+            ) : null}
             {task.dependency_status === "blocked" ? (
               <span className="badge badge-warning">Blocked</span>
             ) : null}
@@ -472,6 +559,11 @@ function CompactTaskRow({
               <span className="badge">Estimated</span>
             ) : null}
           </div>
+          {task.created_from_label ? (
+            <p className="mt-1 text-xs text-ink-subtle">
+              Created from: {task.created_from_label}
+            </p>
+          ) : null}
           {task.dependency_reason ? (
             <p className="mt-1 text-xs text-amber-800">{task.dependency_reason}</p>
           ) : null}
@@ -487,15 +579,69 @@ function CompactTaskRow({
                 e.preventDefault();
                 const form = new FormData(e.currentTarget);
                 const nextDue = String(form.get("due_date") || "");
+                const nextOwner = String(form.get("owner") || task.owner) as ChecklistOwner;
+                const nextPriority = String(
+                  form.get("priority") || task.priority,
+                ) as ChecklistPriority;
+                const nextTitle = String(form.get("title") || task.title);
+                const nextNotes = String(form.get("notes") || "");
                 startTransition(async () => {
-                  await onSave(
-                    nextDue
+                  await onSave({
+                    title: nextTitle,
+                    notes: nextNotes || null,
+                    owner: nextOwner,
+                    priority: nextPriority,
+                    ...(nextDue
                       ? { manual_timing: { mode: "exact", date: nextDue } }
-                      : { manual_timing: { mode: "remove" } },
-                  );
+                      : {}),
+                  });
                 });
               }}
             >
+              <label className="field">
+                <span>Title</span>
+                <input
+                  name="title"
+                  className="input"
+                  defaultValue={task.title}
+                />
+              </label>
+              <label className="field">
+                <span>Notes</span>
+                <textarea
+                  name="notes"
+                  className="input min-h-16"
+                  defaultValue={task.notes ?? ""}
+                />
+              </label>
+              <label className="field">
+                <span>Owner</span>
+                <select name="owner" className="input" defaultValue={task.owner}>
+                  {(["unassigned", "sam", "michelle", "both"] as const).map(
+                    (o) => (
+                      <option key={o} value={o}>
+                        {CHECKLIST_OWNER_LABELS[o]}
+                      </option>
+                    ),
+                  )}
+                </select>
+              </label>
+              <label className="field">
+                <span>Priority</span>
+                <select
+                  name="priority"
+                  className="input"
+                  defaultValue={task.priority}
+                >
+                  {(
+                    ["low", "medium", "high", "critical"] as ChecklistPriority[]
+                  ).map((p) => (
+                    <option key={p} value={p}>
+                      {CHECKLIST_PRIORITY_LABELS[p]}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="field">
                 <span>Manual due date</span>
                 <input
@@ -505,9 +651,19 @@ function CompactTaskRow({
                   defaultValue={due ?? ""}
                 />
               </label>
+              {task.subtasks && task.subtasks.length > 0 ? (
+                <ul className="space-y-1 text-sm">
+                  {task.subtasks.map((s) => (
+                    <li key={s.id} className="flex items-center gap-2">
+                      <span>{s.completed ? "✓" : "□"}</span>
+                      <span>{s.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 <button type="submit" className="btn btn-primary" disabled={pending}>
-                  Save date
+                  Save
                 </button>
                 <button
                   type="button"
@@ -521,6 +677,21 @@ function CompactTaskRow({
                 >
                   Remove date
                 </button>
+                {task.is_custom ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost text-danger"
+                    disabled={pending}
+                    onClick={() =>
+                      startTransition(async () => {
+                        await actionArchiveChecklistTask(task.id);
+                        window.location.reload();
+                      })
+                    }
+                  >
+                    Delete
+                  </button>
+                ) : null}
               </div>
             </form>
           ) : null}

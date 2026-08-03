@@ -566,9 +566,29 @@ export async function addCustomChecklistTask(input: {
     | { mode: "days_before"; days: number }
     | { mode: "days_after"; days: number }
     | { mode: "none" };
+  /** Prefer this over raw timing when capturing from the quick-add sheet. */
+  relative_timing_preset?: import("@/lib/types/models").ChecklistRelativeTimingPreset | null;
+  choose_date?: string | null;
+  estimated_minutes?: number | null;
+  estimated_effort?: import("@/lib/types/models").ChecklistEstimatedEffort | null;
+  inbox?: boolean;
+  source?: import("@/lib/types/models").ChecklistTaskSource | string | null;
+  created_by?: string | null;
+  created_from_label?: string | null;
+  linked_question_ids?: string[];
+  linked_conversation_ids?: string[];
+  linked_research_ids?: string[];
+  linked_book_ids?: string[];
+  subtasks?: Array<{ id?: string; title: string; completed?: boolean }>;
+  recurrence?: import("@/lib/types/models").ChecklistRecurrence | null;
 }): Promise<ChecklistTask> {
   const title = input.title.trim();
   if (!title) throw new Error("Task title is required.");
+
+  const {
+    resolveManualTiming,
+    applyRelativeTimingMetadata,
+  } = await import("@/lib/checklists/manual-tasks");
 
   let created!: ChecklistTask;
   await updateStore((store) => {
@@ -581,18 +601,23 @@ export async function addCustomChecklistTask(input: {
       .filter((t) => t.checklist_id === instance.id)
       .reduce((max, t) => Math.max(max, t.sort_order), 0);
 
+    const category = input.category?.trim() || (input.inbox ? "inbox" : "custom");
+    const category_label =
+      input.category_label?.trim() ||
+      (category === "inbox" ? "Inbox" : category === "custom" ? "Custom" : category);
+
     let task: ChecklistTask = {
       id: id("ctask"),
       checklist_id: instance.id,
       template_task_slug: null,
       title,
-      category: input.category?.trim() || "custom",
-      category_label: input.category_label?.trim() || "Custom",
+      category,
+      category_label,
       completed: false,
       completed_at: null,
       due_date: input.due_date || null,
       priority: input.priority ?? "medium",
-      owner: input.owner ?? "both",
+      owner: input.owner ?? "unassigned",
       notes: input.notes?.trim() || null,
       is_custom: true,
       is_default: false,
@@ -600,11 +625,55 @@ export async function addCustomChecklistTask(input: {
       sort_order: maxSort + 1,
       created_at: ts,
       updated_at: ts,
-      ...timingFieldsFromTemplate(null, "custom"),
+      source: input.source ?? "manual",
+      inbox: input.inbox ?? false,
+      created_by: input.created_by ?? null,
+      created_from_label: input.created_from_label ?? null,
+      estimated_minutes: input.estimated_minutes ?? null,
+      estimated_effort: input.estimated_effort ?? null,
+      linked_question_ids: input.linked_question_ids ?? [],
+      linked_conversation_ids: input.linked_conversation_ids ?? [],
+      linked_research_ids: input.linked_research_ids ?? [],
+      linked_book_ids: input.linked_book_ids ?? [],
+      recurrence: input.recurrence ?? null,
+      subtasks: (input.subtasks ?? []).map((s, i) => ({
+        id: s.id ?? id(`sub_${i}`),
+        title: s.title.trim(),
+        completed: Boolean(s.completed),
+      })),
+      ...timingFieldsFromTemplate(null, category === "inbox" ? "custom" : category),
     };
 
-        const due = store.settings.expected_due_date ?? null;
-    if (input.timing && input.timing.mode !== "none") {
+    const due = store.settings.expected_due_date ?? null;
+    const resolved = resolveManualTiming(input.relative_timing_preset, {
+      dueDate: due,
+      chooseDate: input.choose_date ?? input.due_date ?? null,
+    });
+
+    if (resolved.kind === "relative") {
+      if (!due) {
+        // Keep relative intent; absolute date fills in when due date is set.
+        task.relative_timing_preset = resolved.preset;
+        task.relative_timing_label = resolved.label;
+        if (resolved.timing.mode === "weeks_before") {
+          task.recommended_due_offset_days = -(resolved.timing.weeks * 7);
+          task.timing_type = "before_birth";
+        } else if (resolved.timing.mode === "days_before") {
+          task.recommended_due_offset_days = -resolved.timing.days;
+          task.timing_type = "before_birth";
+        } else {
+          task.recommended_due_offset_days = resolved.timing.days;
+          task.timing_type = "after_birth";
+        }
+        task.date_source = "none";
+      } else {
+        task = setManualTaskTiming(task, resolved.timing, due);
+        task = applyRelativeTimingMetadata(task, resolved);
+      }
+    } else if (resolved.kind === "absolute") {
+      task = setManualTaskTiming(task, { mode: "exact", date: resolved.date }, due);
+      task = applyRelativeTimingMetadata(task, resolved);
+    } else if (input.timing && input.timing.mode !== "none") {
       task = setManualTaskTiming(
         task,
         input.timing.mode === "exact"
@@ -617,9 +686,19 @@ export async function addCustomChecklistTask(input: {
       task.due_date = input.due_date;
       task.date_source = "manual";
       task.timing_type = "exact_date";
-    } else if (due && store.settings.before_baby_scheduling_mode !== "manual_only") {
-      const scheduled = applyScheduleToTasks([task], store.settings)[0];
-      task = scheduled;
+    }
+
+    if (
+      task.inbox ||
+      (task.owner === "unassigned" &&
+        !task.due_date &&
+        (task.category === "inbox" || task.category === "custom"))
+    ) {
+      task.inbox = true;
+      if (task.category === "custom") {
+        task.category = "inbox";
+        task.category_label = "Inbox";
+      }
     }
 
     created = task;
@@ -681,6 +760,18 @@ export async function updateChecklistTask(
     priority: ChecklistPriority;
     category: string;
     category_label: string;
+    inbox: boolean;
+    estimated_minutes: number | null;
+    estimated_effort: import("@/lib/types/models").ChecklistEstimatedEffort | null;
+    relative_timing_preset: import("@/lib/types/models").ChecklistRelativeTimingPreset | null;
+    choose_date: string | null;
+    linked_question_ids: string[];
+    linked_conversation_ids: string[];
+    linked_research_ids: string[];
+    linked_book_ids: string[];
+    created_from_label: string | null;
+    subtasks: Array<{ id: string; title: string; completed: boolean }>;
+    recurrence: import("@/lib/types/models").ChecklistRecurrence | null;
     manual_timing:
       | { mode: "exact"; date: string }
       | { mode: "weeks_before"; weeks: number }
@@ -689,6 +780,11 @@ export async function updateChecklistTask(
       | { mode: "remove" };
   }>,
 ): Promise<ChecklistTask | null> {
+  const {
+    resolveManualTiming,
+    applyRelativeTimingMetadata,
+  } = await import("@/lib/checklists/manual-tasks");
+
   let updated: ChecklistTask | null = null;
   await updateStore((store) => {
     ensureCollections(store);
@@ -696,18 +792,89 @@ export async function updateChecklistTask(
     if (!task || task.archived) return store;
     if (patch.title != null) task.title = patch.title.trim() || task.title;
     if (patch.notes !== undefined) task.notes = patch.notes?.trim() || null;
-    if (patch.owner) task.owner = patch.owner;
+    if (patch.owner) {
+      task.owner = patch.owner;
+      task.ownership_source = "explicit";
+      task.ownership_updated_at = nowIso();
+    }
     if (patch.priority) task.priority = patch.priority;
     if (patch.category) task.category = patch.category;
     if (patch.category_label) task.category_label = patch.category_label;
+    if (patch.inbox !== undefined) task.inbox = patch.inbox;
+    if (patch.estimated_minutes !== undefined) {
+      task.estimated_minutes = patch.estimated_minutes;
+    }
+    if (patch.estimated_effort !== undefined) {
+      task.estimated_effort = patch.estimated_effort;
+    }
+    if (patch.linked_question_ids) {
+      task.linked_question_ids = patch.linked_question_ids;
+    }
+    if (patch.linked_conversation_ids) {
+      task.linked_conversation_ids = patch.linked_conversation_ids;
+    }
+    if (patch.linked_research_ids) {
+      task.linked_research_ids = patch.linked_research_ids;
+    }
+    if (patch.linked_book_ids) {
+      task.linked_book_ids = patch.linked_book_ids;
+    }
+    if (patch.created_from_label !== undefined) {
+      task.created_from_label = patch.created_from_label;
+    }
+    if (patch.subtasks) task.subtasks = patch.subtasks;
+    if (patch.recurrence !== undefined) task.recurrence = patch.recurrence;
 
-    if (patch.manual_timing) {
+    const due = store.settings.expected_due_date ?? null;
+
+    if (patch.relative_timing_preset !== undefined) {
+      const resolved = resolveManualTiming(patch.relative_timing_preset, {
+        dueDate: due,
+        chooseDate: patch.choose_date ?? patch.due_date ?? null,
+      });
+      if (resolved.kind === "relative" && due) {
+        Object.assign(
+          task,
+          applyRelativeTimingMetadata(
+            setManualTaskTiming(
+              ensureTaskTimingFields(task),
+              resolved.timing,
+              due,
+            ),
+            resolved,
+          ),
+        );
+      } else if (resolved.kind === "absolute") {
+        Object.assign(
+          task,
+          applyRelativeTimingMetadata(
+            setManualTaskTiming(
+              ensureTaskTimingFields(task),
+              { mode: "exact", date: resolved.date },
+              due,
+            ),
+            resolved,
+          ),
+        );
+      } else if (patch.relative_timing_preset === null) {
+        Object.assign(
+          task,
+          setManualTaskTiming(
+            ensureTaskTimingFields(task),
+            { mode: "remove" },
+            due,
+          ),
+        );
+        task.relative_timing_preset = null;
+        task.relative_timing_label = null;
+      }
+    } else if (patch.manual_timing) {
       Object.assign(
         task,
         setManualTaskTiming(
           ensureTaskTimingFields(task),
           patch.manual_timing,
-          store.settings.expected_due_date ?? null,
+          due,
         ),
       );
     } else if (patch.due_date !== undefined) {
@@ -722,9 +889,27 @@ export async function updateChecklistTask(
           setManualTaskTiming(
             ensureTaskTimingFields(task),
             { mode: "remove" },
-            store.settings.expected_due_date ?? null,
+            due,
           ),
         );
+      }
+    }
+
+    if (
+      patch.owner ||
+      patch.category ||
+      patch.relative_timing_preset ||
+      patch.due_date ||
+      patch.manual_timing
+    ) {
+      // Leaving inbox once organized.
+      if (
+        task.inbox &&
+        task.owner !== "unassigned" &&
+        task.category !== "inbox" &&
+        (task.due_date || task.relative_timing_preset)
+      ) {
+        task.inbox = false;
       }
     }
 

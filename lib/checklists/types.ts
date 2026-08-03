@@ -3,14 +3,14 @@
  * register here without changing product UI.
  */
 
-export type ChecklistOwner = "sam" | "michelle" | "both";
-export type ChecklistPriority = "high" | "medium" | "low";
+export type ChecklistOwner = "sam" | "michelle" | "both" | "unassigned";
+export type ChecklistPriority = "critical" | "high" | "medium" | "low";
 
 export type ChecklistTemplateTaskDef = {
   slug: string;
   title: string;
   priority?: ChecklistPriority;
-  owner?: ChecklistOwner;
+  owner?: Exclude<ChecklistOwner, "unassigned">;
 };
 
 export type ChecklistTemplateSectionDef = {
@@ -27,16 +27,28 @@ export type ChecklistTemplateDef = {
   sections: ChecklistTemplateSectionDef[];
 };
 
-export const CHECKLIST_OWNERS = ["sam", "michelle", "both"] as const;
-export const CHECKLIST_PRIORITIES = ["high", "medium", "low"] as const;
+export const CHECKLIST_OWNERS = [
+  "sam",
+  "michelle",
+  "both",
+  "unassigned",
+] as const;
+export const CHECKLIST_PRIORITIES = [
+  "critical",
+  "high",
+  "medium",
+  "low",
+] as const;
 
 export const CHECKLIST_OWNER_LABELS: Record<ChecklistOwner, string> = {
   sam: "Sam",
   michelle: "Michelle",
   both: "Both",
+  unassigned: "Unassigned",
 };
 
 export const CHECKLIST_PRIORITY_LABELS: Record<ChecklistPriority, string> = {
+  critical: "Critical",
   high: "High",
   medium: "Medium",
   low: "Low",

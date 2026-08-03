@@ -27,9 +27,10 @@ type FilterStatus = "all" | "open" | "done" | "overdue";
 type SortMode = "category" | "due" | "priority" | "title";
 
 const PRIORITY_RANK: Record<ChecklistPriority, number> = {
-  high: 0,
-  medium: 1,
-  low: 2,
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
 };
 
 export function BeforeBabyBoard({

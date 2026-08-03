@@ -455,8 +455,42 @@ export interface PlaybookSection {
   ai_placeholder: boolean;
 }
 
-export type ChecklistOwner = "sam" | "michelle" | "both";
-export type ChecklistPriority = "high" | "medium" | "low";
+export type ChecklistOwner = "sam" | "michelle" | "both" | "unassigned";
+export type ChecklistPriority = "critical" | "high" | "medium" | "low";
+
+export type ChecklistTaskSource =
+  | "manual"
+  | "generated"
+  | "conversation"
+  | "question"
+  | "research"
+  | "essentials"
+  | "qa_test_lab";
+
+export type ChecklistRelativeTimingPreset =
+  | "asap"
+  | "this_week"
+  | "next_week"
+  | "before_20_weeks"
+  | "before_28_weeks"
+  | "before_32_weeks"
+  | "before_36_weeks"
+  | "before_birth"
+  | "after_birth"
+  | "choose_date"
+  | "custom";
+
+export type ChecklistEstimatedEffort =
+  | "5_min"
+  | "15_min"
+  | "30_min"
+  | "1_hour"
+  | "half_day"
+  | "full_day";
+
+export type ChecklistRecurrence =
+  | { frequency: "weekly"; weekday: 0 | 1 | 2 | 3 | 4 | 5 | 6 }
+  | { frequency: "monthly"; day_of_month: number };
 
 export interface ChecklistInstance {
   id: string;
@@ -563,7 +597,24 @@ export interface ChecklistTask {
   is_test_data?: boolean;
   test_run_id?: string | null;
   test_case_id?: string | null;
-  source?: string | null;
+  /** Origin of the task — prefer ChecklistTaskSource values. */
+  source?: ChecklistTaskSource | string | null;
+  /** Capture-first inbox: organize later. */
+  inbox?: boolean;
+  /** Pregnancy-relative timing label shown alongside absolute date. */
+  relative_timing_preset?: ChecklistRelativeTimingPreset | null;
+  relative_timing_label?: string | null;
+  estimated_effort?: ChecklistEstimatedEffort | null;
+  estimated_minutes?: number | null;
+  linked_question_ids?: string[];
+  linked_conversation_ids?: string[];
+  linked_research_ids?: string[];
+  linked_book_ids?: string[];
+  linked_question_titles?: Record<string, string>;
+  created_by?: string | null;
+  /** Human-readable origin, e.g. "Created from: Choosing a pediatrician". */
+  created_from_label?: string | null;
+  recurrence?: ChecklistRecurrence | null;
 }
 
 export type ConversationEnergy = "light" | "medium" | "deep" | "planning";
