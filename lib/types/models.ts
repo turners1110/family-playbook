@@ -235,6 +235,17 @@ export interface Decision {
   principle_ids: string[];
   created_at: string;
   updated_at: string;
+  /** Phase 1 knowledge-hub fields (optional for backward compatibility). */
+  slug?: string | null;
+  current_position?: string | null;
+  last_reviewed_at?: string | null;
+  linked_question_ids?: string[];
+  linked_conversation_ids?: string[];
+  linked_book_ids?: string[];
+  linked_research_ids?: string[];
+  linked_task_ids?: string[];
+  linked_provider_ids?: string[];
+  related_decision_ids?: string[];
 }
 
 export interface DecisionVersion {

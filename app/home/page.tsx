@@ -6,6 +6,10 @@ import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDashboardStats } from "@/lib/services/stats";
 import { readStore } from "@/lib/db/store";
 import { buildQuestionStatusIndex } from "@/lib/services/question-status";
+import {
+  decisionHref,
+  decisionsNeedingAttention,
+} from "@/lib/knowledge";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +17,7 @@ export default async function HomePage() {
   const store = await readStore();
   const stats = await getDashboardStats();
   const statusIndex = buildQuestionStatusIndex(store);
+  const attentionDecisions = decisionsNeedingAttention(store).slice(0, 5);
 
   return (
     <AppShell
@@ -125,6 +130,39 @@ export default async function HomePage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
+        <section className="surface p-5">
+          <h3 className="font-display text-xl">Decisions that need attention</h3>
+          <p className="mt-2 text-sm text-ink-muted">
+            Topics where discussion, evidence, or a shared position still needs
+            work.
+          </p>
+          <ul className="mt-4 space-y-2 text-sm">
+            {attentionDecisions.length === 0 ? (
+              <li className="text-ink-muted">Nothing urgent right now.</li>
+            ) : (
+              attentionDecisions.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border px-3 py-2"
+                >
+                  <Link
+                    href={decisionHref(d)}
+                    className="font-medium hover:text-accent"
+                  >
+                    {d.title}
+                  </Link>
+                  <span className="text-xs text-ink-subtle">
+                    {d.health.grade.replace(/_/g, " ")}
+                  </span>
+                </li>
+              ))
+            )}
+          </ul>
+          <Link href="/decisions?filter=needs_attention" className="btn btn-secondary mt-4">
+            Browse decisions
+          </Link>
+        </section>
+
         <section className="surface p-5">
           <h3 className="font-display text-xl">Recommended next session</h3>
           <p className="mt-2 text-sm text-ink-muted">

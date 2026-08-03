@@ -21,6 +21,10 @@ import {
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { helperForQuestion } from "@/lib/content/helper-templates";
 import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
+import {
+  decisionHref,
+  getDecisionsForQuestion,
+} from "@/lib/knowledge";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +91,7 @@ export default async function QuestionDetailPage({
   );
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
   const research = await getResearchForQuestion(question.id, ctx);
+  const relatedDecisions = getDecisionsForQuestion(store, question.id);
   const returnHref =
     sp.source === "conversation" || sp.returnTo || sp.sessionId || sp.testRunId
       ? conversationReturnHref({
@@ -123,6 +128,24 @@ export default async function QuestionDetailPage({
           <Link href={returnHref} className="btn btn-secondary mt-3">
             Return to conversation
           </Link>
+        </section>
+      ) : null}
+
+      {relatedDecisions.length > 0 ? (
+        <section className="surface mb-4 p-4">
+          <h2 className="font-display text-lg">Related family topics</h2>
+          <ul className="mt-2 flex flex-wrap gap-2">
+            {relatedDecisions.map((d) => (
+              <li key={d.id}>
+                <Link
+                  href={decisionHref(d)}
+                  className="rounded-full border border-border px-3 py-1 text-sm hover:border-accent hover:text-accent"
+                >
+                  {d.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

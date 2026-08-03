@@ -17,14 +17,23 @@ export async function listDecisions(filters?: {
   return list.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 }
 
-export async function getDecision(decisionId: string) {
+export async function getDecision(decisionIdOrSlug: string) {
   const store = await readStore();
-  const decision = store.decisions.find((d) => d.id === decisionId);
+  const { normalizeDecision, slugifyDecisionTitle } = await import(
+    "@/lib/knowledge/family-decisions"
+  );
+  const decision =
+    store.decisions.find((d) => d.id === decisionIdOrSlug) ??
+    store.decisions.find(
+      (d) =>
+        (d.slug ?? slugifyDecisionTitle(d.title)) === decisionIdOrSlug,
+    );
   if (!decision) return null;
+  const normalized = normalizeDecision(decision);
   const versions = store.decision_versions
-    .filter((v) => v.decision_id === decisionId)
+    .filter((v) => v.decision_id === decision.id)
     .sort((a, b) => a.version - b.version);
-  return { decision, versions };
+  return { decision: normalized, versions };
 }
 
 export async function saveDecision(input: SaveDecisionInput, actorId?: string) {

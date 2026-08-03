@@ -10,6 +10,10 @@ import {
   exportConversationReviewJson,
   exportConversationReviewMarkdown,
 } from "@/lib/services/conversation-review";
+import {
+  decisionHref,
+  getDecisionsForConversation,
+} from "@/lib/knowledge";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +26,7 @@ export default async function ConversationSessionReviewPage({
   const store = await readStore();
   const model = buildConversationReview(store, sessionId);
   if (!model) notFound();
+  const linkedDecisions = getDecisionsForConversation(store, sessionId);
 
   const markdown = exportConversationReviewMarkdown(model);
   const json = exportConversationReviewJson(model);
@@ -81,6 +86,24 @@ export default async function ConversationSessionReviewPage({
             <dd>{model.openFollowUps}</dd>
           </div>
         </dl>
+
+        {linkedDecisions.length > 0 ? (
+          <div className="mt-5">
+            <h3 className="text-sm font-semibold text-ink">Related topics</h3>
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {linkedDecisions.map((d) => (
+                <li key={d.id}>
+                  <Link
+                    href={decisionHref(d)}
+                    className="rounded-full border border-border px-3 py-1 text-sm hover:border-accent hover:text-accent"
+                  >
+                    {d.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="mt-5 flex flex-wrap gap-2">
           {model.incomplete ? (
