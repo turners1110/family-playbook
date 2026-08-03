@@ -3,7 +3,7 @@
   "mutated": false,
   "remoteVersion": 214,
   "family": "Turner Family",
-  "verdict": "No answer data was lost. Home “4” counted unique store.answers question IDs. Conversation quick answers (22 real) are a separate collection and correctly do not raise the canonical deep count. Proposed repairs are prompt-catalog deep-link ID alignments only.",
+  "verdict": "No live answer mutations required. Deep-link catalog IDs align with the question bank (or resolve via prefix match).",
   "metrics": {
     "canonicalQuestionsAnswered": 3,
     "canonicalQuestionsTotal": 430,
@@ -14,7 +14,7 @@
     "conversationQuickAnswers": 22,
     "essentialsScreensCompleted": 1,
     "essentialsScreensVisible": 33,
-    "sharedDecisions": 0,
+    "sharedDecisions": 2,
     "openFollowUps": 4,
     "undecidedLibrary": 0,
     "discussLaterItems": 0,
@@ -22,165 +22,10 @@
     "activeSessionAnswered": 0,
     "activeSessionItemCount": 0
   },
-  "proposedPromptCatalogRepairs": [
-    {
-      "promptId": "qp_solve_or_listen",
-      "from": "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted",
-      "to": "q_what_does_a_good_day_look_like_when_both_parents_are_exha",
-      "action": "update_prompt_catalog_follow_up_id"
-    },
-    {
-      "promptId": "qp_conflict_style",
-      "from": "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
-      "to": "q_how_should_we_handle_parenting_disagreements_in_front_of",
-      "action": "update_prompt_catalog_follow_up_id"
-    },
-    {
-      "promptId": "qp_lulu_intro",
-      "from": "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab",
-      "to": "q_how_should_we_prepare_siblings_or_pets_if_relevant_for",
-      "action": "update_prompt_catalog_follow_up_id"
-    },
-    {
-      "promptId": "qp_stroller_walk",
-      "from": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
-      "to": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
-      "action": "update_prompt_catalog_follow_up_id"
-    },
-    {
-      "promptId": "qp_primary_dog_sitter",
-      "from": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
-      "to": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
-      "action": "update_prompt_catalog_follow_up_id"
-    },
-    {
-      "promptId": "qp_backup_sitter",
-      "from": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
-      "to": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
-      "action": "update_prompt_catalog_follow_up_id"
-    }
-  ],
-  "sessionCardPlan": [
-    {
-      "itemId": "citem_1iaj4usp5a2g",
-      "promptId": "qp_parent_word",
-      "status": "answered_different",
-      "linkedDeepId": "q_what_does_success_as_parents_mean_to_us",
-      "resolvedDeepId": "q_what_does_success_as_parents_mean_to_us",
-      "hasCanonicalAnswer": true,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_di8fc5ti5a2g",
-      "promptId": "qp_holiday_size",
-      "status": "answered_same",
-      "linkedDeepId": null,
-      "resolvedDeepId": null,
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_sa0t00305a2g",
-      "promptId": "qp_family_food",
-      "status": "answered_different",
-      "linkedDeepId": null,
-      "resolvedDeepId": null,
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_h27wdult5a2h",
-      "promptId": "qp_bm_success_deep",
-      "status": "answered_different",
-      "linkedDeepId": "q_what_does_success_as_parents_mean_to_us",
-      "resolvedDeepId": "q_what_does_success_as_parents_mean_to_us",
-      "hasCanonicalAnswer": true,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_sjljys4s5a2h",
-      "promptId": "qp_bm_rose_thorn",
-      "status": "answered_same",
-      "linkedDeepId": null,
-      "resolvedDeepId": null,
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_fodwr2r15a2h",
-      "promptId": "qp_baby_face_online",
-      "status": "answered_different",
-      "linkedDeepId": "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
-      "resolvedDeepId": "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_q0r9oofteil1",
-      "promptId": "qp_first_week_home",
-      "status": "answered_same",
-      "linkedDeepId": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
-      "resolvedDeepId": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_si1fnqbdgqja",
-      "promptId": "qp_visitors_bring",
-      "status": "answered_same",
-      "linkedDeepId": "q_what_does_a_calm_postpartum_home_environment_require_from",
-      "resolvedDeepId": "q_what_does_a_calm_postpartum_home_environment_require_from",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_38v4w66jh7go",
-      "promptId": "qp_ask_before_holding",
-      "status": "answered_same",
-      "linkedDeepId": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
-      "resolvedDeepId": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_w",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_pije2q11ieuy",
-      "promptId": "qp_hospital_updates",
-      "status": "answered_different",
-      "linkedDeepId": "q_how_should_family_members_receive_updates_during_labor_an",
-      "resolvedDeepId": "q_how_should_family_members_receive_updates_during_labor_an",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_uokv1y7ak3pl",
-      "promptId": "qp_hospital_photos",
-      "status": "answered_different",
-      "linkedDeepId": "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
-      "resolvedDeepId": "q_how_do_we_want_to_handle_photos_and_social_media_after_bi",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    },
-    {
-      "itemId": "citem_kr4jpgb0ldr5",
-      "promptId": "qp_birth_room_word",
-      "status": "opened",
-      "linkedDeepId": "q_what_role_should_each_parent_have_during_labor",
-      "resolvedDeepId": "q_what_role_should_each_parent_have_during_labor",
-      "hasCanonicalAnswer": false,
-      "mutateLiveAnswers": false,
-      "note": "OK"
-    }
-  ],
-  "liveAnswerMutations": []
+  "proposedPromptCatalogRepairs": [],
+  "liveAnswerMutations": [],
+  "orphanedAnswerCount": 0,
+  "wrongActorCount": 0,
+  "missingSessionLinkCount": 0,
+  "duplicateRepairCount": 0
 }

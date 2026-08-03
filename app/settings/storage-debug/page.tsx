@@ -153,59 +153,47 @@ export default async function StorageDebugPage() {
       <section className="surface mt-5 p-5">
         <h2 className="font-display text-xl">Compare counts</h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Remote collections vs Home / Essentials / session display. Mismatches
-          are flagged.
+          Home and Storage Debug both use{" "}
+          <code className="text-xs">buildFamilyProgressMetrics</code>. Mismatches
+          are flagged in red.
         </p>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Remote canonical answers (fully answered)
+              Deep discussions (Home = Debug)
             </dt>
-            <dd>{remoteCanonical}</dd>
+            <dd>{familyProgress.canonicalQuestionsAnswered}</dd>
           </div>
           <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Home canonical count
+              Conversation prompts
             </dt>
-            <dd className={remoteCanonical !== homeCanonical ? "text-danger" : ""}>
-              {homeCanonical}
-            </dd>
+            <dd>{familyProgress.conversationPromptsCompleted}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Remote quick answers (real)
-            </dt>
-            <dd>{remoteQuick}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Remote session answered items
-            </dt>
-            <dd>{remoteSessionAnswered}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Home conversation prompts
-            </dt>
-            <dd
-              className={
-                remoteSessionAnswered !== homeConversation ? "text-danger" : ""
-              }
-            >
-              {homeConversation}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-ink-subtle">
-              Essentials completed (displayed)
-            </dt>
+            <dt className="text-xs uppercase text-ink-subtle">Essentials</dt>
             <dd>
-              {essentialsDisplayed} / {familyProgress.essentialsScreensVisible}
+              {familyProgress.essentialsScreensCompleted} of{" "}
+              {familyProgress.essentialsScreensVisible}
             </dd>
           </div>
           <div>
+            <dt className="text-xs uppercase text-ink-subtle">Shared decisions</dt>
+            <dd>{familyProgress.sharedDecisions}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Open follow-ups</dt>
+            <dd>{familyProgress.openFollowUps}</dd>
+          </div>
+          <div>
             <dt className="text-xs uppercase text-ink-subtle">
-              Legacy unique answer question IDs
+              Real quick answers
+            </dt>
+            <dd>{familyProgress.conversationQuickAnswers}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">
+              Legacy unique answer IDs
             </dt>
             <dd>{familyProgress.legacyUniqueAnsweredQuestionIds}</dd>
           </div>
@@ -244,10 +232,22 @@ export default async function StorageDebugPage() {
         </dl>
         {countMismatch ? (
           <p className="mt-3 text-sm text-danger" role="alert">
-            Count mismatch flagged — compare remote vs displayed metrics.
+            Counts differ
+            {remoteCanonical !== homeCanonical
+              ? " · deep discussions"
+              : ""}
+            {remoteSessionAnswered !== homeConversation
+              ? " · conversation prompts"
+              : ""}
+            {resumeProgress != null &&
+            resumeProgress.answeredCount !== snapshot.conversationAnsweredCount
+              ? " · active session"
+              : ""}
           </p>
         ) : (
-          <p className="mt-3 text-sm text-accent">Counts aligned.</p>
+          <p className="mt-3 text-sm text-accent" role="status">
+            Counts match
+          </p>
         )}
       </section>
 

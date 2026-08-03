@@ -568,7 +568,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted",
+      "q_what_does_a_good_day_look_like_when_both_parents_are_exha",
     conversation_energy: "lightning",
     conversation_tags: ["partnership"],
     session_tags: [],
@@ -655,7 +655,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
+      "q_how_should_we_handle_parenting_disagreements_in_front_of",
     conversation_energy: "lightning",
     conversation_tags: ["partnership"],
     session_tags: [],
@@ -1184,7 +1184,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab",
+      "q_how_should_we_prepare_siblings_or_pets_if_relevant_for",
     conversation_energy: "lightning",
     conversation_tags: ["lulu"],
     session_tags: [],
@@ -1213,7 +1213,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["lulu", "fun"],
     session_tags: [],
@@ -1238,7 +1238,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: 60,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["lulu"],
     session_tags: [],
@@ -1267,7 +1267,7 @@ export const QUICK_PROMPTS: ConversationPromptDef[] = [
     suggested_discussion_minutes: null,
     short_text_max_length: null,
     follow_up_open_question_id:
-      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_bi",
     conversation_energy: "lightning",
     conversation_tags: ["lulu"],
     session_tags: [],

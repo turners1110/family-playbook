@@ -19,10 +19,13 @@
  *   Visible primary Essentials screens meeting buildEssentialsDashboard rules.
  *
  * sharedDecisions:
- *   Decisions with status decided or tentatively_decided.
+ *   Progress-eligible questions with a saved shared answer (content),
+ *   plus decisions with status decided or tentatively_decided.
  *
  * openFollowUps:
- *   Partial library answers + undecided + cooling-off + research needed.
+ *   Undecided library items + Discuss Later conversation items +
+ *   Waiting for provider / needs_research answers + active cooling-off +
+ *   partially answered library questions (Sam-only or Michelle-only).
  */
 
 import type {
@@ -32,6 +35,7 @@ import type {
 } from "@/lib/types/models";
 import {
   buildQuestionStatusIndex,
+  hasAnswerContent,
   isProgressEligibleQuestion,
   type QuestionAnswerStatus,
 } from "@/lib/services/question-status";
@@ -177,20 +181,44 @@ export function buildFamilyProgressMetrics(
     .filter((a) => !isQaRecord(a) && realSessions.has(a.session_id)).length;
 
   const essentials = buildEssentialsDashboard(store);
-  const sharedDecisions = (store.decisions ?? []).filter((d) =>
+
+  const sharedAnswerQuestionIds = new Set(
+    (store.answers ?? [])
+      .filter(
+        (a) =>
+          !isQaRecord(a) &&
+          a.is_shared &&
+          hasAnswerContent(a.payload) &&
+          eligible.some((q) => q.id === a.question_id),
+      )
+      .map((a) => a.question_id),
+  );
+  const approvedDecisionCount = (store.decisions ?? []).filter((d) =>
     ["decided", "tentatively_decided"].includes(d.status),
   ).length;
+  const sharedDecisions = sharedAnswerQuestionIds.size + approvedDecisionCount;
 
   const discussLaterItems = realItems.filter(
     (i) => i.status === "discuss_later",
+  ).length;
+  const waitingProviderAnswers = (store.answers ?? []).filter(
+    (a) => !isQaRecord(a) && a.needs_research,
+  ).length;
+  const waitingProviderItems = realItems.filter(
+    (i) => i.status === "needs_follow_up",
+  ).length;
+  const discussLaterAnswers = (store.answers ?? []).filter(
+    (a) => !isQaRecord(a) && a.status === "review_scheduled",
   ).length;
 
   const openFollowUps =
     canonicalQuestionsPartial +
     undecidedLibrary +
-    (store.cooling_off_items ?? []).filter((c) => c.active).length +
-    (store.answers ?? []).filter((a) => !isQaRecord(a) && a.needs_research)
-      .length;
+    discussLaterItems +
+    discussLaterAnswers +
+    waitingProviderAnswers +
+    waitingProviderItems +
+    (store.cooling_off_items ?? []).filter((c) => c.active).length;
 
   const progress = session
     ? getConversationSessionProgress(store, session.id)

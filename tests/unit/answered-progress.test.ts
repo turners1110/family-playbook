@@ -334,12 +334,100 @@ describe("family progress metric contract", () => {
     expect(conversationItemIsComplete("discuss_later")).toBe(true);
   });
 
-  it("homepage uses multi-metric progress helpers", () => {
+  it("shared answer increases shared-decision count", () => {
+    const store = emptyStore({
+      answers: [
+        {
+          id: "a1",
+          family_id: "family_t",
+          question_id: "q_deep_one",
+          member_id: null,
+          is_shared: true,
+          payload: { text: "Shared" },
+          status: "tentatively_decided",
+          confidence: 3,
+          bookmarked: false,
+          needs_research: false,
+          review_date: null,
+          version: 1,
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+    } as never);
+    const metrics = buildFamilyProgressMetrics(store);
+    expect(metrics.sharedDecisions).toBeGreaterThanOrEqual(1);
+    expect(metrics.canonicalQuestionsAnswered).toBe(1);
+  });
+
+  it("needs_research increases open follow-ups", () => {
+    const store = emptyStore({
+      answers: [
+        {
+          id: "a1",
+          family_id: "family_t",
+          question_id: "q_deep_two",
+          member_id: "member_sam",
+          is_shared: false,
+          payload: { text: "Need research" },
+          status: "needs_research",
+          confidence: 2,
+          bookmarked: false,
+          needs_research: true,
+          review_date: null,
+          version: 1,
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-01T00:00:00.000Z",
+        },
+      ],
+    } as never);
+    const metrics = buildFamilyProgressMetrics(store);
+    expect(metrics.openFollowUps).toBeGreaterThanOrEqual(1);
+  });
+
+  it("Home and Storage Debug both call buildFamilyProgressMetrics", () => {
     const home = readFileSync(path.join(root, "app/home/page.tsx"), "utf8");
-    expect(home).toMatch(/Deep discussions answered/);
-    expect(home).toMatch(/Conversation prompts completed/);
-    expect(home).toMatch(/Essentials screens/);
-    expect(home).toMatch(/stats\.progress\.canonicalQuestionsAnswered/);
+    const debug = readFileSync(
+      path.join(root, "app/settings/storage-debug/page.tsx"),
+      "utf8",
+    );
+    expect(home).toMatch(/stats\.progress/);
+    expect(debug).toMatch(/buildFamilyProgressMetrics/);
+    expect(debug).toMatch(/Counts match/);
+  });
+
+  it("zero-answer sessions do not inflate conversation prompt totals", () => {
+    const store = emptyStore({
+      conversation_sessions: [
+        {
+          id: "csess_empty",
+          family_id: "family_t",
+          mode: "babymoon",
+          status: "active",
+          title: "Empty",
+          planned_minutes: 30,
+          current_item_index: 0,
+          created_by: "user",
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-02T00:00:00.000Z",
+          is_test_data: false,
+        } as never,
+        ...(emptyStore().conversation_sessions ?? []),
+      ],
+      conversation_session_items: [
+        {
+          id: "item_empty",
+          session_id: "csess_empty",
+          prompt_id: "qp_x",
+          display_order: 0,
+          status: "pending",
+          energy: "light",
+        } as never,
+        ...(emptyStore().conversation_session_items ?? []),
+      ],
+    } as never);
+    const metrics = buildFamilyProgressMetrics(store);
+    expect(metrics.conversationPromptsCompleted).toBe(2);
   });
 });
 

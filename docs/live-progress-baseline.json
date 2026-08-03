@@ -1,0 +1,126 @@
+{
+  "capturedAt": "2026-08-03T20:30:17.169Z",
+  "commitHint": "trip-online-mode verification",
+  "environment": {
+    "useRemoteJsonStore": true,
+    "usesRemoteAtRuntime": true,
+    "storageMode": "remote",
+    "remoteConnected": true,
+    "remoteVersion": 214,
+    "familyName": "Turner Family",
+    "familyIdPrefix": "family_tur",
+    "tripMode": false,
+    "backupLabel": "Remote storage",
+    "writesAllowedInTripMode": true,
+    "deploymentHost": "http://localhost:3000"
+  },
+  "metrics": {
+    "canonicalQuestionsAnswered": 3,
+    "canonicalQuestionsTotal": 430,
+    "canonicalQuestionsPartial": 1,
+    "legacyUniqueAnsweredQuestionIds": 4,
+    "conversationPromptsCompleted": 11,
+    "conversationPromptsTotal": 36,
+    "conversationQuickAnswers": 22,
+    "essentialsScreensCompleted": 1,
+    "essentialsScreensVisible": 33,
+    "sharedDecisions": 2,
+    "openFollowUps": 4,
+    "undecidedLibrary": 0,
+    "discussLaterItems": 0,
+    "activeSessionId": null,
+    "activeSessionAnswered": 0,
+    "activeSessionItemCount": 0
+  },
+  "raw": {
+    "deepDiscussions": 3,
+    "conversationPrompts": 11,
+    "essentialsCompleted": 1,
+    "essentialsVisible": 33,
+    "sharedDecisions": 2,
+    "openFollowUps": 4,
+    "uniqueCanonicalQuestionIds": 4,
+    "samCanonical": 3,
+    "michelleCanonical": 3,
+    "sharedCanonical": 2,
+    "quickReal": 22,
+    "quickQa": 36
+  },
+  "homeEqualsContract": {
+    "deepDiscussions": true,
+    "conversationPrompts": true,
+    "essentials": true,
+    "sharedDecisions": true,
+    "openFollowUps": true
+  },
+  "countsMatch": true,
+  "collections": {
+    "canonicalAnswers": 8,
+    "uniqueCanonicalQuestionIds": 4,
+    "samCanonical": 3,
+    "michelleCanonical": 3,
+    "sharedCanonical": 2,
+    "quickConversationAnswersReal": 22,
+    "quickConversationAnswersQa": 36,
+    "answeredConversationItems": 11,
+    "essentialsCompleted": 1,
+    "sharedDecisions": 2,
+    "openFollowUps": 4,
+    "activeNonTestSessions": 4,
+    "completedNonTestSessions": 1,
+    "zeroAnswerSessions": 4,
+    "qaSessions": 1
+  },
+  "babymoonKnownSession": {
+    "exists": true,
+    "id": "csess_9ouyjygd59hk",
+    "mode": "babymoon",
+    "status": "completed",
+    "title": "Babymoon · Warm-up and Family Identity",
+    "totalItems": 12,
+    "answeredItems": 11,
+    "quickAnswers": 22,
+    "deepAnswers": 1,
+    "samAnswers": 11,
+    "michelleAnswers": 11,
+    "sharedAnswers": 0,
+    "differences": 6,
+    "currentIndex": 11,
+    "lastUpdated": "2026-08-03T16:05:33.007Z",
+    "progressEqualsDurable": true,
+    "resumeRankAmongActive": -1,
+    "note": "Completed — Resume shows completed/history; active empty sessions must not outrank unfinished progress sessions"
+  },
+  "resumeRankingTop": [
+    {
+      "id": "csess_s95vzg5ocg9l",
+      "answeredCount": 0,
+      "itemCount": 6,
+      "hasProgress": false
+    },
+    {
+      "id": "csess_0nh0smvefu7j",
+      "answeredCount": 0,
+      "itemCount": 6,
+      "hasProgress": false
+    },
+    {
+      "id": "csess_sl3nzgnn4jya",
+      "answeredCount": 0,
+      "itemCount": 6,
+      "hasProgress": false
+    },
+    {
+      "id": "csess_56nb2jc5g730",
+      "answeredCount": 0,
+      "itemCount": 6,
+      "hasProgress": false
+    }
+  ],
+  "remainingCatalogRepairs": [],
+  "dryRunRecovery": {
+    "liveAnswerMutationsRequired": 0,
+    "orphanedAnswers": 0,
+    "catalogRepairsRemaining": 0
+  }
+}
