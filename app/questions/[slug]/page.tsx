@@ -265,6 +265,7 @@ export default async function QuestionDetailPage({
           />
         </div>
         <AnswerEditor
+          question={question}
           questionId={question.id}
           members={store.members}
           answers={answers}
@@ -275,25 +276,41 @@ export default async function QuestionDetailPage({
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <section className="surface p-5">
-          <h3 className="font-display text-xl">Current perspectives</h3>
+          <h3 className="font-display text-xl">Family decision</h3>
           <div className="mt-3 space-y-3">
-            {answers.length === 0 && (
-              <p className="text-sm text-ink-muted">No answers yet.</p>
+            {answers.filter((a) => a.is_shared).length === 0 && (
+              <p className="text-sm text-ink-muted">No shared decision yet.</p>
             )}
-            {answers.map((a) => (
-              <div key={a.id} className="rounded-xl border border-border p-3 text-sm">
-                <div className="mb-2 flex flex-wrap gap-2">
-                  <span className="badge">{a.is_shared ? "Shared" : "Individual"}</span>
+            {answers
+              .filter((a) => a.is_shared)
+              .map((a) => (
+                <div
+                  key={a.id}
+                  className="rounded-xl border border-border p-3 text-sm"
+                >
+                  <span className="badge">Shared</span>
+                  <p className="mt-2">{a.payload.text || a.payload.quick || "—"}</p>
                 </div>
-                <p>{a.payload.text || a.payload.quick || "—"}</p>
-                {a.payload.disagreement_notes && (
-                  <p className="mt-2 text-ink-muted">
-                    Disagreement: {a.payload.disagreement_notes}
-                  </p>
-                )}
-              </div>
-            ))}
+              ))}
           </div>
+          {answers.some((a) => !a.is_shared) ? (
+            <div className="mt-4 space-y-3">
+              <h4 className="font-medium">Separate perspectives</h4>
+              {answers
+                .filter((a) => !a.is_shared)
+                .map((a) => (
+                  <div
+                    key={a.id}
+                    className="rounded-xl border border-border p-3 text-sm"
+                  >
+                    <span className="badge">Individual</span>
+                    <p className="mt-2">
+                      {a.payload.text || a.payload.quick || "—"}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          ) : null}
         </section>
 
         <section className="surface p-5">

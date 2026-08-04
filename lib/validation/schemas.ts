@@ -113,6 +113,12 @@ export const saveDecisionSchema = z.object({
   outcome_ids: z.array(z.string()).optional(),
   principle_ids: z.array(z.string()).optional(),
   change_reason: z.string().optional(),
+  started_mode: z
+    .enum(["shared_first", "separate_first", "either"])
+    .nullable()
+    .optional(),
+  merged_at: z.string().nullable().optional(),
+  merge_initiated_by: z.string().nullable().optional(),
 });
 
 export const coolingOffSchema = z.object({
@@ -172,6 +178,11 @@ export const questionSeedSchema = z.object({
   evidence_summary: z.string().nullable().default(null),
   practical_tip: z.string().nullable().default(null),
   separate_answers_recommended: z.boolean().default(false),
+  discussion_mode: z
+    .enum(["shared_first", "separate_first", "either"])
+    .optional()
+    .nullable(),
+  discussion_reason: z.string().optional().nullable(),
   cooling_off_recommended: z.boolean().default(false),
   follow_up_prompts: z.array(z.string()).default([]),
   review_recommendation: z.string().nullable().default(null),

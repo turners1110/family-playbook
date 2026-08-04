@@ -133,8 +133,49 @@ export default async function DecisionDetailPage({
             Questions: {node?.questions.length ?? decision?.source_question_ids.length ?? 0}
           </div>
           <div>Conversations: {node?.conversations.length ?? 0}</div>
+          {decision?.started_mode ? (
+            <div>
+              {decision.started_mode === "separate_first"
+                ? "Started separately"
+                : decision.started_mode === "either"
+                  ? "Either mode"
+                  : "Started together"}
+            </div>
+          ) : null}
+          {decision?.merged_at ? (
+            <div>
+              Merged later · {decision.merged_at.slice(0, 10)}
+              {decision.merge_initiated_by
+                ? ` · ${decision.merge_initiated_by}`
+                : ""}
+            </div>
+          ) : null}
         </div>
       </section>
+
+      {(decision?.sam_perspective || decision?.michelle_perspective) && (
+        <section className="surface mb-5 p-5">
+          <h3 className="font-display text-xl">Separate perspectives</h3>
+          <div className="mt-3 grid gap-4 md:grid-cols-2">
+            {decision.sam_perspective ? (
+              <div>
+                <p className="text-sm font-medium">Sam</p>
+                <p className="mt-1 text-sm text-ink-muted">
+                  {decision.sam_perspective}
+                </p>
+              </div>
+            ) : null}
+            {decision.michelle_perspective ? (
+              <div>
+                <p className="text-sm font-medium">Michelle</p>
+                <p className="mt-1 text-sm text-ink-muted">
+                  {decision.michelle_perspective}
+                </p>
+              </div>
+            ) : null}
+          </div>
+        </section>
+      )}
 
       <div className="mb-5 grid gap-5 lg:grid-cols-2">
         <LinkSection title="Conversations" empty="No linked conversations yet.">

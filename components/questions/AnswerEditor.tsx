@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   actionSaveAnswer,
@@ -8,9 +8,14 @@ import {
   actionScheduleReview,
   actionToggleBookmark,
 } from "@/lib/actions";
-import type { Answer, FamilyMember } from "@/lib/types/models";
+import type { Answer, FamilyMember, Question } from "@/lib/types/models";
 import { DECISION_STATUSES, CONFIDENCE_LABELS } from "@/lib/constants/enums";
 import type { SaveAnswerInput } from "@/lib/validation/schemas";
+import {
+  discussionModeIcon,
+  resolveEffectiveDiscussionMode,
+  type DiscussionMode,
+} from "@/lib/discussions/discussion-mode";
 
 function newMutationId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -19,13 +24,29 @@ function newMutationId() {
   return `mut_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+type DiffLevel = "none" | "minor" | "major" | null;
+type UiMode = "shared" | "separate";
+
 export function AnswerEditor({
+  question,
   questionId,
   members,
   answers,
   hideUntilBoth,
   currentMemberId,
 }: {
+  question?: Pick<
+    Question,
+    | "discussion_mode"
+    | "discussion_reason"
+    | "separate_answers_recommended"
+    | "id"
+    | "slug"
+    | "short_title"
+    | "text"
+    | "categories"
+    | "why_it_matters"
+  >;
   questionId: string;
   members: FamilyMember[];
   answers: Answer[];
@@ -37,25 +58,83 @@ export function AnswerEditor({
   const sam = members.find((m) => m.display_name === "Sam");
   const michelle = members.find((m) => m.display_name === "Michelle");
   const shared = answers.find((a) => a.is_shared);
-  const [text, setText] = useState(shared?.payload.text ?? "");
-  const [samText, setSamText] = useState(
-    answers.find((a) => a.member_id === sam?.id)?.payload.text ?? "",
+  const samAnswer = answers.find((a) => a.member_id === sam?.id);
+  const michelleAnswer = answers.find((a) => a.member_id === michelle?.id);
+  const hasSeparateAnswers = Boolean(samAnswer || michelleAnswer);
+
+  const recommended = resolveEffectiveDiscussionMode({
+    discussion_mode: question?.discussion_mode ?? null,
+    separate_answers_recommended: question?.separate_answers_recommended,
+    hasSeparateAnswers,
+    question: question
+      ? {
+          id: question.id,
+          slug: question.slug,
+          short_title: question.short_title,
+          text: question.text,
+          categories: question.categories,
+          why_it_matters: question.why_it_matters,
+          separate_answers_recommended: question.separate_answers_recommended,
+        }
+      : null,
+  });
+
+  const [eitherChoice, setEitherChoice] = useState<DiscussionMode | null>(
+    () => {
+      if (recommended !== "either") return null;
+      if (typeof window === "undefined") return "shared_first";
+      const pref = window.localStorage.getItem(
+        "discussion_mode_pref_either",
+      ) as DiscussionMode | null;
+      if (pref === "shared_first" || pref === "separate_first") return pref;
+      return null;
+    },
   );
+
+  const activeMode: DiscussionMode =
+    recommended === "either"
+      ? (eitherChoice ?? "shared_first")
+      : recommended;
+
+  const [uiMode, setUiMode] = useState<UiMode>(() =>
+    hasSeparateAnswers || activeMode === "separate_first"
+      ? "separate"
+      : "shared",
+  );
+
+  const [text, setText] = useState(shared?.payload.text ?? "");
+  const [samText, setSamText] = useState(samAnswer?.payload.text ?? "");
   const [michelleText, setMichelleText] = useState(
-    answers.find((a) => a.member_id === michelle?.id)?.payload.text ?? "",
+    michelleAnswer?.payload.text ?? "",
   );
   const [status, setStatus] = useState(shared?.status ?? "in_discussion");
-  const [confidence, setConfidence] = useState<1 | 2 | 3 | 4 | 5 | null>(shared?.confidence ?? 3);
+  const [confidence, setConfidence] = useState<1 | 2 | 3 | 4 | 5 | null>(
+    shared?.confidence ?? 3,
+  );
   const [notes, setNotes] = useState(shared?.payload.notes ?? "");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [retryPayload, setRetryPayload] = useState<SaveAnswerInput | null>(null);
-  const bothSaved = Boolean(
-    answers.find((a) => a.member_id === sam?.id) &&
-      answers.find((a) => a.member_id === michelle?.id),
-  );
-  const reveal = !hideUntilBoth || bothSaved;
+  const [diffPrompt, setDiffPrompt] = useState<DiffLevel>(null);
+  const [mergeNotes, setMergeNotes] = useState("");
 
-  function runSaveAnswer(input: SaveAnswerInput) {
+  const bothSaved = Boolean(samAnswer && michelleAnswer);
+  const reveal = !hideUntilBoth || bothSaved;
+  const icon = discussionModeIcon(activeMode);
+
+  const samVisible =
+    reveal || currentMemberId === sam?.id || !samAnswer;
+  const michelleVisible =
+    reveal || currentMemberId === michelle?.id || !michelleAnswer;
+
+  const agreementPreview = useMemo(() => {
+    if (!samText.trim() || !michelleText.trim()) return null;
+    if (samText.trim() === michelleText.trim()) {
+      return { same: true as const, summary: samText.trim() };
+    }
+    return { same: false as const, summary: null };
+  }, [samText, michelleText]);
+
+  function runSaveAnswer(input: SaveAnswerInput, after?: () => void) {
     const payload: SaveAnswerInput = {
       ...input,
       mutation_id: input.mutation_id ?? newMutationId(),
@@ -66,10 +145,10 @@ export function AnswerEditor({
       const result = await actionSaveAnswer(payload);
       if (result && "ok" in result && result.ok === false) {
         setSaveError(result.error);
-        // Keep form values and retry payload; do not refresh or redirect.
         return;
       }
       setRetryPayload(null);
+      after?.();
       router.refresh();
     });
   }
@@ -81,6 +160,38 @@ export function AnswerEditor({
       router.refresh();
     });
   }
+
+  function chooseEither(next: DiscussionMode) {
+    setEitherChoice(next);
+    setUiMode(next === "separate_first" ? "separate" : "shared");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("discussion_mode_pref_either", next);
+    }
+  }
+
+  function captureSeparate() {
+    setUiMode("separate");
+    if (!samText && text) setSamText(text);
+    if (!michelleText && text) setMichelleText(text);
+  }
+
+  function saveShared(options?: { afterSave?: () => void }) {
+    runSaveAnswer(
+      {
+        question_id: questionId,
+        is_shared: true,
+        payload: { text, notes: notes || undefined },
+        status: status as never,
+        confidence,
+        change_reason: shared
+          ? "Updated shared family decision"
+          : "Created shared family decision",
+      },
+      options?.afterSave,
+    );
+  }
+
+  const needsEitherChoice = recommended === "either" && eitherChoice === null;
 
   return (
     <div className="mt-4 space-y-4">
@@ -107,143 +218,358 @@ export function AnswerEditor({
           ) : null}
         </div>
       ) : null}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="field">
-          <label htmlFor="sam">Sam’s answer</label>
-          <textarea
-            id="sam"
-            className="textarea"
-            value={samText}
-            onChange={(e) => setSamText(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={pending || !sam}
-            onClick={() =>
-              runSaveAnswer({
-                question_id: questionId,
-                is_shared: false,
-                member_id: sam!.id,
-                payload: { text: samText },
-                status: "in_discussion",
-                confidence: null,
-              })
-            }
-          >
-            Save Sam
-          </button>
-        </div>
-        <div className="field">
-          <label htmlFor="michelle">Michelle’s answer</label>
-          {!reveal ? (
-            <p className="mb-2 text-sm text-ink-muted">
-              Partner answers stay hidden until both are saved.
-            </p>
-          ) : null}
-          <textarea
-            id="michelle"
-            className="textarea"
-            value={michelleText}
-            onChange={(e) => setMichelleText(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={pending || !michelle}
-            onClick={() =>
-              runSaveAnswer({
-                question_id: questionId,
-                is_shared: false,
-                member_id: michelle!.id,
-                payload: { text: michelleText },
-                status: "in_discussion",
-                confidence: null,
-              })
-            }
-          >
-            Save Michelle
-          </button>
-        </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+        <span aria-hidden className="text-base">
+          {icon.symbol}
+        </span>
+        <span>{icon.label}</span>
+        {question?.discussion_reason ? (
+          <span className="text-ink-subtle">· {question.discussion_reason}</span>
+        ) : null}
       </div>
 
-      <div className="field">
-        <label htmlFor="shared">Shared decision</label>
-        <textarea
-          id="shared"
-          className="textarea"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-      </div>
-      <div className="field">
-        <label htmlFor="notes">Notes</label>
-        <textarea
-          id="notes"
-          className="textarea"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="field">
-          <label htmlFor="status">Status</label>
-          <select
-            id="status"
-            className="select"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as typeof status)}
-          >
-            {DECISION_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <label htmlFor="confidence">Confidence</label>
-          <select
-            id="confidence"
-            className="select"
-            value={confidence ?? ""}
-            onChange={(e) =>
-              setConfidence(
-                e.target.value === ""
-                  ? null
-                  : (Number(e.target.value) as 1 | 2 | 3 | 4 | 5),
-              )
-            }
-          >
-            <option value="">Not rated</option>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {CONFIDENCE_LABELS[n]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      {recommended === "either" ? (
+        <fieldset className="surface space-y-2 p-4">
+          <legend className="font-medium text-ink">
+            How would you like to answer?
+          </legend>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="either-mode"
+              checked={eitherChoice === "shared_first"}
+              onChange={() => chooseEither("shared_first")}
+            />
+            Together
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="radio"
+              name="either-mode"
+              checked={eitherChoice === "separate_first"}
+              onChange={() => chooseEither("separate_first")}
+            />
+            Separately
+          </label>
+          <p className="text-xs text-ink-subtle">
+            We remember this preference for similar questions on this device.
+          </p>
+        </fieldset>
+      ) : null}
+
+      {!needsEitherChoice && uiMode === "shared" ? (
+        <section className="space-y-3">
+          <div className="field">
+            <label htmlFor="shared" className="font-display text-lg">
+              Shared family decision
+            </label>
+            <textarea
+              id="shared"
+              className="textarea min-h-40"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Write what you decide together…"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="notes">Notes</label>
+            <textarea
+              id="notes"
+              className="textarea"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="field">
+              <label htmlFor="status">Status</label>
+              <select
+                id="status"
+                className="select"
+                value={status}
+                onChange={(e) => setStatus(e.target.value as typeof status)}
+              >
+                {DECISION_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="confidence">Confidence</label>
+              <select
+                id="confidence"
+                className="select"
+                value={confidence ?? ""}
+                onChange={(e) =>
+                  setConfidence(
+                    e.target.value === ""
+                      ? null
+                      : (Number(e.target.value) as 1 | 2 | 3 | 4 | 5),
+                  )
+                }
+              >
+                <option value="">Not rated</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>
+                    {CONFIDENCE_LABELS[n]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={pending}
+              onClick={() =>
+                saveShared({
+                  afterSave: () => setDiffPrompt("none"),
+                })
+              }
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending}
+              onClick={captureSeparate}
+            >
+              Capture separate perspectives
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {diffPrompt !== null && uiMode === "shared" ? (
+        <section className="surface space-y-3 p-4" role="status">
+          <p className="font-medium">
+            Did this discussion uncover meaningful differences?
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setDiffPrompt(null)}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setDiffPrompt("minor")}
+            >
+              Minor differences
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setDiffPrompt("major");
+                captureSeparate();
+              }}
+            >
+              Major differences
+            </button>
+          </div>
+          {diffPrompt === "minor" ? (
+            <div className="field">
+              <label htmlFor="minor-notes">Optional notes</label>
+              <textarea
+                id="minor-notes"
+                className="textarea"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary mt-2"
+                disabled={pending}
+                onClick={() => {
+                  saveShared({ afterSave: () => setDiffPrompt(null) });
+                }}
+              >
+                Save notes
+              </button>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {!needsEitherChoice && uiMode === "separate" ? (
+        <section className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-lg">Separate perspectives</h3>
+            {activeMode !== "separate_first" || hasSeparateAnswers ? (
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setUiMode("shared")}
+              >
+                Back to shared
+              </button>
+            ) : null}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="field">
+              <label htmlFor="sam">Sam’s answer</label>
+              {!samVisible ? (
+                <p className="mb-2 text-sm text-ink-muted">
+                  Partner answers stay hidden until both are saved.
+                </p>
+              ) : null}
+              <textarea
+                id="sam"
+                className="textarea"
+                value={samVisible ? samText : ""}
+                onChange={(e) => setSamText(e.target.value)}
+                disabled={!samVisible && Boolean(samAnswer)}
+                placeholder={
+                  !samVisible ? "Hidden until both answers are saved" : undefined
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={pending || !sam || (!samVisible && Boolean(samAnswer))}
+                onClick={() =>
+                  runSaveAnswer({
+                    question_id: questionId,
+                    is_shared: false,
+                    member_id: sam!.id,
+                    payload: { text: samText },
+                    status: "in_discussion",
+                    confidence: null,
+                  })
+                }
+              >
+                Save Sam
+              </button>
+            </div>
+            <div className="field">
+              <label htmlFor="michelle">Michelle’s answer</label>
+              {!michelleVisible ? (
+                <p className="mb-2 text-sm text-ink-muted">
+                  Partner answers stay hidden until both are saved.
+                </p>
+              ) : null}
+              <textarea
+                id="michelle"
+                className="textarea"
+                value={michelleVisible ? michelleText : ""}
+                onChange={(e) => setMichelleText(e.target.value)}
+                disabled={!michelleVisible && Boolean(michelleAnswer)}
+                placeholder={
+                  !michelleVisible
+                    ? "Hidden until both answers are saved"
+                    : undefined
+                }
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={
+                  pending ||
+                  !michelle ||
+                  (!michelleVisible && Boolean(michelleAnswer))
+                }
+                onClick={() =>
+                  runSaveAnswer({
+                    question_id: questionId,
+                    is_shared: false,
+                    member_id: michelle!.id,
+                    payload: { text: michelleText },
+                    status: "in_discussion",
+                    confidence: null,
+                  })
+                }
+              >
+                Save Michelle
+              </button>
+            </div>
+          </div>
+
+          {bothSaved && reveal ? (
+            <div className="surface space-y-3 p-4">
+              <h4 className="font-medium">Merge into family decision</h4>
+              {agreementPreview?.same ? (
+                <p className="text-sm text-ink-muted">
+                  Areas of agreement: your answers match.
+                </p>
+              ) : (
+                <p className="text-sm text-ink-muted">
+                  Areas of difference: review both perspectives, then write a
+                  shared summary.
+                </p>
+              )}
+              <div className="field">
+                <label htmlFor="merge-shared">Shared summary</label>
+                <textarea
+                  id="merge-shared"
+                  className="textarea"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder={
+                    agreementPreview?.same
+                      ? agreementPreview.summary ?? ""
+                      : "Create or update the family decision…"
+                  }
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="merge-notes">Merge notes</label>
+                <textarea
+                  id="merge-notes"
+                  className="textarea"
+                  value={mergeNotes || notes}
+                  onChange={(e) => {
+                    setMergeNotes(e.target.value);
+                    setNotes(e.target.value);
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={pending}
+                onClick={() =>
+                  runSaveAnswer({
+                    question_id: questionId,
+                    is_shared: true,
+                    payload: {
+                      text:
+                        text ||
+                        agreementPreview?.summary ||
+                        `${samText}\n\n${michelleText}`,
+                      notes: notes || undefined,
+                      agreement_notes: agreementPreview?.same
+                        ? "Answers matched"
+                        : undefined,
+                      disagreement_notes: agreementPreview?.same
+                        ? undefined
+                        : "Differences captured in separate perspectives",
+                    },
+                    status: "decided",
+                    confidence,
+                    change_reason: "Merged separate perspectives",
+                  })
+                }
+              >
+                Create or update family decision
+              </button>
+              <p className="text-xs text-ink-subtle">
+                Separate perspectives stay attached. Nothing is overwritten.
+              </p>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={pending}
-          onClick={() =>
-            runSaveAnswer({
-              question_id: questionId,
-              is_shared: true,
-              payload: { text, notes: notes || undefined },
-              status: status as never,
-              confidence,
-              change_reason: shared
-                ? "Updated from question detail"
-                : "Created from question detail",
-            })
-          }
-        >
-          Save shared answer
-        </button>
         <button
           type="button"
           className="btn btn-secondary"

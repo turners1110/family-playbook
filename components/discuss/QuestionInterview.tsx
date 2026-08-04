@@ -14,6 +14,10 @@ import { DECISION_STATUSES, CONFIDENCE_LABELS, QUICK_DECISION_OPTIONS } from "@/
 import { StatusBadge, PriorityBadge, ConfidenceBadge } from "@/components/shared/ui";
 import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
 import { helperForQuestion } from "@/lib/content/helper-templates";
+import {
+  discussionModeIcon,
+  resolveEffectiveDiscussionMode,
+} from "@/lib/discussions/discussion-mode";
 
 export function QuestionInterview({
   sessionId,
@@ -40,9 +44,16 @@ export function QuestionInterview({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const discussionMode = resolveEffectiveDiscussionMode({
+    discussion_mode: question.discussion_mode ?? null,
+    separate_answers_recommended: question.separate_answers_recommended,
+    hasSeparateAnswers: answers.some((a) => !a.is_shared),
+    question,
+  });
   const [mode, setMode] = useState<"shared" | "separate" | "quick">(
-    question.separate_answers_recommended ? "separate" : "shared",
+    discussionMode === "separate_first" ? "separate" : "shared",
   );
+  const modeIcon = discussionModeIcon(discussionMode);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [retryAction, setRetryAction] = useState<(() => Promise<void>) | null>(null);
@@ -239,9 +250,9 @@ export function QuestionInterview({
         <div className="mb-3 flex flex-wrap gap-2">
           <PriorityBadge priority={question.priority} />
           {question.babymoon_priority && <span className="badge badge-accent">Babymoon</span>}
-          {question.separate_answers_recommended && (
-            <span className="badge badge-info">Separate answers recommended</span>
-          )}
+          <span className="badge badge-info" title={modeIcon.label}>
+            {modeIcon.symbol} {modeIcon.label}
+          </span>
           {question.evidence_summary && <span className="badge">Evidence available</span>}
           {bookmarked && <span className="badge badge-warning">Bookmarked</span>}
         </div>

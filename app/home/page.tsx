@@ -10,6 +10,7 @@ import {
   decisionHref,
   decisionsNeedingAttention,
 } from "@/lib/knowledge";
+import { buildDiscussionModeHomeStats } from "@/lib/discussions/discussion-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function HomePage() {
   const stats = await getDashboardStats();
   const statusIndex = buildQuestionStatusIndex(store);
   const attentionDecisions = decisionsNeedingAttention(store).slice(0, 5);
+  const discussionStats = buildDiscussionModeHomeStats(store);
 
   return (
     <AppShell
@@ -100,6 +102,31 @@ export default async function HomePage() {
             label="Overall completion"
             value={`${stats.completion}%`}
             hint="Based on deep discussions only"
+          />
+        </div>
+      </section>
+
+      <section className="surface mb-6 p-5 sm:p-6">
+        <h2 className="font-display text-2xl text-ink">How you discuss</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Most parenting decisions are made together. Separate reflection is
+          intentional when it helps.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            label="Completed together"
+            value={`${discussionStats.completedTogetherPct}%`}
+            hint="Share of finished discussions that started shared-first"
+          />
+          <StatCard
+            label="Separate reflection remaining"
+            value={discussionStats.separateReflectionRemaining}
+            hint="Topics that still benefit from independent thinking"
+          />
+          <StatCard
+            label="Shared decisions completed"
+            value={discussionStats.sharedDecisionsCompleted}
+            hint="Family positions saved from discussion"
           />
         </div>
       </section>

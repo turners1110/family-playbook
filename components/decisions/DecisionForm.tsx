@@ -30,6 +30,12 @@ export function DecisionForm({
   const [sam, setSam] = useState(decision?.sam_perspective ?? "");
   const [michelle, setMichelle] = useState(decision?.michelle_perspective ?? "");
   const [shared, setShared] = useState(decision?.shared_conclusion ?? "");
+  const [startedMode, setStartedMode] = useState(
+    decision?.started_mode ?? "shared_first",
+  );
+  const [showPerspectives, setShowPerspectives] = useState(
+    Boolean(decision?.sam_perspective || decision?.michelle_perspective),
+  );
   const [outcomeIds, setOutcomeIds] = useState<string[]>(decision?.outcome_ids ?? []);
   const [sourceQuestions, setSourceQuestions] = useState<string[]>(
     decision?.source_question_ids ?? [],
@@ -52,6 +58,15 @@ export function DecisionForm({
             sam_perspective: sam || null,
             michelle_perspective: michelle || null,
             shared_conclusion: shared || null,
+            started_mode: startedMode as never,
+            merged_at:
+              sam || michelle
+                ? decision?.merged_at ?? new Date().toISOString()
+                : decision?.merged_at ?? null,
+            merge_initiated_by:
+              sam || michelle
+                ? decision?.merge_initiated_by ?? "family"
+                : decision?.merge_initiated_by ?? null,
             outcome_ids: outcomeIds,
             source_question_ids: sourceQuestions,
             principle_ids: principles.slice(0, 1).map((p) => p.id),
@@ -112,20 +127,53 @@ export function DecisionForm({
         <label htmlFor="reasoning">Reasoning</label>
         <textarea id="reasoning" className="textarea" value={reasoning} onChange={(e) => setReasoning(e.target.value)} />
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="field">
-          <label htmlFor="sam">Sam’s perspective</label>
-          <textarea id="sam" className="textarea" value={sam} onChange={(e) => setSam(e.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="michelle">Michelle’s perspective</label>
-          <textarea id="michelle" className="textarea" value={michelle} onChange={(e) => setMichelle(e.target.value)} />
-        </div>
-        <div className="field">
-          <label htmlFor="shared">Shared conclusion</label>
-          <textarea id="shared" className="textarea" value={shared} onChange={(e) => setShared(e.target.value)} />
-        </div>
+      <div className="field">
+        <label htmlFor="shared">Current family position</label>
+        <textarea id="shared" className="textarea" value={shared} onChange={(e) => setShared(e.target.value)} />
       </div>
+      <div className="field">
+        <label htmlFor="started-mode">Discussion started</label>
+        <select
+          id="started-mode"
+          className="select"
+          value={startedMode ?? "shared_first"}
+          onChange={(e) =>
+            setStartedMode(e.target.value as typeof startedMode)
+          }
+        >
+          <option value="shared_first">Started together</option>
+          <option value="separate_first">Started separately</option>
+          <option value="either">Either</option>
+        </select>
+      </div>
+      {showPerspectives || sam || michelle ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="field">
+            <label htmlFor="sam">Sam’s perspective</label>
+            <textarea id="sam" className="textarea" value={sam} onChange={(e) => setSam(e.target.value)} />
+          </div>
+          <div className="field">
+            <label htmlFor="michelle">Michelle’s perspective</label>
+            <textarea id="michelle" className="textarea" value={michelle} onChange={(e) => setMichelle(e.target.value)} />
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setShowPerspectives(true)}
+        >
+          Capture separate perspectives
+        </button>
+      )}
+      {decision?.merged_at ? (
+        <p className="text-sm text-ink-muted">
+          Merged later · {decision.merged_at.slice(0, 10)}
+          {decision.merge_initiated_by
+            ? ` · initiated by ${decision.merge_initiated_by}`
+            : ""}
+        </p>
+      ) : null}
       <div className="field">
         <label>Linked outcomes</label>
         <div className="max-h-40 overflow-auto rounded-xl border border-border p-3">

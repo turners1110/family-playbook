@@ -142,6 +142,9 @@ export interface Question {
   active: boolean;
   created_at: string;
   updated_at: string;
+  /** Shared-first discussion guidance (recommendation, not a permission). */
+  discussion_mode?: "shared_first" | "separate_first" | "either" | null;
+  discussion_reason?: string | null;
 }
 
 export interface QuestionOption {
@@ -246,6 +249,10 @@ export interface Decision {
   linked_task_ids?: string[];
   linked_provider_ids?: string[];
   related_decision_ids?: string[];
+  /** Shared-first model: how discussion began / merged. */
+  started_mode?: "shared_first" | "separate_first" | "either" | null;
+  merged_at?: string | null;
+  merge_initiated_by?: string | null;
 }
 
 export interface DecisionVersion {

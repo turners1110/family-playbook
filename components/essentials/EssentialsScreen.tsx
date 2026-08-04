@@ -16,6 +16,7 @@ import {
   SaveButton,
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
+import { essentialsShowSeparateEditors } from "@/lib/discussions/discussion-mode";
 
 type SaveMode =
   | "continue"
@@ -125,6 +126,8 @@ export function EssentialsScreenView({
     return true;
   }, [samText, michelleText]);
 
+  const showSeparate = essentialsShowSeparateEditors(screen, question);
+
   function toggleMulti(option: string) {
     setSelected((prev) => {
       if (prev.includes(option)) return prev.filter((x) => x !== option);
@@ -188,7 +191,11 @@ export function EssentialsScreenView({
     const needs_research = mode === "needs_research";
     const writes: SaveAnswerInput[] = [];
 
-    if (screen.separate_answers || screen.response_type === "separate_then_shared") {
+    if (
+      showSeparate &&
+      (screen.separate_answers ||
+        screen.response_type === "separate_then_shared")
+    ) {
       if (sam?.id && samText.trim()) {
         writes.push({
           question_id: screen.question_id,
@@ -517,7 +524,8 @@ export function EssentialsScreenView({
         </section>
       ) : null}
 
-      {(screen.separate_answers ||
+      {showSeparate &&
+      (screen.separate_answers ||
         screen.response_type === "separate_then_shared") &&
       screen.response_type !== "paired_text" ? (
         <section className="space-y-3">
@@ -554,6 +562,19 @@ export function EssentialsScreenView({
             />
           </label>
         </section>
+      ) : null}
+
+      {!showSeparate &&
+      screen.response_type === "separate_then_shared" ? (
+        <label className="block text-sm">
+          Shared family decision
+          <textarea
+            className="input mt-1 min-h-28"
+            value={sharedText}
+            onChange={(e) => setSharedText(e.target.value)}
+            placeholder="Write what you decide together…"
+          />
+        </label>
       ) : null}
 
       {screen.response_type === "open_with_prompts" ? (

@@ -14,6 +14,10 @@ import {
   type QuestionStatusFilter,
   type QuestionStatusSort,
 } from "@/lib/services/question-status";
+import {
+  discussionModeIcon,
+  resolveEffectiveDiscussionMode,
+} from "@/lib/discussions/discussion-mode";
 
 export const dynamic = "force-dynamic";
 
@@ -227,9 +231,23 @@ export default async function QuestionsPage({
                 {status.confidence != null && (
                   <ConfidenceBadge confidence={status.confidence} />
                 )}
-                {q.separate_answers_recommended && (
-                  <span className="badge badge-info">Separate</span>
-                )}
+                {(() => {
+                  const mode = resolveEffectiveDiscussionMode({
+                    discussion_mode: q.discussion_mode ?? null,
+                    separate_answers_recommended: q.separate_answers_recommended,
+                    question: q,
+                  });
+                  const icon = discussionModeIcon(mode);
+                  return (
+                    <span
+                      className="badge"
+                      title={icon.label}
+                      aria-label={icon.label}
+                    >
+                      {icon.symbol}
+                    </span>
+                  );
+                })()}
                 {q.evidence_summary && <span className="badge">Evidence</span>}
                 {bookmarks.has(q.id) && (
                   <span className="badge badge-warning">Bookmark</span>

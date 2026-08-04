@@ -76,6 +76,16 @@ export async function saveDecision(input: SaveDecisionInput, actorId?: string) {
         source_question_ids: data.source_question_ids ?? existing.source_question_ids,
         outcome_ids: data.outcome_ids ?? existing.outcome_ids,
         principle_ids: data.principle_ids ?? existing.principle_ids,
+        started_mode:
+          data.started_mode !== undefined
+            ? data.started_mode
+            : existing.started_mode,
+        merged_at:
+          data.merged_at !== undefined ? data.merged_at : existing.merged_at,
+        merge_initiated_by:
+          data.merge_initiated_by !== undefined
+            ? data.merge_initiated_by
+            : existing.merge_initiated_by,
         version: nextVersion,
         updated_at: timestamp,
       });
@@ -125,6 +135,9 @@ export async function saveDecision(input: SaveDecisionInput, actorId?: string) {
       source_question_ids: data.source_question_ids ?? [],
       outcome_ids: data.outcome_ids ?? [],
       principle_ids: data.principle_ids ?? [],
+      started_mode: data.started_mode ?? null,
+      merged_at: data.merged_at ?? null,
+      merge_initiated_by: data.merge_initiated_by ?? null,
       created_at: timestamp,
       updated_at: timestamp,
     };

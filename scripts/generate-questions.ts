@@ -6,6 +6,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { QuestionSeed } from "@/lib/validation/schemas";
 import type { LifeStage, QuestionPriority, QuestionType, ResearchMode } from "@/lib/constants/enums";
+import { classifyDiscussionMode } from "@/lib/discussions/discussion-mode";
 
 type Draft = Omit<QuestionSeed, "id" | "slug" | "logical_order" | "created_at" | "updated_at"> & {
   categoryBucket: string;
@@ -1067,6 +1068,14 @@ async function main() {
       Boolean,
     ) as string[];
     question.related_questions = related;
+  }
+
+  for (const question of questions) {
+    const classified = classifyDiscussionMode(question);
+    question.discussion_mode = classified.discussion_mode;
+    question.discussion_reason = classified.discussion_reason;
+    question.separate_answers_recommended =
+      classified.separate_answers_recommended;
   }
 
   const outDir = path.join(process.cwd(), "data", "seed");
