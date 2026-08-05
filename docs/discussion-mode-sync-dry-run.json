@@ -1,0 +1,333 @@
+{
+  "apply": true,
+  "family": "Turner Family",
+  "health": {
+    "connected": true,
+    "familyName": "Turner Family",
+    "familyId": "b9344633-d53b-4032-a17b-fe5982f112c5",
+    "version": 257,
+    "updatedAt": "2026-08-04T14:12:24.897966+00:00",
+    "backupCount": 50,
+    "lastBackupAt": "2026-08-04T14:12:24.897966+00:00"
+  },
+  "live_question_count": 430,
+  "answer_count": 8,
+  "questions_missing_discussion_mode": 430,
+  "questions_incorrect_discussion_mode": 0,
+  "questions_incorrect_separate_answers_recommended": 247,
+  "questions_unchanged": 0,
+  "custom_questions_skipped": 0,
+  "questions_to_update": 430,
+  "before_distribution": {
+    "total": 430,
+    "shared_first": 430,
+    "separate_first": 0,
+    "either": 0,
+    "shared_first_pct": 100,
+    "separate_first_pct": 0,
+    "either_pct": 0
+  },
+  "before_raw": {
+    "missing": 430
+  },
+  "expected_seed_classifier_distribution": {
+    "total": 430,
+    "shared_first": 369,
+    "separate_first": 56,
+    "either": 5,
+    "shared_first_pct": 85.8,
+    "separate_first_pct": 13,
+    "either_pct": 1.2
+  },
+  "after_distribution_predicted": {
+    "total": 430,
+    "shared_first": 369,
+    "separate_first": 56,
+    "either": 5,
+    "shared_first_pct": 85.8,
+    "separate_first_pct": 13,
+    "either_pct": 1.2
+  },
+  "sample_changes": [
+    {
+      "id": "q_what_does_success_as_parents_mean_to_us",
+      "slug": "what-does-success-as-parents-mean-to-us",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "either",
+        "discussion_reason": "Either works",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_traits_do_we_most_hope_our_child_develops",
+      "slug": "what-traits-do-we-most-hope-our-child-develops",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "either",
+        "discussion_reason": "Either works",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_kind_of_relationship_do_we_hope_to_have_with_our_adu",
+      "slug": "what-kind-of-relationship-do-we-hope-to-have-with-our-adu",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "either",
+        "discussion_reason": "Either works",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_which_values_are_non_negotiable_in_our_family",
+      "slug": "which-values-are-non-negotiable-in-our-family",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "either",
+        "discussion_reason": "Either works",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_does_a_loving_home_look_and_feel_like_to_us",
+      "slug": "what-does-a-loving-home-look-and-feel-like-to-us",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+      "slug": "what-parts-of-our-own-childhoods-do-we-hope-to-repeat",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Personal reflection",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+      "slug": "what-parts-of-our-childhoods-do-we-hope-to-change",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Personal reflection",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_when_values_conflict_how_should_we_choose_between_them",
+      "slug": "when-values-conflict-how-should-we-choose-between-them",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "either",
+        "discussion_reason": "Either works",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_how_much_should_achievement_matter_in_our_family",
+      "slug": "how-much-should-achievement-matter-in-our-family",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Individual values",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_how_do_we_want_our_child_to_understand_failure",
+      "slug": "how-do-we-want-our-child-to-understand-failure",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Individual values",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_what_does_our_family_mission_statement_sound_like_in_one",
+      "slug": "what-does-our-family-mission-statement-sound-like-in-one",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_how_should_our_child_understand_the_purpose_of_family",
+      "slug": "how-should-our-child-understand-the-purpose-of-family",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_stories_from_our_families_do_we_want_to_pass_on",
+      "slug": "what-stories-from-our-families-do-we-want-to-pass-on",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_how_should_we_talk_about_money_status_and_enough",
+      "slug": "how-should-we-talk-about-money-status-and-enough",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Individual values",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_what_role_should_faith_or_spirituality_play_in_our_home",
+      "slug": "what-role-should-faith-or-spirituality-play-in-our-home",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Individual values",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_how_should_we_celebrate_milestones_without_creating_perfo",
+      "slug": "how-should-we-celebrate-milestones-without-creating-perfo",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_does_respect_look_like_between_parents_and_children",
+      "slug": "what-does-respect-look-like-between-parents-and-children",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "separate_first",
+        "discussion_reason": "Individual values",
+        "separate_answers_recommended": true
+      }
+    },
+    {
+      "id": "q_how_should_we_define_fairness_when_children_have_differen",
+      "slug": "how-should-we-define-fairness-when-children-have-differen",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Shared planning",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_what_boundaries_should_protect_our_family_s_private_life",
+      "slug": "what-boundaries-should-protect-our-family-s-private-life",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": false
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Decision requiring agreement",
+        "separate_answers_recommended": false
+      }
+    },
+    {
+      "id": "q_how_should_we_respond_when_relatives_criticize_our_parent",
+      "slug": "how-should-we-respond-when-relatives-criticize-our-parent",
+      "before": {
+        "discussion_mode": null,
+        "discussion_reason": null,
+        "separate_answers_recommended": true
+      },
+      "after": {
+        "discussion_mode": "shared_first",
+        "discussion_reason": "Shared planning",
+        "separate_answers_recommended": false
+      }
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 /**
- * Shared-first discussion mode classification.
- * Curated rules — not AI. Applied to the full question seed set.
+ * Shared-first discussion mode — classification + canonical resolution.
+ * Curated rules — not AI.
+ *
+ * Product rule: default to one joint family answer.
+ * Never default to separate_first because metadata is absent.
  */
 
 export const DISCUSSION_MODES = [
@@ -19,6 +22,13 @@ export type DiscussionReason =
   | "Decision requiring agreement"
   | "Either works";
 
+export type DiscussionResolutionSource =
+  | "stored"
+  | "seed_classifier"
+  | "explicit_override"
+  | "existing_separate_answers"
+  | "fallback";
+
 export type ClassifiableQuestion = {
   id: string;
   slug: string;
@@ -28,23 +38,15 @@ export type ClassifiableQuestion = {
   why_it_matters?: string;
   separate_answers_recommended?: boolean;
   discussion_mode?: DiscussionMode | null;
+  discussion_reason?: string | null;
 };
 
-const EITHER_PATTERNS: RegExp[] = [
-  /\bsuccess as parents\b/i,
-  /\bnon-negotiable\b/i,
-  /\bwhen values conflict\b/i,
-  /\bwhat traits\b/i,
-  /\bkind of relationship do we hope\b/i,
-];
-
+/** Personal-reflection categories only — not couple planning. */
 const REFLECTIVE_CATEGORIES = new Set([
   "core_values",
   "desired_adult_outcomes",
-  "parent_partnership",
   "attachment",
   "emotional_development",
-  "conflict_between_parents",
 ]);
 
 const PLANNING_CATEGORIES = new Set([
@@ -67,9 +69,19 @@ const PLANNING_CATEGORIES = new Set([
   "reading",
   "creativity",
   "family_boundaries",
+  "parent_partnership",
+  "conflict_between_parents",
 ]);
 
-/** Logistics phrasing should stay shared even in reflective categories. */
+const EITHER_PATTERNS: RegExp[] = [
+  /\bsuccess as parents\b/i,
+  /\bnon-negotiable\b/i,
+  /\bwhen values conflict\b/i,
+  /\bwhat traits\b/i,
+  /\bkind of relationship do we hope\b/i,
+];
+
+/** Logistics / planning phrasing → shared even in reflective categories. */
 const SHARED_LOGISTICS: RegExp[] = [
   /\bdivid(e|ing)\b/i,
   /\bschedule\b/i,
@@ -84,6 +96,18 @@ const SHARED_LOGISTICS: RegExp[] = [
   /\bpreschool\b/i,
   /\bhospital bag\b/i,
   /\bprotect time for our marriage\b/i,
+  /\bcheck[- ]?in\b/i,
+  /\bovernight\b/i,
+  /\bfeeding\b/i,
+  /\bleave\b/i,
+  /\binsurance\b/i,
+  /\bchildcare\b/i,
+  /\bworkload\b/i,
+  /\bfairness\b/i,
+  /\bresentment\b/i,
+  /\brelief\b/i,
+  /\bdisagreement(s)? in front\b/i,
+  /\boverloaded\b/i,
 ];
 
 /** Strong personal-reflection signals → separate_first. */
@@ -94,7 +118,7 @@ const SEPARATE_STRONG: RegExp[] = [
   /\battachment style\b/i,
   /\blove language/i,
   /\bbirth fear/i,
-  /\bwhat scares (me|you|us)\b/i,
+  /\bwhat scares (me|you)\b/i,
   /\bpersonal (strength|weakness|goal|hope|value)/i,
   /\b(my|your) (own )?parents\b/i,
   /\brelationship with (our |my |your )?(own )?parents\b/i,
@@ -106,7 +130,26 @@ const SEPARATE_STRONG: RegExp[] = [
   /\bindividual reflection\b/i,
   /\beach of us\b.{0,40}\b(feel|hope|fear|want|need|bring)\b/i,
   /\beach parent\b.{0,40}\b(feel|hope|fear|want|need|believe)\b/i,
+  /\bprivate hopes?\b/i,
+  /\bemotional needs?\b/i,
 ];
+
+/**
+ * Manual overrides for known Essentials / before-birth planning IDs.
+ * Applied after classification so product philosophy wins over category heuristics.
+ */
+const FORCE_SHARED_IDS = new Set([
+  "q_how_should_we_talk_about_resentment_before_it_grows",
+  "q_how_will_we_check_in_weekly_about_parenting_stress",
+  "q_how_should_we_handle_parenting_disagreements_in_front_of",
+  "q_how_should_we_respond_when_one_parent_feels_overloaded",
+  "q_what_topics_deserve_private_discussion_before_either_pare",
+]);
+
+const FORCE_SEPARATE_IDS = new Set([
+  "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+  "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+]);
 
 export function classifyDiscussionMode(
   question: ClassifiableQuestion,
@@ -115,6 +158,21 @@ export function classifyDiscussionMode(
   discussion_reason: DiscussionReason;
   separate_answers_recommended: boolean;
 } {
+  if (FORCE_SHARED_IDS.has(question.id)) {
+    return {
+      discussion_mode: "shared_first",
+      discussion_reason: "Shared planning",
+      separate_answers_recommended: false,
+    };
+  }
+  if (FORCE_SEPARATE_IDS.has(question.id)) {
+    return {
+      discussion_mode: "separate_first",
+      discussion_reason: "Personal reflection",
+      separate_answers_recommended: true,
+    };
+  }
+
   const blob = `${question.short_title}\n${question.text}\n${question.why_it_matters ?? ""}`;
   const cats = question.categories ?? [];
   const reflectiveCat = cats.some((c) => REFLECTIVE_CATEGORIES.has(c));
@@ -132,18 +190,14 @@ export function classifyDiscussionMode(
 
   const looksLikeLogistics = SHARED_LOGISTICS.some((re) => re.test(blob));
 
-  // Reflective topic families default to separate reflection unless clearly logistics.
   if (reflectiveCat && !looksLikeLogistics) {
     return {
       discussion_mode: "separate_first",
-      discussion_reason: reflectiveCat
-        ? "Individual values"
-        : "Personal reflection",
+      discussion_reason: "Individual values",
       separate_answers_recommended: true,
     };
   }
 
-  // Strong personal patterns outside reflective categories.
   for (const re of SEPARATE_STRONG) {
     if (re.test(blob) && !looksLikeLogistics) {
       return {
@@ -154,7 +208,7 @@ export function classifyDiscussionMode(
     }
   }
 
-  if (planningCat) {
+  if (planningCat || looksLikeLogistics) {
     return {
       discussion_mode: "shared_first",
       discussion_reason: "Shared planning",
@@ -169,21 +223,113 @@ export function classifyDiscussionMode(
   };
 }
 
+export type ResolveDiscussionModeInput = {
+  question?: ClassifiableQuestion | null;
+  /** Explicit UI / session override (Capture separate, either choice, etc.). */
+  preferenceOverride?: DiscussionMode | null;
+  /** Existing Sam/Michelle answers that need review. */
+  hasSeparateAnswers?: boolean;
+  /**
+   * When true, existing separate answers force separate UI even if metadata is shared_first.
+   * Default true for editors; false for list badges / classification stats.
+   */
+  preferExistingSeparate?: boolean;
+};
+
+export type ResolvedDiscussionMode = {
+  mode: DiscussionMode;
+  reason: string | null;
+  source: DiscussionResolutionSource;
+  separate_answers_recommended: boolean;
+};
+
+/**
+ * Canonical discussion-mode resolver for every surface.
+ * Missing metadata → shared_first (never separate_first).
+ */
+export function resolveDiscussionMode(
+  input: ResolveDiscussionModeInput = {},
+): ResolvedDiscussionMode {
+  const preferExisting = input.preferExistingSeparate !== false;
+
+  if (input.preferenceOverride) {
+    return {
+      mode: input.preferenceOverride,
+      reason: "Explicit choice",
+      source: "explicit_override",
+      separate_answers_recommended: input.preferenceOverride === "separate_first",
+    };
+  }
+
+  if (preferExisting && input.hasSeparateAnswers) {
+    return {
+      mode: "separate_first",
+      reason: "Existing separate perspectives",
+      source: "existing_separate_answers",
+      separate_answers_recommended: true,
+    };
+  }
+
+  const q = input.question;
+  if (q?.discussion_mode) {
+    return {
+      mode: q.discussion_mode,
+      reason: q.discussion_reason ?? null,
+      source: "stored",
+      separate_answers_recommended: Boolean(
+        q.separate_answers_recommended ?? q.discussion_mode === "separate_first",
+      ),
+    };
+  }
+
+  if (q && (q.id || q.slug || q.text || q.short_title)) {
+    const classified = classifyDiscussionMode(q);
+    return {
+      mode: classified.discussion_mode,
+      reason: classified.discussion_reason,
+      source: "seed_classifier",
+      separate_answers_recommended: classified.separate_answers_recommended,
+    };
+  }
+
+  return {
+    mode: "shared_first",
+    reason: "Default shared family decision",
+    source: "fallback",
+    separate_answers_recommended: false,
+  };
+}
+
+/** @deprecated Use resolveDiscussionMode — kept for gradual migration. */
 export function resolveEffectiveDiscussionMode(input: {
   discussion_mode?: DiscussionMode | null;
   separate_answers_recommended?: boolean;
   hasSeparateAnswers?: boolean;
   preferenceOverride?: DiscussionMode | null;
-  /** When mode metadata is absent, classify from question text/categories. */
   question?: ClassifiableQuestion | null;
 }): DiscussionMode {
-  if (input.preferenceOverride) return input.preferenceOverride;
-  if (input.discussion_mode) return input.discussion_mode;
-  if (input.question) {
-    return classifyDiscussionMode(input.question).discussion_mode;
-  }
-  if (input.hasSeparateAnswers) return "separate_first";
-  return input.separate_answers_recommended ? "separate_first" : "shared_first";
+  return resolveDiscussionMode({
+    question: input.question
+      ? {
+          ...input.question,
+          discussion_mode:
+            input.discussion_mode ?? input.question.discussion_mode,
+        }
+      : input.discussion_mode
+        ? {
+            id: "unknown",
+            slug: "unknown",
+            short_title: "",
+            text: "",
+            categories: [],
+            discussion_mode: input.discussion_mode,
+            separate_answers_recommended: input.separate_answers_recommended,
+          }
+        : null,
+    preferenceOverride: input.preferenceOverride,
+    hasSeparateAnswers: input.hasSeparateAnswers,
+    preferExistingSeparate: Boolean(input.hasSeparateAnswers),
+  }).mode;
 }
 
 export function discussionModeIcon(mode: DiscussionMode): {
@@ -229,7 +375,18 @@ export function summarizeClassification(
   };
 }
 
-/** Essentials: show separate editors only when metadata says separate-first. */
+/** Whether editors should show Sam/Michelle blocks. */
+export function shouldShowSeparateEditors(input: {
+  resolvedMode: DiscussionMode;
+  hasSeparateAnswers?: boolean;
+  userChoseSeparate?: boolean;
+}): boolean {
+  if (input.userChoseSeparate) return true;
+  if (input.hasSeparateAnswers) return true;
+  return input.resolvedMode === "separate_first";
+}
+
+/** Essentials: separate editors only for separate_first (or paired personal text). */
 export function essentialsShowSeparateEditors(
   screen: {
     separate_answers?: boolean;
@@ -237,15 +394,40 @@ export function essentialsShowSeparateEditors(
   },
   question: ClassifiableQuestion,
 ): boolean {
-  if (screen.response_type === "paired_text") return true;
-  const mode = resolveEffectiveDiscussionMode({
-    discussion_mode: question.discussion_mode ?? null,
-    separate_answers_recommended: question.separate_answers_recommended,
+  if (screen.response_type === "paired_text") {
+    const resolved = resolveDiscussionMode({
+      question,
+      preferExistingSeparate: false,
+    });
+    return resolved.mode === "separate_first" || resolved.mode === "either";
+  }
+  const resolved = resolveDiscussionMode({
     question,
+    preferExistingSeparate: false,
   });
-  if (mode === "shared_first") return false;
-  if (mode === "separate_first") return true;
-  return Boolean(
-    screen.separate_answers || screen.response_type === "separate_then_shared",
-  );
+  return resolved.mode === "separate_first";
+}
+
+/** Diagnostics payload — never includes answer text. */
+export function discussionModeDiagnostics(
+  question: ClassifiableQuestion | null | undefined,
+  context: {
+    surface: string;
+    hasSeparateAnswers?: boolean;
+    preferenceOverride?: DiscussionMode | null;
+  },
+) {
+  const resolved = resolveDiscussionMode({
+    question,
+    hasSeparateAnswers: context.hasSeparateAnswers,
+    preferenceOverride: context.preferenceOverride,
+  });
+  return {
+    questionId: question?.id ?? null,
+    stored_discussion_mode: question?.discussion_mode ?? null,
+    resolved_discussion_mode: resolved.mode,
+    resolution_source: resolved.source,
+    rendering_surface: context.surface,
+    discussion_reason: resolved.reason,
+  };
 }

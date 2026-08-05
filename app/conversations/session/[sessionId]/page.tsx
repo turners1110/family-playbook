@@ -74,6 +74,22 @@ export default async function ConversationSessionPage({
   });
 
   const store = await readStore();
+  const deepQuestionId =
+    item.source_question_id ?? prompt.follow_up_open_question_id ?? null;
+  const linkedQuestion = deepQuestionId
+    ? store.questions.find((q) => q.id === deepQuestionId) ?? null
+    : null;
+  const { resolveDiscussionMode } = await import(
+    "@/lib/discussions/discussion-mode"
+  );
+  const discussion = resolveDiscussionMode({
+    question: linkedQuestion,
+    hasSeparateAnswers: itemAnswers.some(
+      (a) => a.actor === "sam" || a.actor === "michelle",
+    ),
+    preferExistingSeparate: true,
+  });
+
   const deepTarget = resolveDeepQuestionTarget({
     questionId: prompt.follow_up_open_question_id,
     sessionId: session.id,
@@ -100,6 +116,9 @@ export default async function ConversationSessionPage({
         deepTarget={deepTarget}
         sessionBaseHref={`/conversations/session/${session.id}`}
         familyId={store.family.id}
+        discussionMode={discussion.mode}
+        discussionSource={discussion.source}
+        discussionReason={discussion.reason}
       />
     </AppShell>
   );

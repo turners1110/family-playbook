@@ -906,7 +906,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -921,8 +921,8 @@
     "id": "q_how_should_we_define_fairness_when_children_have_different_nee",
     "slug": "how-should-we-define-fairness-when-children-have-different-needs",
     "logical_order": 180,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What boundaries should protect our family’s private life?",
@@ -1557,7 +1557,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -1572,8 +1572,8 @@
     "id": "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
     "slug": "how-should-we-handle-parenting-disagreements-in-front-of-our-child",
     "logical_order": 310,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What topics deserve private discussion before either parent acts?",
@@ -1613,7 +1613,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -1628,8 +1628,8 @@
     "id": "q_what_topics_deserve_private_discussion_before_either_parent_ac",
     "slug": "what-topics-deserve-private-discussion-before-either-parent-acts",
     "logical_order": 320,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should night duties be divided during the newborn stage?",
@@ -1685,7 +1685,7 @@
     "slug": "how-should-night-duties-be-divided-during-the-newborn-stage",
     "logical_order": 330,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we respond when one parent feels overloaded?",
@@ -1725,7 +1725,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -1740,8 +1740,8 @@
     "id": "q_how_should_we_respond_when_one_parent_feels_overloaded",
     "slug": "how-should-we-respond-when-one-parent-feels-overloaded",
     "logical_order": 340,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What should happen when one parent strongly disagrees with a settled decision?",
@@ -1781,7 +1781,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -1796,8 +1796,8 @@
     "id": "q_what_should_happen_when_one_parent_strongly_disagrees_with_a_s",
     "slug": "what-should-happen-when-one-parent-strongly-disagrees-with-a-settled-decision",
     "logical_order": 350,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we protect time for our marriage after the baby arrives?",
@@ -1853,7 +1853,7 @@
     "slug": "how-should-we-protect-time-for-our-marriage-after-the-baby-arrives",
     "logical_order": 360,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we divide invisible household and parenting work?",
@@ -1909,7 +1909,7 @@
     "slug": "how-should-we-divide-invisible-household-and-parenting-work",
     "logical_order": 370,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What does a fair division of labor mean when work schedules differ?",
@@ -1965,7 +1965,7 @@
     "slug": "what-does-a-fair-division-of-labor-mean-when-work-schedules-differ",
     "logical_order": 380,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we repair after speaking sharply to each other?",
@@ -2005,7 +2005,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2020,8 +2020,8 @@
     "id": "q_how_should_we_repair_after_speaking_sharply_to_each_other",
     "slug": "how-should-we-repair-after-speaking-sharply-to-each-other",
     "logical_order": 390,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "Which decisions should trigger a cooling-off period?",
@@ -2061,7 +2061,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2076,8 +2076,8 @@
     "id": "q_which_decisions_should_trigger_a_cooling_off_period",
     "slug": "which-decisions-should-trigger-a-cooling-off-period",
     "logical_order": 400,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How will we check in weekly about parenting stress?",
@@ -2124,7 +2124,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2139,8 +2139,8 @@
     "id": "q_how_will_we_check_in_weekly_about_parenting_stress",
     "slug": "how-will-we-check-in-weekly-about-parenting-stress",
     "logical_order": 410,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What support do we each need during postpartum recovery?",
@@ -2187,7 +2187,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2202,8 +2202,8 @@
     "id": "q_what_support_do_we_each_need_during_postpartum_recovery",
     "slug": "what-support-do-we-each-need-during-postpartum-recovery",
     "logical_order": 420,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we communicate when we are too tired to discuss well?",
@@ -2250,7 +2250,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2265,8 +2265,8 @@
     "id": "q_how_should_we_communicate_when_we_are_too_tired_to_discuss_wel",
     "slug": "how-should-we-communicate-when-we-are-too-tired-to-discuss-well",
     "logical_order": 430,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "Who owns which recurring household tasks in the first three months?",
@@ -2313,7 +2313,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2328,8 +2328,8 @@
     "id": "q_who_owns_which_recurring_household_tasks_in_the_first_three_mo",
     "slug": "who-owns-which-recurring-household-tasks-in-the-first-three-months",
     "logical_order": 440,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we handle advice from one parent’s family versus the other?",
@@ -2376,7 +2376,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2391,8 +2391,8 @@
     "id": "q_how_should_we_handle_advice_from_one_parent_s_family_versus_th",
     "slug": "how-should-we-handle-advice-from-one-parent-s-family-versus-the-other",
     "logical_order": 450,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What does backup look like when one parent is sick?",
@@ -2439,7 +2439,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2454,8 +2454,8 @@
     "id": "q_what_does_backup_look_like_when_one_parent_is_sick",
     "slug": "what-does-backup-look-like-when-one-parent-is-sick",
     "logical_order": 460,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we decide who stays home for sick days later on?",
@@ -2502,7 +2502,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2517,8 +2517,8 @@
     "id": "q_how_should_we_decide_who_stays_home_for_sick_days_later_on",
     "slug": "how-should-we-decide-who-stays-home-for-sick-days-later-on",
     "logical_order": 470,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What boundaries protect our couple time once extended family visits begin?",
@@ -2565,7 +2565,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2580,8 +2580,8 @@
     "id": "q_what_boundaries_protect_our_couple_time_once_extended_family_v",
     "slug": "what-boundaries-protect-our-couple-time-once-extended-family-visits-begin",
     "logical_order": 480,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we share emotional labor around planning and remembering?",
@@ -2644,7 +2644,7 @@
     "slug": "how-should-we-share-emotional-labor-around-planning-and-remembering",
     "logical_order": 490,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What words or tones are off-limits during parenting conflict?",
@@ -2691,7 +2691,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2706,8 +2706,8 @@
     "id": "q_what_words_or_tones_are_off_limits_during_parenting_conflict",
     "slug": "what-words-or-tones-are-off-limits-during-parenting-conflict",
     "logical_order": 500,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we handle one parent wanting more visitors than the other?",
@@ -2770,7 +2770,7 @@
     "slug": "how-should-we-handle-one-parent-wanting-more-visitors-than-the-other",
     "logical_order": 510,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How will we revisit division of labor after parental leave ends?",
@@ -2833,7 +2833,7 @@
     "slug": "how-will-we-revisit-division-of-labor-after-parental-leave-ends",
     "logical_order": 520,
     "discussion_mode": "shared_first",
-    "discussion_reason": "Decision requiring agreement"
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What does mutual respect look like when we disagree about sleep?",
@@ -2880,7 +2880,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2895,8 +2895,8 @@
     "id": "q_what_does_mutual_respect_look_like_when_we_disagree_about_slee",
     "slug": "what-does-mutual-respect-look-like-when-we-disagree-about-sleep",
     "logical_order": 530,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we support each other’s mental health after birth?",
@@ -2943,7 +2943,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -2958,8 +2958,8 @@
     "id": "q_how_should_we_support_each_other_s_mental_health_after_birth",
     "slug": "how-should-we-support-each-other-s-mental-health-after-birth",
     "logical_order": 540,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "When should we invite outside help rather than push through alone?",
@@ -3006,7 +3006,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3021,8 +3021,8 @@
     "id": "q_when_should_we_invite_outside_help_rather_than_push_through_al",
     "slug": "when-should-we-invite-outside-help-rather-than-push-through-alone",
     "logical_order": 550,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we talk about resentment before it grows?",
@@ -3069,7 +3069,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3084,8 +3084,8 @@
     "id": "q_how_should_we_talk_about_resentment_before_it_grows",
     "slug": "how-should-we-talk-about-resentment-before-it-grows",
     "logical_order": 560,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What does a fair weekend look like with a newborn?",
@@ -3132,7 +3132,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3147,8 +3147,8 @@
     "id": "q_what_does_a_fair_weekend_look_like_with_a_newborn",
     "slug": "what-does-a-fair-weekend-look-like-with-a-newborn",
     "logical_order": 570,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How should we handle different risk tolerances around safety?",
@@ -3195,7 +3195,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3210,8 +3210,8 @@
     "id": "q_how_should_we_handle_different_risk_tolerances_around_safety",
     "slug": "how-should-we-handle-different-risk-tolerances-around-safety",
     "logical_order": 580,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "How will we document decisions so we do not re-argue the same ground?",
@@ -3257,7 +3257,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": true,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3272,8 +3272,8 @@
     "id": "q_how_will_we_document_decisions_so_we_do_not_re_argue_the_same_",
     "slug": "how-will-we-document-decisions-so-we-do-not-re-argue-the-same-ground",
     "logical_order": 590,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "What does repair look like after we undermine each other in front of others?",
@@ -3318,7 +3318,7 @@
     "evidence_available": false,
     "evidence_summary": null,
     "practical_tip": null,
-    "separate_answers_recommended": true,
+    "separate_answers_recommended": false,
     "cooling_off_recommended": false,
     "follow_up_prompts": [
       "What would make us revisit this?",
@@ -3333,8 +3333,8 @@
     "id": "q_what_does_repair_look_like_after_we_undermine_each_other_in_fr",
     "slug": "what-does-repair-look-like-after-we-undermine-each-other-in-front-of-others",
     "logical_order": 600,
-    "discussion_mode": "separate_first",
-    "discussion_reason": "Individual values"
+    "discussion_mode": "shared_first",
+    "discussion_reason": "Shared planning"
   },
   {
     "text": "Who should attend the birth?",

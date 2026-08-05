@@ -1,0 +1,492 @@
+{
+  "total": 33,
+  "shared_ui": 32,
+  "separate_ui": 1,
+  "flagged_separate_first": [
+    {
+      "screen_id": "f3_childhood",
+      "title": "What do we want to repeat or change from our childhoods?",
+      "linked_question_ids": [
+        "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+        "q_what_parts_of_our_childhoods_do_we_hope_to_change"
+      ],
+      "stored_mode": "separate_first",
+      "resolved_mode": "separate_first",
+      "reason": "Personal reflection",
+      "source": "stored",
+      "actual_ui": "separate",
+      "response_type": "paired_text",
+      "flag_separate": true
+    }
+  ],
+  "screens": [
+    {
+      "screen_id": "f1_success",
+      "title": "What does success as parents mean to us?",
+      "linked_question_ids": [
+        "q_what_does_success_as_parents_mean_to_us"
+      ],
+      "stored_mode": "either",
+      "resolved_mode": "either",
+      "reason": "Either works",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "f2_loving_home",
+      "title": "What does a loving home look and feel like to us?",
+      "linked_question_ids": [
+        "q_what_does_a_loving_home_look_and_feel_like_to_us"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Decision requiring agreement",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "f3_childhood",
+      "title": "What do we want to repeat or change from our childhoods?",
+      "linked_question_ids": [
+        "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+        "q_what_parts_of_our_childhoods_do_we_hope_to_change"
+      ],
+      "stored_mode": "separate_first",
+      "resolved_mode": "separate_first",
+      "reason": "Personal reflection",
+      "source": "stored",
+      "actual_ui": "separate",
+      "response_type": "paired_text",
+      "flag_separate": true
+    },
+    {
+      "screen_id": "b1_labor_priorities",
+      "title": "What matters most to us during labor and delivery?",
+      "linked_question_ids": [
+        "q_what_role_should_each_parent_have_during_labor"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "b2_flexible",
+      "title": "Where are we flexible if the birth plan changes?",
+      "linked_question_ids": [
+        "q_how_should_we_respond_when_the_birth_plan_changes"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "open_with_prompts",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "b3_present_and_hospital_visitors",
+      "title": "Who should be present during labor, and what hospital visitor rules apply?",
+      "linked_question_ids": [
+        "q_how_should_family_members_receive_updates_during_labor_and_bir"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "b4_pain",
+      "title": "What pain-management preferences should we discuss with the care team?",
+      "linked_question_ids": [
+        "q_what_pain_management_preferences_do_we_want_discussed_with_our"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "single_choice",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "b5_urgent",
+      "title": "How should urgent medical decisions be handled if the plan changes?",
+      "linked_question_ids": [
+        "q_how_will_we_make_routine_medical_decisions_together"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "b6_cord_circumcision",
+      "title": "Cord blood banking and circumcision (if applicable)",
+      "linked_question_ids": [
+        "q_what_is_our_plan_for_cord_blood_delayed_clamping_and_related_c",
+        "q_how_will_we_decide_about_circumcision_or_other_elective_proced"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "paired_text",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "fs1_feeding_goals",
+      "title": "What are our initial feeding goals?",
+      "linked_question_ids": [
+        "q_what_is_our_approach_to_feeding_in_the_newborn_stage"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "fs2_backup",
+      "title": "What backup feeding options feel acceptable?",
+      "linked_question_ids": [
+        "q_what_is_our_plan_for_formula_combination_feeding_or_bottle_log"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "fs3_overnight",
+      "title": "How should overnight responsibilities and protected sleep work?",
+      "linked_question_ids": [
+        "q_how_should_we_divide_overnight_care_in_the_first_weeks",
+        "q_how_will_we_protect_sleep_for_the_parent_who_is_not_on_overnig"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "responsibility_matrix",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "fs4_sleep_change_signs",
+      "title": "What signs mean the current sleep plan needs to change?",
+      "linked_question_ids": [
+        "q_how_should_we_handle_cluster_feeding_nights_emotionally"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "fs5_safe_sleep",
+      "title": "What safe-sleep rules will we follow?",
+      "linked_question_ids": [
+        "q_how_should_we_decide_on_swaddling_and_safe_sleep_setup"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "p1_michelle_recovery",
+      "title": "What does Michelle need protected during physical recovery?",
+      "linked_question_ids": [
+        "q_what_support_will_michelle_need_during_recovery"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "p2_household",
+      "title": "Who will handle meals, laundry, cleaning, supplies, and communication?",
+      "linked_question_ids": [
+        "q_how_should_we_plan_meals_and_household_support_for_the_first_t",
+        "q_who_owns_which_recurring_household_tasks_in_the_first_three_mo"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "responsibility_matrix",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "p3_warning_signs",
+      "title": "What physical or emotional signs should prompt outside help?",
+      "linked_question_ids": [
+        "q_what_postpartum_mental_health_signs_should_trigger_immediate_h"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "p4_advice",
+      "title": "How will we handle advice, pressure, or criticism from family?",
+      "linked_question_ids": [
+        "q_how_should_we_handle_unsolicited_parenting_advice"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "pp1_exhausted",
+      "title": "How will we make decisions when we are exhausted?",
+      "linked_question_ids": [
+        "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "pp2_disagreement",
+      "title": "How will we handle disagreement in front of the baby—and later the child?",
+      "linked_question_ids": [
+        "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "pp3_relief",
+      "title": "How will either parent ask for relief before resentment builds?",
+      "linked_question_ids": [
+        "q_how_should_we_talk_about_resentment_before_it_grows"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "open_with_prompts",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "pp4_checkin",
+      "title": "How often should we check in about stress, fairness, and workload?",
+      "linked_question_ids": [
+        "q_how_will_we_check_in_weekly_about_parenting_stress"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "single_choice",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "v1_home_visitors",
+      "title": "What visitor rules should apply during the first two weeks at home?",
+      "linked_question_ids": [
+        "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "v2_photos",
+      "title": "What photo and social-media rules should apply?",
+      "linked_question_ids": [
+        "q_how_do_we_want_to_handle_photos_and_social_media_after_birth"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "v3_grandparents",
+      "title": "How do we want grandparents involved?",
+      "linked_question_ids": [
+        "q_what_role_do_we_want_grandparents_to_play"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "open_with_prompts",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "v4_health_and_comms",
+      "title": "What health boundaries apply, and who communicates them?",
+      "linked_question_ids": [
+        "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+        "q_how_should_we_handle_visitors_who_ignore_boundaries"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "policy_builder",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "w1_leave",
+      "title": "What is each parent’s leave plan?",
+      "linked_question_ids": [
+        "q_how_will_we_handle_work_leave_logistics_and_income_during_leav"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "open_with_prompts",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "w2_return_childcare",
+      "title": "What is the return-to-work and childcare plan for the first year?",
+      "linked_question_ids": [
+        "q_what_childcare_options_are_acceptable_to_us_in_the_first_years"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "single_choice",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "w3_daycare_details",
+      "title": "If we use daycare, what matters for the transition?",
+      "linked_question_ids": [
+        "q_what_does_a_transition_plan_into_daycare_look_like"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "open_with_prompts",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "w4_legal_insurance",
+      "title": "What insurance and legal actions must happen before and after birth?",
+      "linked_question_ids": [
+        "q_how_will_we_document_decisions_so_we_do_not_re_argue_the_same_"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "h1_lulu_labor",
+      "title": "Who handles Lulu during labor, and what is the backup plan?",
+      "linked_question_ids": [
+        "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "scenario_plan",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "h2_lulu_boundaries",
+      "title": "What boundaries should Lulu follow, and how should the first introduction happen?",
+      "linked_question_ids": [
+        "q_what_safety_rules_apply_to_pets_and_the_baby",
+        "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab"
+      ],
+      "stored_mode": "shared_first",
+      "resolved_mode": "shared_first",
+      "reason": "Shared planning",
+      "source": "stored",
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    },
+    {
+      "screen_id": "h3_home_setup",
+      "title": "What home setup must be complete by 36 weeks?",
+      "linked_question_ids": [
+        "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab"
+      ],
+      "stored_mode": "missing",
+      "resolved_mode": null,
+      "reason": null,
+      "source": null,
+      "actual_ui": "shared",
+      "response_type": "multi_select",
+      "flag_separate": false
+    }
+  ]
+}

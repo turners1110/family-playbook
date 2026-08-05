@@ -13,7 +13,8 @@ import { DECISION_STATUSES, CONFIDENCE_LABELS } from "@/lib/constants/enums";
 import type { SaveAnswerInput } from "@/lib/validation/schemas";
 import {
   discussionModeIcon,
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
+  shouldShowSeparateEditors,
   type DiscussionMode,
 } from "@/lib/discussions/discussion-mode";
 
@@ -62,10 +63,7 @@ export function AnswerEditor({
   const michelleAnswer = answers.find((a) => a.member_id === michelle?.id);
   const hasSeparateAnswers = Boolean(samAnswer || michelleAnswer);
 
-  const recommended = resolveEffectiveDiscussionMode({
-    discussion_mode: question?.discussion_mode ?? null,
-    separate_answers_recommended: question?.separate_answers_recommended,
-    hasSeparateAnswers,
+  const resolved = resolveDiscussionMode({
     question: question
       ? {
           id: question.id,
@@ -75,9 +73,14 @@ export function AnswerEditor({
           categories: question.categories,
           why_it_matters: question.why_it_matters,
           separate_answers_recommended: question.separate_answers_recommended,
+          discussion_mode: question.discussion_mode,
+          discussion_reason: question.discussion_reason,
         }
       : null,
+    hasSeparateAnswers,
+    preferExistingSeparate: true,
   });
+  const recommended = resolved.mode;
 
   const [eitherChoice, setEitherChoice] = useState<DiscussionMode | null>(
     () => {
@@ -97,7 +100,10 @@ export function AnswerEditor({
       : recommended;
 
   const [uiMode, setUiMode] = useState<UiMode>(() =>
-    hasSeparateAnswers || activeMode === "separate_first"
+    shouldShowSeparateEditors({
+      resolvedMode: activeMode,
+      hasSeparateAnswers,
+    })
       ? "separate"
       : "shared",
   );
@@ -224,8 +230,16 @@ export function AnswerEditor({
           {icon.symbol}
         </span>
         <span>{icon.label}</span>
-        {question?.discussion_reason ? (
-          <span className="text-ink-subtle">· {question.discussion_reason}</span>
+        {resolved.reason ? (
+          <span className="text-ink-subtle">· {resolved.reason}</span>
+        ) : null}
+        {process.env.NODE_ENV === "development" ? (
+          <span className="text-xs text-ink-subtle">
+            · {resolved.source}
+            {question?.discussion_mode
+              ? ` · stored:${question.discussion_mode}`
+              : " · stored:missing"}
+          </span>
         ) : null}
       </div>
 

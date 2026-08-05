@@ -9,7 +9,7 @@ import {
 } from "@/lib/knowledge";
 import {
   discussionModeIcon,
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
 } from "@/lib/discussions/discussion-mode";
 import Link from "next/link";
 
@@ -98,13 +98,11 @@ export default async function SearchPage({
                 <li>No matches.</li>
               ) : (
                 results.questions.map((item) => {
-                  const mode = resolveEffectiveDiscussionMode({
-                    discussion_mode: item.discussion_mode ?? null,
-                    separate_answers_recommended:
-                      item.separate_answers_recommended,
+                  const resolved = resolveDiscussionMode({
                     question: item,
+                    preferExistingSeparate: false,
                   });
-                  const icon = discussionModeIcon(mode);
+                  const icon = discussionModeIcon(resolved.mode);
                   return (
                     <li
                       key={item.id}

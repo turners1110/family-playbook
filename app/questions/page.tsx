@@ -16,7 +16,7 @@ import {
 } from "@/lib/services/question-status";
 import {
   discussionModeIcon,
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
 } from "@/lib/discussions/discussion-mode";
 
 export const dynamic = "force-dynamic";
@@ -232,12 +232,11 @@ export default async function QuestionsPage({
                   <ConfidenceBadge confidence={status.confidence} />
                 )}
                 {(() => {
-                  const mode = resolveEffectiveDiscussionMode({
-                    discussion_mode: q.discussion_mode ?? null,
-                    separate_answers_recommended: q.separate_answers_recommended,
+                  const resolved = resolveDiscussionMode({
                     question: q,
+                    preferExistingSeparate: false,
                   });
-                  const icon = discussionModeIcon(mode);
+                  const icon = discussionModeIcon(resolved.mode);
                   return (
                     <span
                       className="badge"

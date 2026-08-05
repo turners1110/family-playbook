@@ -139,7 +139,7 @@ export default async function QuickToDeepPage({
           helper: question.discussion_guidance,
           prompts: question.follow_up_prompts,
           response_type: "open_with_prompts",
-          separate_answers: question.separate_answers_recommended,
+          separate_answers: false,
           timing_reason: question.timing_reason ?? "Conversation follow-up",
           review_trigger: question.review_recommendation ?? "Revisit as needed",
         }}

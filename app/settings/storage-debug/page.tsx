@@ -15,6 +15,11 @@ import { isEmergencyAccessModeEnabled } from "@/lib/auth/emergency";
 import { buildFamilyProgressMetrics, buildProgressSnapshot } from "@/lib/services/answered-status";
 import { getConversationSessionProgress } from "@/lib/services/conversations";
 import { reconcileProgressTileCounts } from "@/lib/services/progress-records";
+import {
+  resolveDiscussionMode,
+  summarizeClassification,
+  type DiscussionMode,
+} from "@/lib/discussions/discussion-mode";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +77,14 @@ export default async function StorageDebugPage() {
     remoteSessionAnswered !== homeConversation ||
     (resumeProgress != null &&
       resumeProgress.answeredCount !== snapshot.conversationAnsweredCount);
+
+  const discussionModes = store.questions.map(
+    (q) =>
+      resolveDiscussionMode({ question: q, preferExistingSeparate: false })
+        .mode,
+  );
+  const discussionDist = summarizeClassification(discussionModes);
+  const storedMissing = store.questions.filter((q) => !q.discussion_mode).length;
 
   return (
     <AppShell
@@ -149,6 +162,31 @@ export default async function StorageDebugPage() {
           <div>
             <dt className="text-xs uppercase text-ink-subtle">Version history rows</dt>
             <dd>{health.backupCount}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="surface mt-5 p-5">
+        <h2 className="font-display text-xl">Discussion modes</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Resolved modes for live questions. Never shows answer text.
+        </p>
+        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">shared_first</dt>
+            <dd>{discussionDist.shared_first}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">separate_first</dt>
+            <dd>{discussionDist.separate_first}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">either</dt>
+            <dd>{discussionDist.either}</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">stored missing</dt>
+            <dd>{storedMissing}</dd>
           </div>
         </dl>
       </section>

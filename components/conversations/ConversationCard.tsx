@@ -49,6 +49,14 @@ import {
   type ConversationDraftPayload,
 } from "@/lib/ui/form-identity";
 import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
+import type {
+  DiscussionMode,
+  DiscussionResolutionSource,
+} from "@/lib/discussions/discussion-mode";
+import {
+  discussionModeIcon,
+  shouldShowSeparateEditors,
+} from "@/lib/discussions/discussion-mode";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -106,6 +114,9 @@ export function ConversationCard({
   deepTarget = null,
   sessionBaseHref,
   familyId = "family",
+  discussionMode = "shared_first",
+  discussionSource = "fallback",
+  discussionReason = null,
 }: {
   session: ConversationSession;
   item: ConversationSessionItem;
@@ -120,6 +131,9 @@ export function ConversationCard({
   deepTarget?: DeepQuestionTarget | null;
   sessionBaseHref?: string;
   familyId?: string;
+  discussionMode?: DiscussionMode;
+  discussionSource?: DiscussionResolutionSource;
+  discussionReason?: string | null;
 }) {
   void _difference;
   const router = useRouter();
@@ -152,6 +166,24 @@ export function ConversationCard({
 
   const samAns = answers.find((a) => a.actor === "sam");
   const michelleAns = answers.find((a) => a.actor === "michelle");
+  const sharedAns = answers.find((a) => a.actor === "shared");
+  const hasSeparateAnswers = Boolean(samAns || michelleAns);
+
+  const [eitherChoice, setEitherChoice] = useState<DiscussionMode | null>(
+    () => (discussionMode === "either" ? "shared_first" : null),
+  );
+  const activeDiscussionMode: DiscussionMode =
+    discussionMode === "either"
+      ? (eitherChoice ?? "shared_first")
+      : discussionMode;
+
+  const [forceSeparate, setForceSeparate] = useState(false);
+  const showSeparate = shouldShowSeparateEditors({
+    resolvedMode: activeDiscussionMode,
+    hasSeparateAnswers,
+    userChoseSeparate: forceSeparate,
+  });
+  const modeIcon = discussionModeIcon(activeDiscussionMode);
 
   const validOptionValues = useMemo(
     () => (prompt.answer_options ?? []).map((o) => o.value),
@@ -187,6 +219,18 @@ export function ConversationCard({
       }
     }
     const fromAnswers = stateFromAnswers(samAns, michelleAns);
+    const joint = sharedAns ?? (!samAns && !michelleAns ? null : null);
+    if (sharedAns && !samAns && !michelleAns) {
+      return {
+        ...emptyFormState(),
+        samChoices: filterChoices(sharedAns.selected_options ?? []),
+        samText: sharedAns.short_text ?? "",
+        samExplain: sharedAns.explanation ?? "",
+        samScale: sharedAns.scale ?? null,
+        sharedText: sharedAns.short_text ?? "",
+      };
+    }
+    void joint;
     return {
       ...fromAnswers,
       samChoices: filterChoices(fromAnswers.samChoices),
@@ -318,12 +362,37 @@ export function ConversationCard({
     });
   }
 
-  function buildActorWrite(actor: "sam" | "michelle") {
-    const choices = actor === "sam" ? samChoices : michelleChoices;
-    const custom = actor === "sam" ? customSam : customMichelle;
-    const text = actor === "sam" ? samText : michelleText;
-    const explain = actor === "sam" ? samExplain : michelleExplain;
-    const scale = actor === "sam" ? samScale : michelleScale;
+  function buildActorWrite(actor: "sam" | "michelle" | "shared") {
+    const choices =
+      actor === "michelle"
+        ? michelleChoices
+        : actor === "shared"
+          ? samChoices
+          : samChoices;
+    const custom =
+      actor === "michelle"
+        ? customMichelle
+        : actor === "shared"
+          ? customSam
+          : customSam;
+    const text =
+      actor === "michelle"
+        ? michelleText
+        : actor === "shared"
+          ? samText || sharedText
+          : samText;
+    const explain =
+      actor === "michelle"
+        ? michelleExplain
+        : actor === "shared"
+          ? samExplain
+          : samExplain;
+    const scale =
+      actor === "michelle"
+        ? michelleScale
+        : actor === "shared"
+          ? samScale
+          : samScale;
     const selected =
       prompt.allow_custom_answer && custom.trim()
         ? [...choices, custom.trim()]
@@ -415,7 +484,9 @@ export function ConversationCard({
   function saveAndNext() {
     void save.runSave(
       async () => {
-        const writes = [buildActorWrite("sam"), buildActorWrite("michelle")];
+        const writes = showSeparate
+          ? [buildActorWrite("sam"), buildActorWrite("michelle")]
+          : [buildActorWrite("shared")];
         const check = assertCurrentPayload(writes);
         if (!check.ok) {
           setIdentityError(STALE_PAYLOAD_USER_MESSAGE);
@@ -528,47 +599,164 @@ export function ConversationCard({
           </p>
         ) : null}
 
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+          <span aria-hidden>{modeIcon.symbol}</span>
+          <span>{modeIcon.label}</span>
+          {discussionReason ? (
+            <span className="text-ink-subtle">· {discussionReason}</span>
+          ) : null}
+          {process.env.NODE_ENV === "development" ? (
+            <span className="text-xs text-ink-subtle">
+              · {discussionSource}
+            </span>
+          ) : null}
+        </div>
+
+        {discussionMode === "either" ? (
+          <fieldset className="mt-4 space-y-2 rounded-xl border border-border p-3">
+            <legend className="px-1 text-sm font-medium">How would you like to answer?</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="conv-either"
+                checked={eitherChoice !== "separate_first"}
+                onChange={() => {
+                  setEitherChoice("shared_first");
+                  setForceSeparate(false);
+                }}
+              />
+              Answer together
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="conv-either"
+                checked={eitherChoice === "separate_first"}
+                onChange={() => {
+                  setEitherChoice("separate_first");
+                  setForceSeparate(true);
+                }}
+              />
+              Answer separately
+            </label>
+          </fieldset>
+        ) : null}
+
         <div className="mt-6 space-y-6">
-          <ParentBlock
-            name="Sam"
-            memberHint={samMember?.display_name}
-            prompt={prompt}
-            choices={samChoices}
-            text={samText}
-            explain={samExplain}
-            scale={samScale}
-            custom={customSam}
-            scalePoints={scalePoints}
-            onToggle={(v) =>
-              toggleChoice("sam", v, prompt.allow_multiple_selections)
-            }
-            onText={setSamText}
-            onExplain={setSamExplain}
-            onScale={setSamScale}
-            onCustom={setCustomSam}
-            onSave={() => saveActor("sam")}
-            pending={pending}
-          />
-          <ParentBlock
-            name="Michelle"
-            memberHint={michelleMember?.display_name}
-            prompt={prompt}
-            choices={michelleChoices}
-            text={michelleText}
-            explain={michelleExplain}
-            scale={michelleScale}
-            custom={customMichelle}
-            scalePoints={scalePoints}
-            onToggle={(v) =>
-              toggleChoice("michelle", v, prompt.allow_multiple_selections)
-            }
-            onText={setMichelleText}
-            onExplain={setMichelleExplain}
-            onScale={setMichelleScale}
-            onCustom={setCustomMichelle}
-            onSave={() => saveActor("michelle")}
-            pending={pending}
-          />
+          {!showSeparate ? (
+            <>
+              <ParentBlock
+                name="Shared family answer"
+                prompt={prompt}
+                choices={samChoices}
+                text={samText}
+                explain={samExplain}
+                scale={samScale}
+                custom={customSam}
+                scalePoints={scalePoints}
+                onToggle={(v) =>
+                  toggleChoice("sam", v, prompt.allow_multiple_selections)
+                }
+                onText={setSamText}
+                onExplain={setSamExplain}
+                onScale={setSamScale}
+                onCustom={setCustomSam}
+                onSave={() => {
+                  void save.runSave(
+                    async () => {
+                      const writes = [buildActorWrite("shared")];
+                      const check = assertCurrentPayload(writes);
+                      if (!check.ok) {
+                        setIdentityError(STALE_PAYLOAD_USER_MESSAGE);
+                        throw new Error(STALE_PAYLOAD_USER_MESSAGE);
+                      }
+                      const ack = await actionSaveConversationAnswersBatch({
+                        sessionId: session.id,
+                        itemId: item.id,
+                        answers: writes,
+                        mutationId: save.mutationId(),
+                        testRunId: session.test_run_id,
+                        expectedPromptId: prompt.id,
+                      });
+                      if (!ack.ok || !ack.verified) {
+                        throw new Error(
+                          "Save could not be verified. Your answer is still on this screen.",
+                        );
+                      }
+                      clearDraft(draftKey);
+                      return ack;
+                    },
+                    {
+                      operation: "save_shared",
+                      route: "/conversations/session",
+                      sessionId: session.id,
+                      onSuccess: async () => router.refresh(),
+                    },
+                  );
+                }}
+                pending={pending}
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setForceSeparate(true)}
+              >
+                Capture separate perspectives
+              </button>
+            </>
+          ) : (
+            <>
+              {forceSeparate && activeDiscussionMode !== "separate_first" ? (
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setForceSeparate(false)}
+                >
+                  Back to shared
+                </button>
+              ) : null}
+              <ParentBlock
+                name="Sam"
+                memberHint={samMember?.display_name}
+                prompt={prompt}
+                choices={samChoices}
+                text={samText}
+                explain={samExplain}
+                scale={samScale}
+                custom={customSam}
+                scalePoints={scalePoints}
+                onToggle={(v) =>
+                  toggleChoice("sam", v, prompt.allow_multiple_selections)
+                }
+                onText={setSamText}
+                onExplain={setSamExplain}
+                onScale={setSamScale}
+                onCustom={setCustomSam}
+                onSave={() => saveActor("sam")}
+                pending={pending}
+              />
+              <ParentBlock
+                name="Michelle"
+                memberHint={michelleMember?.display_name}
+                prompt={prompt}
+                choices={michelleChoices}
+                text={michelleText}
+                explain={michelleExplain}
+                scale={michelleScale}
+                custom={customMichelle}
+                scalePoints={scalePoints}
+                onToggle={(v) =>
+                  toggleChoice("michelle", v, prompt.allow_multiple_selections)
+                }
+                onText={setMichelleText}
+                onExplain={setMichelleExplain}
+                onScale={setMichelleScale}
+                onCustom={setCustomMichelle}
+                onSave={() => saveActor("michelle")}
+                pending={pending}
+              />
+            </>
+          )}
         </div>
 
         {prompt.response_type === "either_or" ||

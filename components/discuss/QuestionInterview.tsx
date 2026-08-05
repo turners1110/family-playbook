@@ -16,7 +16,7 @@ import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
 import { helperForQuestion } from "@/lib/content/helper-templates";
 import {
   discussionModeIcon,
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
 } from "@/lib/discussions/discussion-mode";
 
 export function QuestionInterview({
@@ -44,12 +44,12 @@ export function QuestionInterview({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const discussionMode = resolveEffectiveDiscussionMode({
-    discussion_mode: question.discussion_mode ?? null,
-    separate_answers_recommended: question.separate_answers_recommended,
-    hasSeparateAnswers: answers.some((a) => !a.is_shared),
+  const discussion = resolveDiscussionMode({
     question,
+    hasSeparateAnswers: answers.some((a) => !a.is_shared),
+    preferExistingSeparate: true,
   });
+  const discussionMode = discussion.mode;
   const [mode, setMode] = useState<"shared" | "separate" | "quick">(
     discussionMode === "separate_first" ? "separate" : "shared",
   );

@@ -1,27 +1,22 @@
 import type { AppStore, Question } from "@/lib/types/models";
 import {
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
   type DiscussionMode,
 } from "@/lib/discussions/discussion-mode";
 import { isProgressEligibleQuestion } from "@/lib/services/question-status";
 
 export type DiscussionModeHomeStats = {
-  /** Shared-first (or either→shared) questions answered with a shared decision. */
   sharedFirstCompleted: number;
-  /** Separate-first questions still missing a full answer. */
   separateReflectionRemaining: number;
-  /** Shared decisions completed (any mode). */
   sharedDecisionsCompleted: number;
-  /** Share of completed deep discussions that used shared-first metadata. */
   completedTogetherPct: number;
 };
 
 function modeFor(q: Question): DiscussionMode {
-  return resolveEffectiveDiscussionMode({
-    discussion_mode: q.discussion_mode ?? null,
-    separate_answers_recommended: q.separate_answers_recommended,
+  return resolveDiscussionMode({
     question: q,
-  });
+    preferExistingSeparate: false,
+  }).mode;
 }
 
 function questionHasAnswer(store: AppStore, questionId: string): boolean {

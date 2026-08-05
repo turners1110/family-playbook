@@ -25,6 +25,12 @@ import {
   decisionHref,
   getDecisionsForQuestion,
 } from "@/lib/knowledge";
+import {
+  resolveDiscussionMode,
+  shouldShowSeparateEditors,
+} from "@/lib/discussions/discussion-mode";
+import { filterAnswersForClient } from "@/lib/discussions/answer-privacy";
+import { DiscussionModeDebug } from "@/components/discussions/DiscussionModeDebug";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +83,26 @@ export default async function QuestionDetailPage({
   }
   const helpers = helperForQuestion(question);
 
-  const answers = store.answers.filter((a) => a.question_id === question.id);
+  const rawAnswers = store.answers.filter((a) => a.question_id === question.id);
+  const hasSeparateAnswers = rawAnswers.some((a) => !a.is_shared);
+  const discussion = resolveDiscussionMode({
+    question,
+    hasSeparateAnswers,
+    preferExistingSeparate: true,
+  });
+  const separateEditorsVisible = shouldShowSeparateEditors({
+    resolvedMode: discussion.mode,
+    hasSeparateAnswers,
+  });
+  const filtered = filterAnswersForClient({
+    answers: rawAnswers,
+    members: store.members,
+    hideUntilBoth: store.settings.hide_partner_answers_until_both_saved,
+    currentMemberId:
+      store.members.find((m) => m.user_id === store.current_user_id)?.id ?? "",
+    separateEditorsVisible,
+  });
+  const answers = filtered.answers;
   const status = getQuestionAnswerStatus(question.id, store);
   const statusIndex = buildQuestionStatusIndex(store);
   const versions = store.answer_versions
@@ -264,6 +289,13 @@ export default async function QuestionDetailPage({
             }}
           />
         </div>
+        <DiscussionModeDebug
+          questionId={question.id}
+          storedMode={question.discussion_mode ?? null}
+          resolvedMode={discussion.mode}
+          source={discussion.source}
+          surface="questions/[slug]"
+        />
         <AnswerEditor
           question={question}
           questionId={question.id}

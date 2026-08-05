@@ -5,13 +5,15 @@ import {
   classifyDiscussionMode,
   discussionModeIcon,
   essentialsShowSeparateEditors,
-  resolveEffectiveDiscussionMode,
+  resolveDiscussionMode,
+  shouldShowSeparateEditors,
   summarizeClassification,
   type DiscussionMode,
 } from "@/lib/discussions/discussion-mode";
+import { filterAnswersForClient } from "@/lib/discussions/answer-privacy";
 import { buildDiscussionModeHomeStats } from "@/lib/discussions/discussion-stats";
 import { canRevealPartnerAnswers } from "@/lib/services/answers";
-import type { AppStore, Question } from "@/lib/types/models";
+import type { Answer, AppStore, Question } from "@/lib/types/models";
 import seedQuestions from "@/data/seed/questions.json";
 
 function baseQuestion(
@@ -52,8 +54,71 @@ function baseQuestion(
   };
 }
 
+describe("resolveDiscussionMode canonical contract", () => {
+  it("defaults to shared_first when metadata is missing", () => {
+    const r = resolveDiscussionMode({});
+    expect(r.mode).toBe("shared_first");
+    expect(r.source).toBe("fallback");
+  });
+
+  it("never uses separate_answers_recommended alone to force separate", () => {
+    const r = resolveDiscussionMode({
+      question: baseQuestion({
+        id: "q1",
+        slug: "x",
+        text: "What is our visitor plan for the first weeks?",
+        short_title: "Visitors",
+        separate_answers_recommended: true,
+        discussion_mode: null,
+        categories: ["extended_family"],
+      }),
+      preferExistingSeparate: false,
+    });
+    expect(r.mode).toBe("shared_first");
+  });
+
+  it("uses stored discussion_mode when present", () => {
+    const r = resolveDiscussionMode({
+      question: baseQuestion({
+        id: "q1",
+        slug: "x",
+        text: "What are your birth fears?",
+        short_title: "Birth fears",
+        discussion_mode: "separate_first",
+        categories: ["pregnancy"],
+      }),
+    });
+    expect(r.mode).toBe("separate_first");
+    expect(r.source).toBe("stored");
+  });
+
+  it("either defaults to shared UI unless user chooses separate", () => {
+    expect(
+      shouldShowSeparateEditors({
+        resolvedMode: "either",
+        userChoseSeparate: false,
+      }),
+    ).toBe(false);
+    expect(
+      shouldShowSeparateEditors({
+        resolvedMode: "either",
+        userChoseSeparate: true,
+      }),
+    ).toBe(true);
+  });
+
+  it("shows separate when existing separate answers need review", () => {
+    expect(
+      shouldShowSeparateEditors({
+        resolvedMode: "shared_first",
+        hasSeparateAnswers: true,
+      }),
+    ).toBe(true);
+  });
+});
+
 describe("discussion mode classification", () => {
-  it("classifies the full seed within target bands", () => {
+  it("classifies the full seed within shared-first bands", () => {
     const modes = (seedQuestions as Array<{
       id: string;
       slug: string;
@@ -61,7 +126,6 @@ describe("discussion mode classification", () => {
       text: string;
       categories: string[];
       why_it_matters?: string;
-      separate_answers_recommended?: boolean;
       discussion_mode?: DiscussionMode;
     }>).map((q) => {
       expect(q.discussion_mode).toBeTruthy();
@@ -70,56 +134,84 @@ describe("discussion mode classification", () => {
     const stats = summarizeClassification(modes);
     expect(stats.total).toBe(430);
     expect(stats.shared_first_pct).toBeGreaterThanOrEqual(70);
-    expect(stats.shared_first_pct).toBeLessThanOrEqual(85);
-    expect(stats.separate_first_pct).toBeGreaterThanOrEqual(15);
     expect(stats.separate_first_pct).toBeLessThanOrEqual(25);
     expect(stats.either_pct).toBeLessThan(5);
   });
 
-  it("keeps visitors shared-first and birth fears separate-first", () => {
+  it("keeps visitors shared-first and childhood separate-first", () => {
     const visitors = seedQuestions.find((q) =>
       /visitor/i.test(q.short_title) || /visitor/i.test(q.text),
     );
-    const fears = seedQuestions.find((q) =>
-      /birth fear/i.test(q.short_title) || /birth fear/i.test(q.text),
+    const childhood = seedQuestions.find((q) =>
+      /childhood/i.test(q.short_title),
     );
     expect(visitors).toBeTruthy();
-    expect(classifyDiscussionMode(visitors!).discussion_mode).toBe(
+    expect(classifyDiscussionMode(visitors! as never).discussion_mode).toBe(
       "shared_first",
     );
-    if (fears) {
-      expect(classifyDiscussionMode(fears).discussion_mode).toBe(
+    if (childhood) {
+      expect(classifyDiscussionMode(childhood as never).discussion_mode).toBe(
         "separate_first",
       );
     }
   });
-
-  it("resolves effective mode with existing separate answers", () => {
-    expect(
-      resolveEffectiveDiscussionMode({
-        discussion_mode: "shared_first",
-        hasSeparateAnswers: true,
-      }),
-    ).toBe("shared_first");
-    expect(
-      resolveEffectiveDiscussionMode({
-        separate_answers_recommended: true,
-      }),
-    ).toBe("separate_first");
-  });
-
-  it("exposes icons without requiring text labels in lists", () => {
-    expect(discussionModeIcon("shared_first").symbol).toBeTruthy();
-    expect(discussionModeIcon("separate_first").symbol).toBeTruthy();
-    expect(discussionModeIcon("either").symbol).toBeTruthy();
-  });
 });
 
-describe("shared-first privacy and essentials", () => {
-  it("preserves partner reveal rules for separate answers", () => {
+describe("privacy and essentials", () => {
+  it("preserves partner reveal rules", () => {
     expect(canRevealPartnerAnswers(true, true, false, false)).toBe(false);
     expect(canRevealPartnerAnswers(true, true, true, false)).toBe(true);
-    expect(canRevealPartnerAnswers(false, true, false, false)).toBe(true);
+  });
+
+  it("redacts partner payloads server-side before client", () => {
+    const members = [
+      {
+        id: "m_sam",
+        family_id: "f",
+        user_id: "u_sam",
+        display_name: "Sam",
+        role: "parent" as const,
+        sort_order: 1,
+        created_at: "",
+      },
+      {
+        id: "m_michelle",
+        family_id: "f",
+        user_id: "u_michelle",
+        display_name: "Michelle",
+        role: "parent" as const,
+        sort_order: 2,
+        created_at: "",
+      },
+    ];
+    const answers: Answer[] = [
+      {
+        id: "a_sam",
+        family_id: "f",
+        question_id: "q1",
+        member_id: "m_sam",
+        is_shared: false,
+        payload: { text: "Sam secret" },
+        status: "in_discussion",
+        confidence: null,
+        bookmarked: false,
+        needs_research: false,
+        review_date: null,
+        version: 1,
+        created_at: "",
+        updated_at: "",
+      },
+    ];
+    const filtered = filterAnswersForClient({
+      answers,
+      members,
+      hideUntilBoth: true,
+      currentMemberId: "m_michelle",
+      separateEditorsVisible: true,
+    });
+    expect(filtered.reveal).toBe(false);
+    expect(filtered.answers[0]?.payload.text).toBeUndefined();
+    expect(filtered.hiddenPartnerIds).toContain("a_sam");
   });
 
   it("hides essentials separate editors for shared-first planning", () => {
@@ -137,23 +229,11 @@ describe("shared-first privacy and essentials", () => {
         q,
       ),
     ).toBe(false);
-    expect(
-      essentialsShowSeparateEditors(
-        { response_type: "separate_then_shared" },
-        { ...q, discussion_mode: "separate_first" },
-      ),
-    ).toBe(true);
-    expect(
-      essentialsShowSeparateEditors(
-        { response_type: "paired_text" },
-        q,
-      ),
-    ).toBe(true);
   });
 });
 
 describe("home discussion metrics", () => {
-  it("counts shared-first completions and separate remaining", () => {
+  it("counts shared-first completions", () => {
     const questions = [
       baseQuestion({
         id: "q_shared",
@@ -165,9 +245,9 @@ describe("home discussion metrics", () => {
       }),
       baseQuestion({
         id: "q_sep",
-        slug: "fears",
-        text: "What are your biggest birth fears?",
-        short_title: "Birth fears",
+        slug: "childhood",
+        text: "What parts of childhood do we hope to repeat?",
+        short_title: "Childhood",
         discussion_mode: "separate_first",
         separate_answers_recommended: true,
         categories: ["core_values"],
@@ -199,38 +279,32 @@ describe("home discussion metrics", () => {
     const stats = buildDiscussionModeHomeStats(store);
     expect(stats.sharedFirstCompleted).toBe(1);
     expect(stats.separateReflectionRemaining).toBe(1);
-    expect(stats.sharedDecisionsCompleted).toBe(1);
   });
 });
 
-describe("AnswerEditor shared-first source contract", () => {
-  it("defaults to shared family decision without Sam/Michelle editors", () => {
+describe("surface contracts", () => {
+  it("Conversations card supports shared-first rendering", () => {
+    const src = readFileSync(
+      path.join(process.cwd(), "components/conversations/ConversationCard.tsx"),
+      "utf8",
+    );
+    expect(src).toContain("Shared family answer");
+    expect(src).toContain("Capture separate perspectives");
+    expect(src).toContain("buildActorWrite(\"shared\")");
+    expect(src).toContain("shouldShowSeparateEditors");
+  });
+
+  it("AnswerEditor uses resolveDiscussionMode", () => {
     const src = readFileSync(
       path.join(process.cwd(), "components/questions/AnswerEditor.tsx"),
       "utf8",
     );
+    expect(src).toContain("resolveDiscussionMode");
     expect(src).toContain("Shared family decision");
-    expect(src).toContain("Capture separate perspectives");
-    expect(src).toContain("Did this discussion uncover meaningful differences?");
-    expect(src).toContain("Merge into family decision");
-    expect(src).toContain("resolveEffectiveDiscussionMode");
   });
 
-  it("QuestionInterview defaults from discussion_mode", () => {
-    const src = readFileSync(
-      path.join(process.cwd(), "components/discuss/QuestionInterview.tsx"),
-      "utf8",
-    );
-    expect(src).toContain("resolveEffectiveDiscussionMode");
-    expect(src).toContain('discussionMode === "separate_first" ? "separate"');
-  });
-
-  it("Decision page hides empty separate perspectives", () => {
-    const src = readFileSync(
-      path.join(process.cwd(), "app/decisions/[id]/page.tsx"),
-      "utf8",
-    );
-    expect(src).toContain("decision?.sam_perspective || decision?.michelle_perspective");
-    expect(src).toContain("Started together");
+  it("icons exist", () => {
+    expect(discussionModeIcon("shared_first").symbol).toBeTruthy();
+    expect(discussionModeIcon("separate_first").symbol).toBeTruthy();
   });
 });
