@@ -91,16 +91,18 @@ export function ensureConversationQuestionOptions(store: AppStore): {
     ALLOWANCE_OPTIONS,
   );
 
-  // Soft-update question types / schemas without touching answers.
+  // Soft-update legacy schemas only. Never overwrite Question Experience V2 (version >= 2).
   const childTraits = store.questions.find(
     (q) => q.id === "q_what_traits_do_we_most_hope_our_child_develops",
   );
-  if (childTraits) {
+  if (childTraits && Number(childTraits.response_schema?.version) < 2) {
     childTraits.question_type = "multiple_choice";
     childTraits.response_schema = {
       ...childTraits.response_schema,
-      mode: "multi_select_top_n",
+      mode: "ranking",
+      version: 2,
       max_selections: 5,
+      options: TRAIT_CHILD_OPTIONS,
       allow_custom: true,
     };
   }
@@ -108,12 +110,14 @@ export function ensureConversationQuestionOptions(store: AppStore): {
   const adultTraits = store.questions.find(
     (q) => q.id === "q_which_five_adult_traits_matter_most_to_us",
   );
-  if (adultTraits) {
+  if (adultTraits && Number(adultTraits.response_schema?.version) < 2) {
     adultTraits.question_type = "ranking";
     adultTraits.response_schema = {
       ...adultTraits.response_schema,
-      mode: "ranking_top_n",
+      mode: "ranking",
+      version: 2,
       max_rank: 5,
+      options: TRAIT_ADULT_OPTIONS,
       allow_custom: true,
     };
   }
@@ -121,11 +125,13 @@ export function ensureConversationQuestionOptions(store: AppStore): {
   const allowance = store.questions.find(
     (q) => q.id === "q_should_allowance_be_tied_to_chores",
   );
-  if (allowance) {
+  if (allowance && Number(allowance.response_schema?.version) < 2) {
     allowance.question_type = "single_choice";
     allowance.response_schema = {
       ...allowance.response_schema,
       mode: "single_choice",
+      version: 2,
+      options: ALLOWANCE_OPTIONS,
       allow_explanation: true,
     };
   }

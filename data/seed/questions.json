@@ -6,7 +6,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Child feels safe and loved",
+        "Strong parent-child relationship",
+        "Child becomes independent",
+        "Child develops sound judgment",
+        "Child is kind",
+        "Child is resilient",
+        "Child takes responsibility",
+        "Child feels comfortable being themselves",
+        "Family remains connected",
+        "Parents maintain their relationship",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -28,7 +42,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 12,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -59,7 +73,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "ranking",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "ranking",
+      "version": 2,
+      "options": [
+        "Kindness",
+        "Curiosity",
+        "Resilience",
+        "Honesty",
+        "Independence",
+        "Empathy",
+        "Responsibility",
+        "Courage"
+      ]
     },
     "life_stages": [
       "all_stages"
@@ -81,7 +106,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 15,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -165,7 +190,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -186,7 +212,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -217,7 +243,23 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Calm",
+        "Warm",
+        "Playful",
+        "Structured",
+        "Honest",
+        "Respectful",
+        "Affectionate",
+        "Curious",
+        "Safe for mistakes",
+        "Connected",
+        "Private",
+        "Welcoming",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -238,7 +280,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -269,7 +311,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "reflection",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -288,7 +331,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 20,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -319,7 +362,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "reflection",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -336,7 +380,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 20,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -367,7 +411,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "tradeoff",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "tradeoff",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -388,7 +433,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -419,7 +464,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -442,7 +488,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -473,7 +519,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -493,7 +540,7 @@
     "related_questions": [],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -524,7 +571,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -538,7 +586,7 @@
     "related_questions": [],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -721,7 +769,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -737,7 +786,7 @@
     "related_questions": [],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -817,7 +866,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -847,7 +897,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -931,7 +981,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -977,7 +1028,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "all_stages"
@@ -995,7 +1047,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1527,7 +1579,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "No personal attacks",
+        "Pause option",
+        "Repair after conflict",
+        "Whether disagreement may be visible",
+        "How to explain repair as the child grows"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -1551,7 +1611,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 15,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1582,7 +1642,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1607,7 +1668,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1638,7 +1699,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Night feeding",
+        "Diaper changes",
+        "Soothing back to sleep",
+        "Getting baby settled after feeds",
+        "Protecting the off-duty parent's sleep"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -1663,7 +1738,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1694,7 +1769,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1719,7 +1795,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1750,7 +1826,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1775,7 +1852,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1806,7 +1883,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1831,7 +1909,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1862,7 +1940,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Tracking supplies / appointments",
+        "Mental load / planning",
+        "Cleaning / laundry",
+        "Feeding prep",
+        "Communicating with family"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -1887,7 +1979,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1918,7 +2010,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1943,7 +2036,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -1974,7 +2067,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -1999,7 +2093,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2030,7 +2124,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "threshold",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -2055,7 +2150,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 6,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2086,7 +2181,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "options": [
+        "Daily two-minute check",
+        "Twice weekly",
+        "Weekly",
+        "Every two weeks",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2118,7 +2221,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2149,7 +2252,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2181,7 +2285,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2275,7 +2379,22 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Dishes",
+        "Laundry",
+        "Trash / recycling",
+        "Groceries",
+        "Cleaning bathrooms",
+        "Pet care (if any)"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2307,7 +2426,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2527,7 +2646,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2559,7 +2679,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2716,7 +2836,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2748,7 +2869,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2779,7 +2900,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2811,7 +2933,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -2842,7 +2964,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -2874,7 +2997,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3031,7 +3154,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -3063,7 +3187,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 8,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3220,7 +3344,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Decide: baby health insurance plan",
+        "Decide: life insurance review",
+        "Decide: will and guardians",
+        "Decide: beneficiaries",
+        "Decide: 529 / education savings approach",
+        "Complete before birth: employer leave paperwork",
+        "Complete after birth: add baby to insurance",
+        "Complete after birth: birth certificate process",
+        "Complete after birth: Social Security process",
+        "Need legal advice",
+        "Undecided on guardians"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -3251,7 +3389,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 10,
+    "estimated_minutes": 12,
     "emotional_weight": 4,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3343,7 +3481,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "version": 2,
+      "options": [
+        "Partner only",
+        "Partner + one support person",
+        "Doula / birth professional",
+        "Parents / close family",
+        "Keep the room limited — decide closer to due date"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -3363,7 +3509,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 5,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3394,7 +3540,23 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Healthy parent and baby",
+        "Clear communication",
+        "Pain control",
+        "Mobility during labor",
+        "Minimal intervention where safe",
+        "Support for vaginal delivery",
+        "Openness to medical intervention",
+        "Calm environment",
+        "Immediate skin-to-skin where possible",
+        "Feeding support",
+        "Partner involvement",
+        "Privacy",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3415,7 +3577,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3446,7 +3608,26 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "options": [
+        "Partner only during labor",
+        "Doula welcome",
+        "Parent or family member welcome",
+        "No visitors at hospital",
+        "Limited visitors after birth",
+        "Undecided"
+      ],
+      "version": 2,
+      "policy_fields": [
+        "Who may be present during labor",
+        "Who may visit at the hospital",
+        "When visits begin",
+        "Maximum visit length",
+        "Health rules",
+        "Photo rules",
+        "Either parent may pause visits",
+        "Who communicates the boundary"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -3467,7 +3648,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3498,7 +3679,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3519,7 +3701,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3550,7 +3732,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "ranking",
+      "version": 2,
+      "options": [
+        "Pain management approach",
+        "Who is in the room",
+        "Immediate skin-to-skin",
+        "Delayed cord clamping",
+        "Feeding plan in first hour",
+        "Cesarean preferences if needed",
+        "Music / atmosphere",
+        "Partner's role during labor"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -3571,7 +3764,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3602,7 +3795,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3623,7 +3817,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3654,7 +3848,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3675,7 +3870,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3706,7 +3901,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Sleep",
+        "Pain management",
+        "Limited visitors",
+        "Meal support",
+        "Reduced household work",
+        "Feeding support",
+        "Emotional space",
+        "Privacy",
+        "Help with appointments",
+        "Help with Lulu",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3727,7 +3936,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3758,7 +3967,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Overnight support",
+        "Meals / household",
+        "Visitor coordination",
+        "Errands / logistics",
+        "Emotional support"
+      ],
+      "matrix_owners": [
+        "Sam primary",
+        "Shared",
+        "Michelle primary",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -3779,7 +4002,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3810,7 +4033,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3831,7 +4055,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3862,7 +4086,16 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "options": [
+        "Prefer unmedicated if feasible",
+        "Open to medication",
+        "Prefer epidural",
+        "Decide during labor",
+        "Need provider discussion",
+        "Undecided"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3883,7 +4116,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3914,7 +4147,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3935,7 +4169,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -3966,7 +4200,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -3987,7 +4222,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4018,7 +4253,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Contact OB",
+        "Contact primary doctor",
+        "Contact pediatrician",
+        "Contact emergency services",
+        "Contact family support",
+        "Contact mental-health support",
+        "Need provider list written down"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4039,7 +4284,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4070,7 +4315,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "No public posting",
+        "Ask before posting",
+        "Private family sharing only",
+        "No identifying details",
+        "No medical information",
+        "No bath or undressed photos",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4174,7 +4429,20 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Safe sleep area",
+        "Car seat",
+        "Feeding area",
+        "Changing area",
+        "Hospital bags",
+        "Recovery supplies",
+        "Baby laundry",
+        "Emergency contacts",
+        "Food and household supplies",
+        "Lulu plan"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4226,7 +4494,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4278,7 +4547,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4299,7 +4569,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4330,7 +4600,19 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "options": [
+        "Public donation if available",
+        "Private banking",
+        "Do not bank",
+        "Need more research",
+        "Ask provider",
+        "Undecided",
+        "Yes",
+        "No",
+        "Not applicable"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4351,7 +4633,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4382,7 +4664,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4403,7 +4686,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4486,7 +4769,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4507,7 +4791,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4538,7 +4822,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4559,7 +4844,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4590,7 +4875,27 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Meals",
+        "Grocery ordering",
+        "Laundry",
+        "Dishes",
+        "Trash",
+        "Cleaning",
+        "Baby supplies",
+        "Visitor communication",
+        "Medical calls",
+        "Lulu care"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -4611,7 +4916,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4642,7 +4947,20 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Who may stay overnight",
+        "How soon after birth",
+        "How long they may stay",
+        "Help we want vs privacy we need"
+      ],
+      "matrix_owners": [
+        "Allowed",
+        "Not yet",
+        "Case by case",
+        "Depends"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -4663,7 +4981,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4694,7 +5012,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4715,7 +5034,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4798,7 +5117,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4819,7 +5139,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4850,7 +5170,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4871,7 +5192,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4902,7 +5223,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -4923,7 +5245,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -4954,7 +5276,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "Illness / exposure rules",
+        "Hand washing",
+        "Smoking",
+        "Kissing baby",
+        "Vaccination discussions",
+        "Who communicates to Sam’s family",
+        "Who communicates to Michelle’s family"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -4975,7 +5307,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5006,7 +5338,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -5109,7 +5442,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -5128,7 +5462,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5159,7 +5493,22 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Feed role",
+        "Diaper role",
+        "Settling role",
+        "Protected sleep — Sam",
+        "Protected sleep — Michelle",
+        "Workday adjustments"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "first_week",
@@ -5182,7 +5531,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5213,7 +5562,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5237,7 +5587,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5268,7 +5618,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "Who may visit",
+        "Start date",
+        "Visit length",
+        "Notice required",
+        "Health rules",
+        "Whether visitors help",
+        "Either parent may cancel"
+      ]
     },
     "life_stages": [
       "first_week",
@@ -5292,7 +5652,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5323,7 +5683,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "Who responds",
+        "Language to use",
+        "When to end a conversation",
+        "Which decisions remain private",
+        "When provider guidance ends debate"
+      ]
     },
     "life_stages": [
       "first_week",
@@ -5347,7 +5715,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5378,7 +5746,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "threshold",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5402,7 +5771,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 6,
     "emotional_weight": 3,
     "evidence_needed": true,
     "evidence_available": true,
@@ -5433,7 +5802,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "First response",
+        "Who speaks for the family",
+        "When we end the visit",
+        "Follow-up conversation",
+        "Exceptions"
+      ]
     },
     "life_stages": [
       "first_week",
@@ -5457,7 +5834,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5488,7 +5865,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5512,7 +5890,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5543,7 +5921,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5567,7 +5946,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5598,7 +5977,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5622,7 +6002,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5653,7 +6033,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5677,7 +6058,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5708,7 +6089,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5732,7 +6114,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5763,7 +6145,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5787,7 +6170,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5818,7 +6201,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5842,7 +6226,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5873,7 +6257,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5897,7 +6282,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -5928,7 +6313,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -5952,7 +6338,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6038,7 +6424,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -6203,7 +6590,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Pause non-urgent decisions",
+        "Use the existing plan",
+        "Defer to the parent handling the task",
+        "Ask the provider",
+        "Use a scheduled check-in",
+        "Trial one option for a set period",
+        "Revisit after sleep"
+      ],
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -6227,7 +6624,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6313,7 +6710,16 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "scenario",
+      "options": [
+        "Primary sitter confirmed",
+        "Backup sitter confirmed",
+        "Written care instructions shared",
+        "Overnight labor plan",
+        "Extended stay plan",
+        "Undecided"
+      ],
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -6423,7 +6829,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "first_week",
@@ -6588,7 +6995,20 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Who is on-call overnight",
+        "Where the on-call parent sleeps",
+        "How the off-duty parent is protected",
+        "Weekend / catch-up sleep plan"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "first_week",
@@ -6612,7 +7032,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6805,7 +7225,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Direct nursing",
+        "Pumping",
+        "Bottle feeding expressed milk",
+        "Combination feeding",
+        "Formula feeding",
+        "Flexible based on recovery and supply",
+        "No fixed goal",
+        "Need provider guidance"
+      ],
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -6825,7 +7256,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6856,7 +7287,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -6877,7 +7309,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6908,7 +7340,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -6929,7 +7362,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -6960,7 +7393,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -6981,7 +7415,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7012,7 +7446,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7033,7 +7468,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7064,7 +7499,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7085,7 +7521,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7116,7 +7552,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Firm flat sleep surface",
+        "Fitted sheet only",
+        "No loose blankets or pillows",
+        "Back sleeping",
+        "Room sharing without bed sharing",
+        "Need pediatrician guidance",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7168,7 +7614,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7189,7 +7636,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7220,7 +7667,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7241,7 +7689,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7272,7 +7720,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7293,7 +7742,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7324,7 +7773,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7345,7 +7795,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7376,7 +7826,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7397,7 +7848,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7428,7 +7879,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7449,7 +7901,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7480,7 +7932,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7501,7 +7954,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7532,7 +7985,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7553,7 +8007,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7584,7 +8038,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7605,7 +8060,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7636,7 +8091,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7657,7 +8113,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7688,7 +8144,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7709,7 +8166,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7740,7 +8197,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "One parent feels unsafe driving",
+        "Repeated conflict",
+        "Falling asleep while holding baby",
+        "Recovery is worsening",
+        "Work performance is unsafe",
+        "Either parent asks for relief",
+        "Provider concern",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7792,7 +8260,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -7813,7 +8282,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -7844,7 +8313,21 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "matrix",
+      "version": 2,
+      "matrix_rows": [
+        "Laundry",
+        "Bottles",
+        "Pump parts",
+        "Dishwashing",
+        "Restocking supplies"
+      ],
+      "matrix_owners": [
+        "Sam",
+        "Michelle",
+        "Both",
+        "Depends"
+      ]
     },
     "life_stages": [
       "newborn_0_3"
@@ -7865,7 +8348,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -8468,7 +8951,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3"
@@ -8881,7 +9365,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -8903,7 +9388,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -8934,7 +9419,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -8957,7 +9443,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -8988,7 +9474,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9011,7 +9498,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": true,
@@ -9042,7 +9529,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9065,7 +9553,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9096,7 +9584,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9119,7 +9608,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9150,7 +9639,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9173,7 +9663,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9204,7 +9694,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9227,7 +9718,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9258,7 +9749,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9281,7 +9773,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9312,7 +9804,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9335,7 +9828,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -9366,7 +9859,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "newborn_0_3",
@@ -9389,7 +9883,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 5,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10227,7 +10721,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10259,7 +10754,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10290,7 +10785,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10323,7 +10819,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10354,7 +10850,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10387,7 +10884,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10418,7 +10915,14 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "version": 2,
+      "options": [
+        "Yes — one polite taste required",
+        "Encourage but never force",
+        "No pressure around tasting",
+        "Depends on the food and situation"
+      ]
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10451,7 +10955,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 3,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10482,7 +10986,14 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "version": 2,
+      "options": [
+        "No separate meals — offer the family meal",
+        "Limited backup option only",
+        "Yes when needed to reduce conflict",
+        "Depends on age and context"
+      ]
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10515,7 +11026,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 3,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10546,7 +11057,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10579,7 +11091,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10610,7 +11122,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10643,7 +11156,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10674,7 +11187,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10707,7 +11221,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10738,7 +11252,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10771,7 +11286,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10802,7 +11317,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10835,7 +11351,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10866,7 +11382,16 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "Formula available at home",
+        "Pumping",
+        "Donor milk through approved source",
+        "Lactation support",
+        "Pediatrician guidance",
+        "Decide only if needed"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -10898,7 +11423,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -10929,7 +11454,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -11806,7 +12332,16 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "Who asks questions",
+        "Who communicates with family",
+        "How much explanation is wanted",
+        "When the partner should advocate",
+        "Trust in clinician recommendation",
+        "How to handle disagreement under time pressure"
+      ]
     },
     "life_stages": [
       "pre_birth_planning",
@@ -11837,7 +12372,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -11868,7 +12403,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -11900,7 +12436,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": true,
     "evidence_available": false,
@@ -11931,7 +12467,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -11963,7 +12500,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -11994,7 +12531,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "ranking",
+      "version": 2,
+      "options": [
+        "Outlet covers and cords",
+        "Cabinet / chemical locks",
+        "Stairs and gates",
+        "Furniture anchoring",
+        "Sleep environment safety",
+        "Water / bathroom hazards",
+        "Choking hazards / floor clutter"
+      ]
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12026,7 +12573,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12057,7 +12604,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12089,7 +12637,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12120,7 +12668,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12152,7 +12701,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12183,7 +12732,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12215,7 +12765,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12246,7 +12796,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12278,7 +12829,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12309,7 +12860,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12341,7 +12893,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12372,7 +12924,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12404,7 +12957,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12435,7 +12988,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12467,7 +13021,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -12498,7 +13052,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -12530,7 +13085,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -13380,7 +13935,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "multi_select",
+      "options": [
+        "No nursery access unsupervised",
+        "No crib or bassinet area",
+        "No feeding-area jumping",
+        "No stroller climbing",
+        "Supervised baby-gear contact only",
+        "Practice with sounds and gear first",
+        "Slow scent introduction",
+        "Other"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -13506,7 +14072,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -13569,7 +14136,19 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "options": [
+        "Public donation if available",
+        "Private banking",
+        "Do not bank",
+        "Need more research",
+        "Ask provider",
+        "Undecided",
+        "Yes",
+        "No",
+        "Not applicable"
+      ],
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -13600,7 +14179,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -15288,7 +15867,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15346,7 +15926,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15405,7 +15986,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15464,7 +16046,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15523,7 +16106,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15582,7 +16166,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15641,7 +16226,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -15700,7 +16286,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "young_toddler_1_2",
@@ -18250,7 +18837,16 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "options": [
+        "Daycare",
+        "Nanny",
+        "Family care",
+        "Parent care",
+        "Mixed plan",
+        "Undecided"
+      ],
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18278,7 +18874,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 20,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -18309,7 +18905,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18369,7 +18966,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18429,7 +19027,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18489,7 +19088,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18549,7 +19149,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -18609,7 +19210,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -19089,7 +19691,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "infant_3_12",
@@ -19118,7 +19721,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "medium",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19446,7 +20049,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19473,7 +20077,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19504,7 +20108,15 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "policy_builder",
+      "version": 2,
+      "policy_fields": [
+        "Default response phrase",
+        "Topics that are off-limits",
+        "Who responds",
+        "When we escalate",
+        "Exceptions"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -19531,7 +20143,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19562,7 +20174,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19589,7 +20202,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19620,7 +20233,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19647,7 +20261,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19678,7 +20292,17 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "ranking",
+      "version": 2,
+      "options": [
+        "Christmas / major winter holiday",
+        "Thanksgiving",
+        "Our own family traditions",
+        "Visiting Sam's family",
+        "Visiting Michelle's family",
+        "Travel / vacation holidays",
+        "Low-key / rest days"
+      ]
     },
     "life_stages": [
       "pregnancy",
@@ -19705,7 +20329,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19736,7 +20360,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19763,7 +20388,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19794,7 +20419,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19821,7 +20447,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19852,7 +20478,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19879,7 +20506,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19910,7 +20537,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19937,7 +20565,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -19968,7 +20596,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pregnancy",
@@ -19995,7 +20624,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "essential_before_birth",
-    "estimated_minutes": 8,
+    "estimated_minutes": 12,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -20603,7 +21232,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -20670,7 +21300,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "joint_discussion",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "pre_birth_planning",
@@ -21619,7 +22250,14 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "yes_or_no",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "version": 2,
+      "options": [
+        "Yes, starting at a set age",
+        "Yes, when they show readiness",
+        "No allowance — use other money teaching",
+        "Undecided / revisit later"
+      ]
     },
     "life_stages": [
       "preschool_3_5",
@@ -21649,7 +22287,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "medium",
-    "estimated_minutes": 8,
+    "estimated_minutes": 3,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -21680,7 +22318,14 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "yes_or_no",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "version": 2,
+      "options": [
+        "Yes — allowance is earned through chores",
+        "No — allowance is separate from chores",
+        "Hybrid — base allowance plus chore bonuses",
+        "Decide later / depends on age"
+      ]
     },
     "life_stages": [
       "preschool_3_5",
@@ -21711,7 +22356,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "medium",
-    "estimated_minutes": 8,
+    "estimated_minutes": 3,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -21742,7 +22387,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "practical_planning",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "preschool_3_5",
@@ -21804,7 +22450,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "practical_planning",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "open_discussion",
+      "version": 2
     },
     "life_stages": [
       "preschool_3_5",
@@ -21866,7 +22513,14 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "practical_planning",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "single_choice",
+      "version": 2,
+      "options": [
+        "Yes — match savings dollar-for-dollar",
+        "Partial match with a cap",
+        "No matching — encourage saving another way",
+        "Decide when relevant"
+      ]
     },
     "life_stages": [
       "preschool_3_5",
@@ -21897,7 +22551,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "medium",
-    "estimated_minutes": 8,
+    "estimated_minutes": 3,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -23692,7 +24346,18 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "ranking",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "ranking",
+      "version": 2,
+      "options": [
+        "Emotional security",
+        "Independence",
+        "Curiosity",
+        "Kindness",
+        "Discipline / self-control",
+        "Faith or spiritual grounding",
+        "Work ethic",
+        "Joy / playfulness"
+      ]
     },
     "life_stages": [
       "all_stages",
@@ -23719,7 +24384,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 10,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -23750,7 +24415,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages",
@@ -23777,7 +24443,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -23808,7 +24474,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages",
@@ -23835,7 +24502,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -23866,7 +24533,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages",
@@ -23893,7 +24561,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,
@@ -23924,7 +24592,8 @@
     "discussion_guidance": "Share instincts first, then note where evidence or experience might change your view. Record disagreement without forcing resolution.",
     "question_type": "values_clarification",
     "response_schema": {
-      "mode": "open_or_policy"
+      "mode": "separate_then_shared",
+      "version": 2
     },
     "life_stages": [
       "all_stages",
@@ -23951,7 +24620,7 @@
     ],
     "parent_decision_dependency": null,
     "priority": "high",
-    "estimated_minutes": 8,
+    "estimated_minutes": 15,
     "emotional_weight": 3,
     "evidence_needed": false,
     "evidence_available": false,

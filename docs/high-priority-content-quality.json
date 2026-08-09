@@ -1,0 +1,3266 @@
+{
+  "generated_at": "2026-08-09T23:28:30.330Z",
+  "cohort_size": 181,
+  "average_score": 7.15,
+  "weak_count": 130,
+  "questions": [
+    {
+      "id": "q_how_should_we_handle_lying",
+      "title": "How should we handle lying?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 5,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_public_tantrums",
+      "title": "How should we handle public tantrums?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 5,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_to_hitting",
+      "title": "How should we respond to hitting?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 5,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_decide_on_preschool_timing",
+      "title": "How will we decide on preschool timing?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 5,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_do_we_want_our_child_to_understand_failure",
+      "title": "How do we want our child to understand failure?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_flexible_should_bedtime_be",
+      "title": "How flexible should bedtime be?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_much_should_achievement_matter_in_our_family",
+      "title": "How much should achievement matter in our family?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_consequences_relate_to_behavior",
+      "title": "How should consequences relate to behavior?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_dessert_be_treated",
+      "title": "How should dessert be treated?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_travel_affect_sleep_routines",
+      "title": "How should travel affect sleep routines?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_approach_early_screen_exposure_for_adults_around",
+      "title": "How should we approach early screen exposure for adults around the baby?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_guilt_about_using_childcare",
+      "title": "How should we handle guilt about using childcare?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_one_parent_wanting_more_visitors_than_the",
+      "title": "How should we handle one parent wanting more visitors than the other?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_help_our_child_learn_from_small_mistakes",
+      "title": "How should we help our child learn from small mistakes?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_protect_rest_after_birth",
+      "title": "How should we protect rest after birth?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_to_picky_eating",
+      "title": "How should we respond to picky eating?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_teach_delayed_gratification_across_childhood",
+      "title": "How should we teach delayed gratification across childhood?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_teach_responsibility_without_creating_shame",
+      "title": "How should we teach responsibility without creating shame?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_decide_about_circumcision_or_other_elective_proced",
+      "title": "How will we decide about circumcision or other elective procedures, if relevant?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 10,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_evaluate_daycare_or_preschool_quality",
+      "title": "How will we evaluate daycare or preschool quality?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_revisit_division_of_labor_after_parental_leave_end",
+      "title": "How will we revisit division of labor after parental leave ends?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_share_the_birth_story_and_with_whom",
+      "title": "How will we share the birth story, and with whom?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_boundaries_protect_our_couple_time_once_extended_family_v",
+      "title": "What boundaries protect our couple time once extended family visits begin?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_boundaries_should_protect_our_family_s_private_life",
+      "title": "What boundaries should protect our family’s private life?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_feeding_success_mean_to_us",
+      "title": "What does feeding success mean to us?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_mutual_respect_look_like_when_we_disagree_about_slee",
+      "title": "What does mutual respect look like when we disagree about sleep?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_respect_look_like_between_parents_and_children_at_di",
+      "title": "What does respect look like between parents and children at different ages?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_information_must_caregivers_know_about_our_routines_and_l",
+      "title": "What information must caregivers know about our routines and limits?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_early_thinking_about_school_choice",
+      "title": "What is our early thinking about school choice?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_philosophy_on_screens_in_the_early_years",
+      "title": "What is our philosophy on screens in the early years?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_the_purpose_of_discipline_in_our_family",
+      "title": "What is the purpose of discipline in our family?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+      "title": "What parts of our childhoods do we hope to change?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 20,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_prenatal_classes_or_education_feel_worthwhile",
+      "title": "What prenatal classes or education feel worthwhile?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_recovery_markers_mean_michelle_needs_more_help_immediatel",
+      "title": "What recovery markers mean Michelle needs more help immediately?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_role_should_faith_or_spirituality_play_in_our_home_if_any",
+      "title": "What role should faith or spirituality play in our home, if any?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_role_should_family_meals_play",
+      "title": "What role should family meals play?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_should_happen_when_we_lose_our_patience",
+      "title": "What should happen when we lose our patience?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_values_should_a_caregiver_share_with_us",
+      "title": "What values should a caregiver share with us?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_when_if_ever_should_a_child_have_a_personal_device",
+      "title": "When, if ever, should a child have a personal device?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_when_should_a_parent_apologize_to_a_child",
+      "title": "When should a parent apologize to a child?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_when_should_our_child_open_a_savings_account",
+      "title": "When should our child open a savings account?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_which_chores_should_be_expected_as_a_family_contribution",
+      "title": "Which chores should be expected as a family contribution?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_which_financial_skills_should_our_child_learn_before_high_scho",
+      "title": "Which financial skills should our child learn before high school?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 15,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_which_forms_of_discipline_are_unacceptable_to_us",
+      "title": "Which forms of discipline are unacceptable to us?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 6,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_do_we_weigh_parental_sleep_against_preferred_sleep_methods",
+      "title": "How do we weigh parental sleep against preferred sleep methods?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_involved_should_we_be_in_choosing_a_pediatrician_before_bi",
+      "title": "How involved should we be in choosing a pediatrician before birth?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_long_should_we_try_a_sleep_approach_before_reviewing_it",
+      "title": "How long should we try a sleep approach before reviewing it?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_much_structure_do_we_want_during_the_first_three_months",
+      "title": "How much structure do we want during the first three months?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_often_should_extended_family_visit_in_the_first_months",
+      "title": "How often should extended family visit in the first months?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_approach_early_reading_and_talking_to_the_baby",
+      "title": "How should we approach early reading and talking to the baby?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_approach_genetic_testing_and_screening_decisions",
+      "title": "How should we approach genetic testing and screening decisions?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_approach_sun_safety_insects_and_outdoor_hazards",
+      "title": "How should we approach sun safety, insects, and outdoor hazards?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_avoid_creating_pressure_around_food",
+      "title": "How should we avoid creating pressure around food?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_communicate_feeding_plans_to_hospital_staff",
+      "title": "How should we communicate feeding plans to hospital staff?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_decide_when_a_routine_is_not_working",
+      "title": "How should we decide when a routine is not working?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_decide_when_to_go_to_urgent_care_versus_wait",
+      "title": "How should we decide when to go to urgent care versus wait?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_decide_whether_to_hire_a_doula_or_postpartum_sup",
+      "title": "How should we decide whether to hire a doula or postpartum support?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_family_members_who_want_to_hold_the_baby_",
+      "title": "How should we handle family members who want to hold the baby constantly?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_gifts_that_conflict_with_our_values",
+      "title": "How should we handle gifts that conflict with our values?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_nail_care_cord_care_and_skin_concerns",
+      "title": "How should we handle nail care, cord care, and skin concerns?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_prolonged_crying_when_we_feel_overwhelmed",
+      "title": "How should we handle prolonged crying when we feel overwhelmed?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_handle_unequal_involvement_from_different_grandp",
+      "title": "How should we handle unequal involvement from different grandparents?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_introduce_the_baby_to_different_caregivers",
+      "title": "How should we introduce the baby to different caregivers?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_prepare_for_an_unexpected_c_section",
+      "title": "How should we prepare for an unexpected C-section?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_prepare_for_breastfeeding_support_or_lactation_c",
+      "title": "How should we prepare for breastfeeding support or lactation consults?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_protect_each_parent_s_mental_health_postpartum",
+      "title": "How should we protect each parent’s mental health postpartum?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_protect_time_for_our_marriage_after_the_baby_arr",
+      "title": "How should we protect time for our marriage after the baby arrives?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_repair_after_speaking_sharply_to_each_other",
+      "title": "How should we repair after speaking sharply to each other?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_if_breastfeeding_is_difficult",
+      "title": "How should we respond if breastfeeding is difficult?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_if_we_strongly_disagree_about_sleep_trai",
+      "title": "How should we respond if we strongly disagree about sleep training?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_to_conflicting_advice_about_pacifiers",
+      "title": "How should we respond to conflicting advice about pacifiers?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_when_one_parent_feels_overloaded",
+      "title": "How should we respond when one parent feels overloaded?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_respond_when_relatives_criticize_our_parenting_c",
+      "title": "How should we respond when relatives criticize our parenting choices?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_support_secure_attachment_from_the_start",
+      "title": "How should we support secure attachment from the start?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_talk_about_bodies_privacy_and_consent_from_early",
+      "title": "How should we talk about bodies, privacy, and consent from early ages?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_talk_about_body_size_and_weight",
+      "title": "How should we talk about body size and weight?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_talk_about_resentment_before_it_grows",
+      "title": "How should we talk about resentment before it grows?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_should_we_teach_healthy_food_choices",
+      "title": "How should we teach healthy food choices?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_communicate_birth_announcements_and_updates",
+      "title": "How will we communicate birth announcements and updates?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_handle_conflicting_medical_advice_from_different_c",
+      "title": "How will we handle conflicting medical advice from different clinicians?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_handle_fever_colds_and_common_infant_illnesses",
+      "title": "How will we handle fever, colds, and common infant illnesses?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_handle_medication_dosing_and_tracking",
+      "title": "How will we handle medication dosing and tracking?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_introduce_solids_and_allergens_thoughtfully",
+      "title": "How will we introduce solids and allergens thoughtfully?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 1,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_know_if_our_soothing_strategy_needs_a_change",
+      "title": "How will we know if our soothing strategy needs a change?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_notice_and_respond_to_signs_of_postpartum_depressi",
+      "title": "How will we notice and respond to signs of postpartum depression or anxiety?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 1,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_protect_michelle_s_recovery_while_keeping_sam_invo",
+      "title": "How will we protect Michelle’s recovery while keeping Sam involved?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_protect_our_child_from_family_conflict",
+      "title": "How will we protect our child from family conflict?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_share_daytime_baby_care_during_leave",
+      "title": "How will we share daytime baby care during leave?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_track_appointments_vaccines_and_follow_ups",
+      "title": "How will we track appointments, vaccines, and follow-ups?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_will_we_track_wet_diapers_feeds_and_concerns_without_obses",
+      "title": "How will we track wet diapers, feeds, and concerns without obsession?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_should_allowance_be_tied_to_chores",
+      "title": "Should allowance be tied to chores?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 3,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_should_our_child_receive_an_allowance",
+      "title": "Should our child receive an allowance?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 3,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_should_we_match_savings",
+      "title": "Should we match savings?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 3,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_are_our_goals_for_sleep_during_the_first_year",
+      "title": "What are our goals for sleep during the first year?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_bedtime_habits_do_we_want_to_establish",
+      "title": "What bedtime habits do we want to establish?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_boundaries_protect_feeding_time_from_interruptions",
+      "title": "What boundaries protect feeding time from interruptions?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_caregiving_roles_are_grandparents_invited_into",
+      "title": "What caregiving roles are grandparents invited into?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_clothing_and_temperature_practices_feel_right_for_our_hom",
+      "title": "What clothing and temperature practices feel right for our home?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_contingency_plan_do_we_have_if_recovery_takes_longer_than",
+      "title": "What contingency plan do we have if recovery takes longer than expected?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_decisions_should_be_delegated_to_medical_professionals",
+      "title": "What decisions should be delegated to medical professionals?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_a_fair_division_of_labor_mean_when_work_schedules_di",
+      "title": "What does a fair division of labor mean when work schedules differ?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_a_sustainable_feeding_night_look_like_for_both_of_us",
+      "title": "What does a sustainable feeding night look like for both of us?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_advocacy_look_like_in_the_delivery_room",
+      "title": "What does advocacy look like in the delivery room?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_our_family_mission_statement_sound_like_in_one_parag",
+      "title": "What does our family mission statement sound like in one paragraph?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_overstimulation_look_like_and_how_will_we_respond",
+      "title": "What does overstimulation look like, and how will we respond?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_respect_for_elders_look_like_alongside_our_parental_",
+      "title": "What does respect for elders look like alongside our parental authority?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_does_responsive_care_mean_to_us_in_practice",
+      "title": "What does responsive care mean to us in practice?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_first_aid_skills_should_both_parents_have_before_birth",
+      "title": "What first-aid skills should both parents have before birth?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_household_tasks_can_wait_and_which_cannot",
+      "title": "What household tasks can wait, and which cannot?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_hygiene_practices_matter_most_for_newborn_care",
+      "title": "What hygiene practices matter most for newborn care?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_information_should_caregivers_receive_about_our_routines",
+      "title": "What information should caregivers receive about our routines?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_approach_to_screenings_and_developmental_checkups",
+      "title": "What is our approach to screenings and developmental checkups?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_approach_to_white_noise_and_the_sleep_environment",
+      "title": "What is our approach to white noise and the sleep environment?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_plan_for_cord_blood_delayed_clamping_and_related_c",
+      "title": "What is our plan for cord blood, delayed clamping, and related choices?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 10,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_plan_for_cpr_and_infant_first_aid_training",
+      "title": "What is our plan for CPR and infant first-aid training?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 8,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 1,
+        "decision": 0,
+        "research": 1,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_plan_for_dental_care_as_teeth_appear",
+      "title": "What is our plan for dental care as teeth appear?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_is_our_plan_for_tummy_time_and_early_movement",
+      "title": "What is our plan for tummy time and early movement?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_level_of_crying_feels_acceptable_to_us_during_sleep_learn",
+      "title": "What level of crying feels acceptable to us during sleep learning?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+      "title": "What parts of our own childhoods do we hope to repeat?",
+      "response_mode": "separate_then_shared",
+      "estimated_minutes": 20,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 1,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_role_should_babywearing_play_if_any",
+      "title": "What role should babywearing play, if any?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_should_happen_when_one_parent_strongly_disagrees_with_a_s",
+      "title": "What should happen when one parent strongly disagrees with a settled decision?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_soothing_methods_do_we_want_to_try_first",
+      "title": "What soothing methods do we want to try first?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_support_do_we_each_need_during_postpartum_recovery",
+      "title": "What support do we each need during postpartum recovery?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_topics_deserve_private_discussion_before_either_parent_ac",
+      "title": "What topics deserve private discussion before either parent acts?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_visitor_limits_should_apply_after_birth",
+      "title": "What visitor limits should apply after birth?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_what_water_safety_rules_will_we_set_for_baths_and_later_swimmi",
+      "title": "What water safety rules will we set for baths and later swimming?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_which_sleep_decisions_depend_on_the_child_s_temperament",
+      "title": "Which sleep decisions depend on the child’s temperament?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_which_values_are_non_negotiable_in_our_family",
+      "title": "Which values are non-negotiable in our family?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_who_is_our_designated_decision_partner_if_michelle_cannot_spea",
+      "title": "Who is our designated decision partner if Michelle cannot speak for herself?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_who_should_attend_the_birth",
+      "title": "Who should attend the birth?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 5,
+      "completeness_score": 7,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": true
+    },
+    {
+      "id": "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "title": "How do we want to handle photos and social media after birth?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_night_duties_be_divided_during_the_newborn_stage",
+      "title": "How should night duties be divided during the newborn stage?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_divide_invisible_household_and_parenting_work",
+      "title": "How should we divide invisible household and parenting work?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_handle_cluster_feeding_nights_emotionally",
+      "title": "How should we handle cluster feeding nights emotionally?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_handle_visitors_who_ignore_boundaries",
+      "title": "How should we handle visitors who ignore boundaries?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab",
+      "title": "How should we prepare siblings or pets, if relevant, for the baby’s arrival?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_respond_when_the_birth_plan_changes",
+      "title": "How should we respond when the birth plan changes?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_check_in_weekly_about_parenting_stress",
+      "title": "How will we check in weekly about parenting stress?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_divide_laundry_bottles_and_pump_parts_if_used",
+      "title": "How will we divide laundry, bottles, and pump parts if used?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_handle_work_leave_logistics_and_income_during_leav",
+      "title": "How will we handle work leave logistics and income during leave?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 15,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_protect_sleep_for_the_parent_who_is_not_on_overnig",
+      "title": "How will we protect sleep for the parent who is not on overnight duty?",
+      "response_mode": "matrix",
+      "estimated_minutes": 15,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_boundaries_apply_to_overnight_guests_after_birth",
+      "title": "What boundaries apply to overnight guests after birth?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_boundaries_apply_to_unsolicited_advice_from_family",
+      "title": "What boundaries apply to unsolicited advice from family?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_does_a_transition_plan_into_daycare_look_like",
+      "title": "What does a transition plan into daycare look like?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_does_success_as_parents_mean_to_us",
+      "title": "What does success as parents mean to us?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 15,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 1,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_holidays_will_we_prioritize_and_with_whom",
+      "title": "What holidays will we prioritize, and with whom?",
+      "response_mode": "ranking",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_is_our_approach_to_vaccines_and_how_will_we_stay_informed",
+      "title": "What is our approach to vaccines and how will we stay informed?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 1,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "title": "What is our plan for pet care and home logistics after birth?",
+      "response_mode": "scenario",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_responsibilities_should_sam_own_during_the_first_two_week",
+      "title": "What responsibilities should Sam own during the first two weeks?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_role_do_we_want_grandparents_to_play",
+      "title": "What role do we want grandparents to play?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 15,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_safety_proofing_priorities_matter_before_crawling",
+      "title": "What safety proofing priorities matter before crawling?",
+      "response_mode": "ranking",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_safety_rules_apply_to_pets_and_the_baby",
+      "title": "What safety rules apply to pets and the baby?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 8,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_when_values_conflict_how_should_we_choose_between_them",
+      "title": "When values conflict, how should we choose between them?",
+      "response_mode": "tradeoff",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_which_birth_preferences_matter_most_to_us",
+      "title": "Which birth preferences matter most to us?",
+      "response_mode": "ranking",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_which_decisions_should_trigger_a_cooling_off_period",
+      "title": "Which decisions should trigger a cooling-off period?",
+      "response_mode": "threshold",
+      "estimated_minutes": 6,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_which_five_adult_traits_matter_most_to_us",
+      "title": "Which five adult traits matter most to us?",
+      "response_mode": "ranking",
+      "estimated_minutes": 10,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_who_owns_which_recurring_household_tasks_in_the_first_three_mo",
+      "title": "Who owns which recurring household tasks in the first three months?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_will_we_prepare_separate_meals_for_a_child_who_refuses_dinner",
+      "title": "Will we prepare separate meals for a child who refuses dinner?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 3,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_will_we_require_tasting_unfamiliar_foods",
+      "title": "Will we require tasting unfamiliar foods?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 3,
+      "completeness_score": 8,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_family_members_receive_updates_during_labor_and_bir",
+      "title": "How should family members receive updates during labor and birth?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 15,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_divide_overnight_care_in_the_first_weeks",
+      "title": "How should we divide overnight care in the first weeks?",
+      "response_mode": "matrix",
+      "estimated_minutes": 15,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
+      "title": "How should we handle parenting disagreements in front of our child?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 15,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_handle_unsolicited_parenting_advice",
+      "title": "How should we handle unsolicited parenting advice?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_plan_meals_and_household_support_for_the_first_t",
+      "title": "How should we plan meals and household support for the first two weeks?",
+      "response_mode": "matrix",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_document_decisions_so_we_do_not_re_argue_the_same_",
+      "title": "How will we document decisions so we do not re-argue the same ground?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_will_we_make_routine_medical_decisions_together",
+      "title": "How will we make routine medical decisions together?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_childcare_options_are_acceptable_to_us_in_the_first_years",
+      "title": "What childcare options are acceptable to us in the first years?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 20,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+      "title": "What does a calm postpartum home environment require from visitors?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted",
+      "title": "What does a good day look like when both parents are exhausted?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_does_a_loving_home_look_and_feel_like_to_us",
+      "title": "What does a loving home look and feel like to us?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_is_our_approach_to_feeding_in_the_newborn_stage",
+      "title": "What is our approach to feeding in the newborn stage?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 15,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "title": "What is our plan for accepting or declining visitors in week one?",
+      "response_mode": "policy_builder",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_is_our_plan_for_formula_combination_feeding_or_bottle_log",
+      "title": "What is our plan for formula, combination feeding, or bottle logistics?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_pain_management_preferences_do_we_want_discussed_with_our",
+      "title": "What pain management preferences do we want discussed with our care team?",
+      "response_mode": "single_choice",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_postpartum_mental_health_signs_should_trigger_immediate_h",
+      "title": "What postpartum mental health signs should trigger immediate help?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_role_should_each_parent_have_during_labor",
+      "title": "What role should each parent have during labor?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 15,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_support_will_michelle_need_during_recovery",
+      "title": "What support will Michelle need during recovery?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_traits_do_we_most_hope_our_child_develops",
+      "title": "What traits do we most hope our child develops?",
+      "response_mode": "ranking",
+      "estimated_minutes": 10,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 0,
+        "practical": 0,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_which_sleep_practices_require_professional_guidance",
+      "title": "Which sleep practices require professional guidance?",
+      "response_mode": "open_discussion",
+      "estimated_minutes": 12,
+      "completeness_score": 9,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 2,
+        "time": 2,
+        "decision": 0,
+        "research": 2,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    },
+    {
+      "id": "q_how_should_we_decide_on_swaddling_and_safe_sleep_setup",
+      "title": "How should we decide on swaddling and safe sleep setup?",
+      "response_mode": "multi_select",
+      "estimated_minutes": 8,
+      "completeness_score": 10,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 1,
+        "decision": 0,
+        "research": 0,
+        "practical": 2,
+        "cross": 2
+      },
+      "weak": false
+    },
+    {
+      "id": "q_what_signs_should_trigger_a_call_to_the_pediatrician",
+      "title": "What signs should trigger a call to the pediatrician?",
+      "response_mode": "threshold",
+      "estimated_minutes": 6,
+      "completeness_score": 10,
+      "max_score": 15,
+      "components": {
+        "prompt": 2,
+        "format": 3,
+        "time": 2,
+        "decision": 0,
+        "research": 2,
+        "practical": 0,
+        "cross": 1
+      },
+      "weak": false
+    }
+  ]
+}

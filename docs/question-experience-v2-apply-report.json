@@ -1,0 +1,2849 @@
+{
+  "dry_run": false,
+  "generated_at": "2026-08-09T23:30:09.507Z",
+  "cohort_size": 181,
+  "changed": 181,
+  "changes": [
+    {
+      "id": "q_how_do_we_want_our_child_to_understand_failure",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "No public posting",
+          "Ask before posting",
+          "Private family sharing only",
+          "No identifying details",
+          "No medical information",
+          "No bath or undressed photos",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen v2_photos (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_do_we_weigh_parental_sleep_against_preferred_sleep_methods",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_flexible_should_bedtime_be",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_involved_should_we_be_in_choosing_a_pediatrician_before_bi",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_long_should_we_try_a_sleep_approach_before_reviewing_it",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_much_should_achievement_matter_in_our_family",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_how_much_structure_do_we_want_during_the_first_three_months",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_often_should_extended_family_visit_in_the_first_months",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_consequences_relate_to_behavior",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_dessert_be_treated",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_family_members_receive_updates_during_labor_and_bir",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "options": [
+          "Partner only during labor",
+          "Doula welcome",
+          "Parent or family member welcome",
+          "No visitors at hospital",
+          "Limited visitors after birth",
+          "Undecided"
+        ],
+        "version": 2,
+        "policy_fields": [
+          "Who may be present during labor",
+          "Who may visit at the hospital",
+          "When visits begin",
+          "Maximum visit length",
+          "Health rules",
+          "Photo rules",
+          "Either parent may pause visits",
+          "Who communicates the boundary"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen b3_present_and_hospital_visitors (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_night_duties_be_divided_during_the_newborn_stage",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Night feeding",
+          "Diaper changes",
+          "Soothing back to sleep",
+          "Getting baby settled after feeds",
+          "Protecting the off-duty parent's sleep"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Division-of-labor framing fits a responsibility matrix."
+    },
+    {
+      "id": "q_how_should_travel_affect_sleep_routines",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_approach_early_reading_and_talking_to_the_baby",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_approach_early_screen_exposure_for_adults_around",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_approach_genetic_testing_and_screening_decisions",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_approach_sun_safety_insects_and_outdoor_hazards",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_avoid_creating_pressure_around_food",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_communicate_feeding_plans_to_hospital_staff",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_decide_on_swaddling_and_safe_sleep_setup",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Firm flat sleep surface",
+          "Fitted sheet only",
+          "No loose blankets or pillows",
+          "Back sleeping",
+          "Room sharing without bed sharing",
+          "Need pediatrician guidance",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen fs5_safe_sleep (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_decide_when_a_routine_is_not_working",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_decide_when_to_go_to_urgent_care_versus_wait",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_decide_whether_to_hire_a_doula_or_postpartum_sup",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_divide_invisible_household_and_parenting_work",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Tracking supplies / appointments",
+          "Mental load / planning",
+          "Cleaning / laundry",
+          "Feeding prep",
+          "Communicating with family"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Division-of-labor framing fits a responsibility matrix."
+    },
+    {
+      "id": "q_how_should_we_divide_overnight_care_in_the_first_weeks",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Feed role",
+          "Diaper role",
+          "Settling role",
+          "Protected sleep — Sam",
+          "Protected sleep — Michelle",
+          "Workday adjustments"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen fs3_overnight (responsibility_matrix) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_handle_cluster_feeding_nights_emotionally",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "One parent feels unsafe driving",
+          "Repeated conflict",
+          "Falling asleep while holding baby",
+          "Recovery is worsening",
+          "Work performance is unsafe",
+          "Either parent asks for relief",
+          "Provider concern",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen fs4_sleep_change_signs (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_handle_family_members_who_want_to_hold_the_baby_",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_handle_gifts_that_conflict_with_our_values",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_handle_guilt_about_using_childcare",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_handle_lying",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_handle_nail_care_cord_care_and_skin_concerns",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_handle_one_parent_wanting_more_visitors_than_the",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "No personal attacks",
+          "Pause option",
+          "Repair after conflict",
+          "Whether disagreement may be visible",
+          "How to explain repair as the child grows"
+        ]
+      },
+      "from_minutes": 10,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen pp2_disagreement (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_handle_prolonged_crying_when_we_feel_overwhelmed",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_handle_public_tantrums",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_handle_unequal_involvement_from_different_grandp",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_handle_unsolicited_parenting_advice",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "Who responds",
+          "Language to use",
+          "When to end a conversation",
+          "Which decisions remain private",
+          "When provider guidance ends debate"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen p4_advice (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_handle_visitors_who_ignore_boundaries",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "First response",
+          "Who speaks for the family",
+          "When we end the visit",
+          "Follow-up conversation",
+          "Exceptions"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen v4_health_and_comms (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_help_our_child_learn_from_small_mistakes",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_how_should_we_introduce_the_baby_to_different_caregivers",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_plan_meals_and_household_support_for_the_first_t",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Meals",
+          "Grocery ordering",
+          "Laundry",
+          "Dishes",
+          "Trash",
+          "Cleaning",
+          "Baby supplies",
+          "Visitor communication",
+          "Medical calls",
+          "Lulu care"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen p2_household (responsibility_matrix) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_prepare_for_an_unexpected_c_section",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_prepare_for_breastfeeding_support_or_lactation_c",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Safe sleep area",
+          "Car seat",
+          "Feeding area",
+          "Changing area",
+          "Hospital bags",
+          "Recovery supplies",
+          "Baby laundry",
+          "Emergency contacts",
+          "Food and household supplies",
+          "Lulu plan"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen h2_lulu_boundaries (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_protect_each_parent_s_mental_health_postpartum",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_protect_rest_after_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_protect_time_for_our_marriage_after_the_baby_arr",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_repair_after_speaking_sharply_to_each_other",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_if_breastfeeding_is_difficult",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_if_we_strongly_disagree_about_sleep_trai",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_to_conflicting_advice_about_pacifiers",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_to_hitting",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_should_we_respond_to_picky_eating",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_when_one_parent_feels_overloaded",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_when_relatives_criticize_our_parenting_c",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_respond_when_the_birth_plan_changes",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen b2_flexible (open_with_prompts) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_support_secure_attachment_from_the_start",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_talk_about_bodies_privacy_and_consent_from_early",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_talk_about_body_size_and_weight",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_talk_about_resentment_before_it_grows",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen pp3_relief (open_with_prompts) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_should_we_teach_delayed_gratification_across_childhood",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_how_should_we_teach_healthy_food_choices",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_should_we_teach_responsibility_without_creating_shame",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_how_will_we_check_in_weekly_about_parenting_stress",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "options": [
+          "Daily two-minute check",
+          "Twice weekly",
+          "Weekly",
+          "Every two weeks",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen pp4_checkin (single_choice) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_communicate_birth_announcements_and_updates",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_decide_about_circumcision_or_other_elective_proced",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "options": [
+          "Public donation if available",
+          "Private banking",
+          "Do not bank",
+          "Need more research",
+          "Ask provider",
+          "Undecided",
+          "Yes",
+          "No",
+          "Not applicable"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen b6_cord_circumcision (paired_text) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_decide_on_preschool_timing",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_divide_laundry_bottles_and_pump_parts_if_used",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Laundry",
+          "Bottles",
+          "Pump parts",
+          "Dishwashing",
+          "Restocking supplies"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Division-of-labor framing fits a responsibility matrix."
+    },
+    {
+      "id": "q_how_will_we_document_decisions_so_we_do_not_re_argue_the_same_",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Decide: baby health insurance plan",
+          "Decide: life insurance review",
+          "Decide: will and guardians",
+          "Decide: beneficiaries",
+          "Decide: 529 / education savings approach",
+          "Complete before birth: employer leave paperwork",
+          "Complete after birth: add baby to insurance",
+          "Complete after birth: birth certificate process",
+          "Complete after birth: Social Security process",
+          "Need legal advice",
+          "Undecided on guardians"
+        ],
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen w4_legal_insurance (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_evaluate_daycare_or_preschool_quality",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_handle_conflicting_medical_advice_from_different_c",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_handle_fever_colds_and_common_infant_illnesses",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_handle_medication_dosing_and_tracking",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_handle_work_leave_logistics_and_income_during_leav",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen w1_leave (open_with_prompts) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_introduce_solids_and_allergens_thoughtfully",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_know_if_our_soothing_strategy_needs_a_change",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_make_routine_medical_decisions_together",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "Who asks questions",
+          "Who communicates with family",
+          "How much explanation is wanted",
+          "When the partner should advocate",
+          "Trust in clinician recommendation",
+          "How to handle disagreement under time pressure"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen b5_urgent (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_notice_and_respond_to_signs_of_postpartum_depressi",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_protect_michelle_s_recovery_while_keeping_sam_invo",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_protect_our_child_from_family_conflict",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_protect_sleep_for_the_parent_who_is_not_on_overnig",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Who is on-call overnight",
+          "Where the on-call parent sleeps",
+          "How the off-duty parent is protected",
+          "Weekend / catch-up sleep plan"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen fs3_overnight (responsibility_matrix) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_how_will_we_revisit_division_of_labor_after_parental_leave_end",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_share_daytime_baby_care_during_leave",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_share_the_birth_story_and_with_whom",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_how_will_we_track_appointments_vaccines_and_follow_ups",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_how_will_we_track_wet_diapers_feeds_and_concerns_without_obses",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_should_allowance_be_tied_to_chores",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "version": 2,
+        "options": [
+          "Yes — allowance is earned through chores",
+          "No — allowance is separate from chores",
+          "Hybrid — base allowance plus chore bonuses",
+          "Decide later / depends on age"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 3,
+      "rationale": "Short binary/planning fork — single choice speeds alignment."
+    },
+    {
+      "id": "q_should_our_child_receive_an_allowance",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "version": 2,
+        "options": [
+          "Yes, starting at a set age",
+          "Yes, when they show readiness",
+          "No allowance — use other money teaching",
+          "Undecided / revisit later"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 3,
+      "rationale": "Short binary/planning fork — single choice speeds alignment."
+    },
+    {
+      "id": "q_should_we_match_savings",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "version": 2,
+        "options": [
+          "Yes — match savings dollar-for-dollar",
+          "Partial match with a cap",
+          "No matching — encourage saving another way",
+          "Decide when relevant"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 3,
+      "rationale": "Short binary/planning fork — single choice speeds alignment."
+    },
+    {
+      "id": "q_what_are_our_goals_for_sleep_during_the_first_year",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_bedtime_habits_do_we_want_to_establish",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_boundaries_apply_to_overnight_guests_after_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Who may stay overnight",
+          "How soon after birth",
+          "How long they may stay",
+          "Help we want vs privacy we need"
+        ],
+        "matrix_owners": [
+          "Allowed",
+          "Not yet",
+          "Case by case",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Division-of-labor framing fits a responsibility matrix."
+    },
+    {
+      "id": "q_what_boundaries_apply_to_unsolicited_advice_from_family",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "Default response phrase",
+          "Topics that are off-limits",
+          "Who responds",
+          "When we escalate",
+          "Exceptions"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Asks for a reusable family rule set — policy fields reduce missed dimensions."
+    },
+    {
+      "id": "q_what_boundaries_protect_feeding_time_from_interruptions",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_boundaries_protect_our_couple_time_once_extended_family_v",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_boundaries_should_protect_our_family_s_private_life",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_caregiving_roles_are_grandparents_invited_into",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_childcare_options_are_acceptable_to_us_in_the_first_years",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "options": [
+          "Daycare",
+          "Nanny",
+          "Family care",
+          "Parent care",
+          "Mixed plan",
+          "Undecided"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 20,
+      "rationale": "Mirrors Essentials screen w2_return_childcare (single_choice) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_clothing_and_temperature_practices_feel_right_for_our_hom",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_contingency_plan_do_we_have_if_recovery_takes_longer_than",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_decisions_should_be_delegated_to_medical_professionals",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "Illness / exposure rules",
+          "Hand washing",
+          "Smoking",
+          "Kissing baby",
+          "Vaccination discussions",
+          "Who communicates to Sam’s family",
+          "Who communicates to Michelle’s family"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen v4_health_and_comms (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_does_a_fair_division_of_labor_mean_when_work_schedules_di",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Pause non-urgent decisions",
+          "Use the existing plan",
+          "Defer to the parent handling the task",
+          "Ask the provider",
+          "Use a scheduled check-in",
+          "Trial one option for a set period",
+          "Revisit after sleep"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen pp1_exhausted (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_does_a_loving_home_look_and_feel_like_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Calm",
+          "Warm",
+          "Playful",
+          "Structured",
+          "Honest",
+          "Respectful",
+          "Affectionate",
+          "Curious",
+          "Safe for mistakes",
+          "Connected",
+          "Private",
+          "Welcoming",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen f2_loving_home (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_does_a_sustainable_feeding_night_look_like_for_both_of_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_a_transition_plan_into_daycare_look_like",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen w3_daycare_details (open_with_prompts) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_does_advocacy_look_like_in_the_delivery_room",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_feeding_success_mean_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_mutual_respect_look_like_when_we_disagree_about_slee",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_does_our_family_mission_statement_sound_like_in_one_parag",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_overstimulation_look_like_and_how_will_we_respond",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_respect_for_elders_look_like_alongside_our_parental_",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_respect_look_like_between_parents_and_children_at_di",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_what_does_responsive_care_mean_to_us_in_practice",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_does_success_as_parents_mean_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Child feels safe and loved",
+          "Strong parent-child relationship",
+          "Child becomes independent",
+          "Child develops sound judgment",
+          "Child is kind",
+          "Child is resilient",
+          "Child takes responsibility",
+          "Child feels comfortable being themselves",
+          "Family remains connected",
+          "Parents maintain their relationship",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 12,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen f1_success (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_first_aid_skills_should_both_parents_have_before_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_holidays_will_we_prioritize_and_with_whom",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "ranking",
+        "version": 2,
+        "options": [
+          "Christmas / major winter holiday",
+          "Thanksgiving",
+          "Our own family traditions",
+          "Visiting Sam's family",
+          "Visiting Michelle's family",
+          "Travel / vacation holidays",
+          "Low-key / rest days"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Asks which items matter most — ranking captures order without forcing a single pick."
+    },
+    {
+      "id": "q_what_household_tasks_can_wait_and_which_cannot",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_hygiene_practices_matter_most_for_newborn_care",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_information_must_caregivers_know_about_our_routines_and_l",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_information_should_caregivers_receive_about_our_routines",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_our_approach_to_feeding_in_the_newborn_stage",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Direct nursing",
+          "Pumping",
+          "Bottle feeding expressed milk",
+          "Combination feeding",
+          "Formula feeding",
+          "Flexible based on recovery and supply",
+          "No fixed goal",
+          "Need provider guidance"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen fs1_feeding_goals (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_is_our_approach_to_screenings_and_developmental_checkups",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_our_approach_to_vaccines_and_how_will_we_stay_informed",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_our_approach_to_white_noise_and_the_sleep_environment",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_our_early_thinking_about_school_choice",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_is_our_philosophy_on_screens_in_the_early_years",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "policy_builder",
+        "version": 2,
+        "policy_fields": [
+          "Who may visit",
+          "Start date",
+          "Visit length",
+          "Notice required",
+          "Health rules",
+          "Whether visitors help",
+          "Either parent may cancel"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen v1_home_visitors (policy_builder) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_is_our_plan_for_cord_blood_delayed_clamping_and_related_c",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "options": [
+          "Public donation if available",
+          "Private banking",
+          "Do not bank",
+          "Need more research",
+          "Ask provider",
+          "Undecided",
+          "Yes",
+          "No",
+          "Not applicable"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen b6_cord_circumcision (paired_text) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_is_our_plan_for_cpr_and_infant_first_aid_training",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_is_our_plan_for_dental_care_as_teeth_appear",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_our_plan_for_formula_combination_feeding_or_bottle_log",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Formula available at home",
+          "Pumping",
+          "Donor milk through approved source",
+          "Lactation support",
+          "Pediatrician guidance",
+          "Decide only if needed"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Mirrors Essentials screen fs2_backup (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "scenario",
+        "options": [
+          "Primary sitter confirmed",
+          "Backup sitter confirmed",
+          "Written care instructions shared",
+          "Overnight labor plan",
+          "Extended stay plan",
+          "Undecided"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen h1_lulu_labor (scenario_plan) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_is_our_plan_for_tummy_time_and_early_movement",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_is_the_purpose_of_discipline_in_our_family",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_level_of_crying_feels_acceptable_to_us_during_sleep_learn",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_pain_management_preferences_do_we_want_discussed_with_our",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "options": [
+          "Prefer unmedicated if feasible",
+          "Open to medication",
+          "Prefer epidural",
+          "Decide during labor",
+          "Need provider discussion",
+          "Undecided"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen b4_pain (single_choice) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 20,
+      "rationale": "Mirrors Essentials screen f3_childhood (paired_text) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 20,
+      "rationale": "Mirrors Essentials screen f3_childhood (paired_text) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_postpartum_mental_health_signs_should_trigger_immediate_h",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Contact OB",
+          "Contact primary doctor",
+          "Contact pediatrician",
+          "Contact emergency services",
+          "Contact family support",
+          "Contact mental-health support",
+          "Need provider list written down"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen p3_warning_signs (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_prenatal_classes_or_education_feel_worthwhile",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_recovery_markers_mean_michelle_needs_more_help_immediatel",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_responsibilities_should_sam_own_during_the_first_two_week",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Overnight support",
+          "Meals / household",
+          "Visitor coordination",
+          "Errands / logistics",
+          "Emotional support"
+        ],
+        "matrix_owners": [
+          "Sam primary",
+          "Shared",
+          "Michelle primary",
+          "Depends"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Division-of-labor framing fits a responsibility matrix."
+    },
+    {
+      "id": "q_what_role_do_we_want_grandparents_to_play",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen v3_grandparents (open_with_prompts) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_role_should_babywearing_play_if_any",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_role_should_each_parent_have_during_labor",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Healthy parent and baby",
+          "Clear communication",
+          "Pain control",
+          "Mobility during labor",
+          "Minimal intervention where safe",
+          "Support for vaginal delivery",
+          "Openness to medical intervention",
+          "Calm environment",
+          "Immediate skin-to-skin where possible",
+          "Feeding support",
+          "Partner involvement",
+          "Privacy",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Mirrors Essentials screen b1_labor_priorities (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_role_should_faith_or_spirituality_play_in_our_home_if_any",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_what_role_should_family_meals_play",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_safety_proofing_priorities_matter_before_crawling",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "ranking",
+        "version": 2,
+        "options": [
+          "Outlet covers and cords",
+          "Cabinet / chemical locks",
+          "Stairs and gates",
+          "Furniture anchoring",
+          "Sleep environment safety",
+          "Water / bathroom hazards",
+          "Choking hazards / floor clutter"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Asks which items matter most — ranking captures order without forcing a single pick."
+    },
+    {
+      "id": "q_what_safety_rules_apply_to_pets_and_the_baby",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "No nursery access unsupervised",
+          "No crib or bassinet area",
+          "No feeding-area jumping",
+          "No stroller climbing",
+          "Supervised baby-gear contact only",
+          "Practice with sounds and gear first",
+          "Slow scent introduction",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "Mirrors Essentials screen h2_lulu_boundaries (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_should_happen_when_one_parent_strongly_disagrees_with_a_s",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_should_happen_when_we_lose_our_patience",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_signs_should_trigger_a_call_to_the_pediatrician",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "threshold",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 6,
+      "rationale": "Asks for a change trigger — threshold capture is more actionable than essay text."
+    },
+    {
+      "id": "q_what_soothing_methods_do_we_want_to_try_first",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_support_do_we_each_need_during_postpartum_recovery",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_support_will_michelle_need_during_recovery",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "options": [
+          "Sleep",
+          "Pain management",
+          "Limited visitors",
+          "Meal support",
+          "Reduced household work",
+          "Feeding support",
+          "Emotional space",
+          "Privacy",
+          "Help with appointments",
+          "Help with Lulu",
+          "Other"
+        ],
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen p1_michelle_recovery (multi_select) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_what_topics_deserve_private_discussion_before_either_parent_ac",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_traits_do_we_most_hope_our_child_develops",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "ranking",
+        "version": 2,
+        "options": [
+          "Kindness",
+          "Curiosity",
+          "Resilience",
+          "Honesty",
+          "Independence",
+          "Empathy",
+          "Responsibility",
+          "Courage"
+        ]
+      },
+      "from_minutes": 15,
+      "to_minutes": 10,
+      "rationale": "Asks which items matter most — ranking captures order without forcing a single pick."
+    },
+    {
+      "id": "q_what_values_should_a_caregiver_share_with_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_what_visitor_limits_should_apply_after_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_what_water_safety_rules_will_we_set_for_baths_and_later_swimmi",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_when_if_ever_should_a_child_have_a_personal_device",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_when_should_a_parent_apologize_to_a_child",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_when_should_our_child_open_a_savings_account",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_when_values_conflict_how_should_we_choose_between_them",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "tradeoff",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Explicit tradeoff language — structured comparison beats free text."
+    },
+    {
+      "id": "q_which_birth_preferences_matter_most_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "ranking",
+        "version": 2,
+        "options": [
+          "Pain management approach",
+          "Who is in the room",
+          "Immediate skin-to-skin",
+          "Delayed cord clamping",
+          "Feeding plan in first hour",
+          "Cesarean preferences if needed",
+          "Music / atmosphere",
+          "Partner's role during labor"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Asks which items matter most — ranking captures order without forcing a single pick."
+    },
+    {
+      "id": "q_which_chores_should_be_expected_as_a_family_contribution",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_which_decisions_should_trigger_a_cooling_off_period",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "threshold",
+        "version": 2
+      },
+      "from_minutes": 10,
+      "to_minutes": 6,
+      "rationale": "Asks for a change trigger — threshold capture is more actionable than essay text."
+    },
+    {
+      "id": "q_which_financial_skills_should_our_child_learn_before_high_scho",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "separate_then_shared",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 15,
+      "rationale": "Already separate_first — preserve independent reflection then optional shared synthesis."
+    },
+    {
+      "id": "q_which_five_adult_traits_matter_most_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "ranking",
+        "version": 2,
+        "options": [
+          "Emotional security",
+          "Independence",
+          "Curiosity",
+          "Kindness",
+          "Discipline / self-control",
+          "Faith or spiritual grounding",
+          "Work ethic",
+          "Joy / playfulness"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 10,
+      "rationale": "Asks which items matter most — ranking captures order without forcing a single pick."
+    },
+    {
+      "id": "q_which_forms_of_discipline_are_unacceptable_to_us",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 8,
+      "rationale": "No stronger structured fit without inventing options — keep open discussion."
+    },
+    {
+      "id": "q_which_sleep_decisions_depend_on_the_child_s_temperament",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_which_sleep_practices_require_professional_guidance",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_which_values_are_non_negotiable_in_our_family",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_who_is_our_designated_decision_partner_if_michelle_cannot_spea",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "open_discussion",
+        "version": 2
+      },
+      "from_minutes": 8,
+      "to_minutes": 12,
+      "rationale": "Nuance-heavy values/planning prompt — open discussion remains best; improve helper/context instead of forcing structure."
+    },
+    {
+      "id": "q_who_owns_which_recurring_household_tasks_in_the_first_three_mo",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "matrix",
+        "version": 2,
+        "matrix_rows": [
+          "Dishes",
+          "Laundry",
+          "Trash / recycling",
+          "Groceries",
+          "Cleaning bathrooms",
+          "Pet care (if any)"
+        ],
+        "matrix_owners": [
+          "Sam",
+          "Michelle",
+          "Both",
+          "Depends"
+        ]
+      },
+      "from_minutes": 10,
+      "to_minutes": 12,
+      "rationale": "Mirrors Essentials screen p2_household (responsibility_matrix) so library/Conversations match the workshop control."
+    },
+    {
+      "id": "q_who_should_attend_the_birth",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "multi_select",
+        "version": 2,
+        "options": [
+          "Partner only",
+          "Partner + one support person",
+          "Doula / birth professional",
+          "Parents / close family",
+          "Keep the room limited — decide closer to due date"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 5,
+      "rationale": "Selecting people/options is faster and more comparable as multi-select."
+    },
+    {
+      "id": "q_will_we_prepare_separate_meals_for_a_child_who_refuses_dinner",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "version": 2,
+        "options": [
+          "No separate meals — offer the family meal",
+          "Limited backup option only",
+          "Yes when needed to reduce conflict",
+          "Depends on age and context"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 3,
+      "rationale": "Short binary/planning fork — single choice speeds alignment."
+    },
+    {
+      "id": "q_will_we_require_tasting_unfamiliar_foods",
+      "from_schema": {
+        "mode": "open_or_policy"
+      },
+      "to_schema": {
+        "mode": "single_choice",
+        "version": 2,
+        "options": [
+          "Yes — one polite taste required",
+          "Encourage but never force",
+          "No pressure around tasting",
+          "Depends on the food and situation"
+        ]
+      },
+      "from_minutes": 8,
+      "to_minutes": 3,
+      "rationale": "Short binary/planning fork — single choice speeds alignment."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "generated_at": "2026-08-09T23:28:30.322Z",
+  "cohort_size": 181,
+  "pair_count": 4,
+  "note": "Automated near-duplicate scan. Do not delete automatically.",
+  "pairs": [
+    {
+      "a_id": "q_what_does_feeding_success_mean_to_us",
+      "b_id": "q_what_does_success_as_parents_mean_to_us",
+      "a_title": "What does feeding success mean to us?",
+      "b_title": "What does success as parents mean to us?",
+      "similarity": 0.667,
+      "classification": "useful_different_angle",
+      "recommendation": "keep_both_unless_redundant_in_session"
+    },
+    {
+      "a_id": "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+      "b_id": "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+      "a_title": "What parts of our childhoods do we hope to change?",
+      "b_title": "What parts of our own childhoods do we hope to repeat?",
+      "similarity": 0.667,
+      "classification": "useful_different_angle",
+      "recommendation": "keep_both_unless_redundant_in_session"
+    },
+    {
+      "a_id": "q_what_role_should_babywearing_play_if_any",
+      "b_id": "q_what_role_should_family_meals_play",
+      "a_title": "What role should babywearing play, if any?",
+      "b_title": "What role should family meals play?",
+      "similarity": 0.571,
+      "classification": "useful_different_angle",
+      "recommendation": "keep_both_unless_redundant_in_session"
+    },
+    {
+      "a_id": "q_what_support_do_we_each_need_during_postpartum_recovery",
+      "b_id": "q_what_support_will_michelle_need_during_recovery",
+      "a_title": "What support do we each need during postpartum recovery?",
+      "b_title": "What support will Michelle need during recovery?",
+      "similarity": 0.556,
+      "classification": "useful_different_angle",
+      "recommendation": "keep_both_unless_redundant_in_session"
+    }
+  ]
+}

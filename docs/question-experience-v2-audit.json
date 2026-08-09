@@ -1,0 +1,328 @@
+{
+  "generated_at": "2026-08-09T23:22:42.938Z",
+  "git_head": "689ed9a04f734b2bf22cde8d3d18192ee6e45529",
+  "branch": "trip-online-mode",
+  "source": "data/seed/questions.json + pathway/babymoon code (not live remote store)",
+  "totals": {
+    "questions": 430,
+    "essentials_primary_screens": 33,
+    "essentials_all_screens": 33,
+    "essentials_linked_question_ids": 38,
+    "conversation_prompts": 64,
+    "conversation_follow_up_links": 39,
+    "conversation_unique_follow_ups": 20,
+    "library_enrichment_ids": 22,
+    "essentials_enrichment_screens": 33
+  },
+  "distributions": {
+    "question_type": {
+      "joint_discussion": 381,
+      "values_clarification": 21,
+      "practical_planning": 18,
+      "ranking": 2,
+      "reflection": 2,
+      "tradeoff": 2,
+      "scale": 2,
+      "yes_or_no": 2
+    },
+    "response_schema_mode": {
+      "open_or_policy": 430
+    },
+    "discussion_mode": {
+      "shared_first": 369,
+      "separate_first": 56,
+      "either": 5
+    },
+    "priority": {
+      "high": 177,
+      "essential_before_birth": 121,
+      "medium": 108,
+      "low": 12,
+      "future": 12
+    },
+    "estimated_minutes": {
+      "8": 398,
+      "10": 30,
+      "12": 1,
+      "15": 1
+    },
+    "research_mode": {
+      "optional_background": 377,
+      "helpful_before_decision": 48,
+      "professional_guidance_needed": 4,
+      "strongly_recommended": 1
+    },
+    "life_stage_mentions": {
+      "newborn_0_3": 243,
+      "first_week": 213,
+      "young_toddler_1_2": 213,
+      "preschool_3_5": 208,
+      "early_elementary_5_8": 208,
+      "pregnancy": 183,
+      "infant_3_12": 183,
+      "labor_and_birth": 153,
+      "older_toddler_2_3": 148,
+      "pre_birth_planning": 118,
+      "all_stages": 82,
+      "teen": 55,
+      "young_adult": 40,
+      "later_elementary_8_11": 35,
+      "preteen": 15
+    },
+    "categories_top": {
+      "newborn_care": 70,
+      "postpartum_recovery": 55,
+      "pregnancy": 35,
+      "core_values": 33,
+      "parent_partnership": 30,
+      "health": 30,
+      "discipline": 30,
+      "boundaries": 30,
+      "tantrums": 30,
+      "emotional_development": 26,
+      "sleep": 25,
+      "nutrition": 25,
+      "attachment": 25,
+      "extended_family": 22,
+      "conflict_between_parents": 22,
+      "desired_adult_outcomes": 21,
+      "family_finances": 21,
+      "family_boundaries": 21,
+      "learning": 20,
+      "play": 20,
+      "reading": 20,
+      "creativity": 20,
+      "childcare": 20,
+      "daycare": 20,
+      "preschool": 20,
+      "education": 20,
+      "school_choice": 20,
+      "grandparents": 20,
+      "allowance": 20,
+      "chores": 20,
+      "financial_education": 20,
+      "independence": 20,
+      "culture": 19,
+      "traditions": 17,
+      "holidays": 17,
+      "faith": 16,
+      "safety": 15,
+      "medical_decisions": 15,
+      "technology": 15,
+      "screens": 15
+    },
+    "essentials_response_type": {
+      "multi_select": 14,
+      "policy_builder": 6,
+      "open_with_prompts": 5,
+      "single_choice": 3,
+      "paired_text": 2,
+      "responsibility_matrix": 2,
+      "scenario_plan": 1
+    }
+  },
+  "content_flags": {
+    "with_evidence_summary": 2,
+    "with_practical_tip": 1,
+    "evidence_needed_true": 5,
+    "evidence_available_true": 2,
+    "babymoon_priority_true": 305,
+    "required_before_birth_true": 113,
+    "priority_essential_before_birth": 121,
+    "separate_answers_recommended_true": 56,
+    "generic_why_it_matters": 430,
+    "schema_open_or_policy": 430,
+    "estimated_minutes_exactly_8": 398
+  },
+  "claude_claim_verification": {
+    "381/430 joint_discussion": {
+      "claimed": "381/430 questions classified as generic joint_discussion",
+      "observed_discussion_mode": {
+        "shared_first": 369,
+        "separate_first": 56,
+        "either": 5
+      },
+      "observed_question_type": {
+        "joint_discussion": 381,
+        "values_clarification": 21,
+        "practical_planning": 18,
+        "ranking": 2,
+        "reflection": 2,
+        "tradeoff": 2,
+        "scale": 2,
+        "yes_or_no": 2
+      },
+      "note": "Seed uses discussion_mode and question_type; 'joint_discussion' may refer to an older classifier label. Verify against discussion_mode shared_first vs question_type.",
+      "verdict": "STALE_OR_RENAMED — current bank uses discussion_mode shared_first/separate_first/either, not joint_discussion"
+    },
+    "every response_schema open_or_policy": {
+      "claimed": "Every question used response_schema {mode: open_or_policy}",
+      "observed": {
+        "open_or_policy": 430
+      },
+      "open_or_policy_count": 430,
+      "total": 430,
+      "pct": 100,
+      "verdict": "TRUE"
+    },
+    "398/430 estimated_minutes=8": {
+      "claimed": 398,
+      "observed": 398,
+      "total": 430,
+      "verdict": "TRUE"
+    },
+    "tiny evidence_summary/practical_tip": {
+      "claimed": "Only a tiny number had evidence_summary or practical_tip",
+      "observed_evidence_summary": 2,
+      "observed_practical_tip": 1,
+      "verdict": "TRUE"
+    }
+  },
+  "essentials": {
+    "separate_answer_screens": [
+      "f3_childhood"
+    ],
+    "response_types": {
+      "multi_select": 14,
+      "policy_builder": 6,
+      "open_with_prompts": 5,
+      "single_choice": 3,
+      "paired_text": 2,
+      "responsibility_matrix": 2,
+      "scenario_plan": 1
+    },
+    "linked_question_ids": [
+      "q_how_do_we_want_to_handle_photos_and_social_media_after_birth",
+      "q_how_should_family_members_receive_updates_during_labor_and_bir",
+      "q_how_should_we_decide_on_swaddling_and_safe_sleep_setup",
+      "q_how_should_we_divide_overnight_care_in_the_first_weeks",
+      "q_how_should_we_handle_cluster_feeding_nights_emotionally",
+      "q_how_should_we_handle_parenting_disagreements_in_front_of_our_c",
+      "q_how_should_we_handle_unsolicited_parenting_advice",
+      "q_how_should_we_handle_visitors_who_ignore_boundaries",
+      "q_how_should_we_plan_meals_and_household_support_for_the_first_t",
+      "q_how_should_we_prepare_siblings_or_pets_if_relevant_for_the_bab",
+      "q_how_should_we_respond_when_the_birth_plan_changes",
+      "q_how_should_we_talk_about_resentment_before_it_grows",
+      "q_how_will_we_check_in_weekly_about_parenting_stress",
+      "q_how_will_we_decide_about_circumcision_or_other_elective_proced",
+      "q_how_will_we_document_decisions_so_we_do_not_re_argue_the_same_",
+      "q_how_will_we_handle_work_leave_logistics_and_income_during_leav",
+      "q_how_will_we_make_routine_medical_decisions_together",
+      "q_how_will_we_protect_sleep_for_the_parent_who_is_not_on_overnig",
+      "q_what_childcare_options_are_acceptable_to_us_in_the_first_years",
+      "q_what_does_a_calm_postpartum_home_environment_require_from_visi",
+      "q_what_does_a_good_day_look_like_when_both_parents_are_exhausted",
+      "q_what_does_a_loving_home_look_and_feel_like_to_us",
+      "q_what_does_a_transition_plan_into_daycare_look_like",
+      "q_what_does_success_as_parents_mean_to_us",
+      "q_what_is_our_approach_to_feeding_in_the_newborn_stage",
+      "q_what_is_our_plan_for_accepting_or_declining_visitors_in_week_o",
+      "q_what_is_our_plan_for_cord_blood_delayed_clamping_and_related_c",
+      "q_what_is_our_plan_for_formula_combination_feeding_or_bottle_log",
+      "q_what_is_our_plan_for_pet_care_and_home_logistics_after_birth",
+      "q_what_pain_management_preferences_do_we_want_discussed_with_our",
+      "q_what_parts_of_our_childhoods_do_we_hope_to_change",
+      "q_what_parts_of_our_own_childhoods_do_we_hope_to_repeat",
+      "q_what_postpartum_mental_health_signs_should_trigger_immediate_h",
+      "q_what_role_do_we_want_grandparents_to_play",
+      "q_what_role_should_each_parent_have_during_labor",
+      "q_what_safety_rules_apply_to_pets_and_the_baby",
+      "q_what_support_will_michelle_need_during_recovery",
+      "q_who_owns_which_recurring_household_tasks_in_the_first_three_mo"
+    ]
+  },
+  "babymoon": {
+    "rounds": [
+      {
+        "round": 1,
+        "count": 6,
+        "withFollowUp": 3,
+        "responseTypes": {
+          "short_text": 2,
+          "either_or": 2,
+          "open_time_boxed": 1,
+          "quick_pick": 1
+        },
+        "estimatedSeconds": 355
+      },
+      {
+        "round": 2,
+        "count": 7,
+        "withFollowUp": 7,
+        "responseTypes": {
+          "quick_pick": 5,
+          "open_time_boxed": 2
+        },
+        "estimatedSeconds": 690
+      },
+      {
+        "round": 3,
+        "count": 6,
+        "withFollowUp": 1,
+        "responseTypes": {
+          "short_text": 4,
+          "open_time_boxed": 2
+        },
+        "estimatedSeconds": 675
+      }
+    ],
+    "unique_follow_ups": 20,
+    "unresolved_follow_ups": []
+  },
+  "decision_topic_seed_coverage": [
+    {
+      "slug": "visitors-after-birth",
+      "matchedQuestions": 52
+    },
+    {
+      "slug": "sleep",
+      "matchedQuestions": 37
+    },
+    {
+      "slug": "feeding",
+      "matchedQuestions": 26
+    },
+    {
+      "slug": "screens",
+      "matchedQuestions": 22
+    },
+    {
+      "slug": "discipline",
+      "matchedQuestions": 30
+    },
+    {
+      "slug": "childcare",
+      "matchedQuestions": 24
+    },
+    {
+      "slug": "birth-plan",
+      "matchedQuestions": 36
+    },
+    {
+      "slug": "vaccinations",
+      "matchedQuestions": 32
+    },
+    {
+      "slug": "money",
+      "matchedQuestions": 21
+    },
+    {
+      "slug": "religion-values",
+      "matchedQuestions": 51
+    },
+    {
+      "slug": "emergency-guardians",
+      "matchedQuestions": 84
+    },
+    {
+      "slug": "school-choice",
+      "matchedQuestions": 46
+    }
+  ],
+  "structured_vs_open": {
+    "seed_questions_with_non_open_schema": 0,
+    "essentials_structured_screens": 28,
+    "note": "Library AnswerEditor largely driven by question_type/response_schema; Essentials has its own richer response_type taxonomy."
+  }
+}

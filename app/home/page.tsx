@@ -70,6 +70,111 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="surface mb-6 p-5 sm:p-6">
+        <h2 className="font-display text-2xl text-ink">What to do next</h2>
+        <p className="mt-1 text-sm text-ink-muted">
+          Start from the path that matches your energy — you should rarely need to
+          choose between Questions and Conversations.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {stats.lastSession && stats.lastSession.status !== "completed" ? (
+            <Link
+              href={`/discuss/${stats.lastSession.id}`}
+              className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                Continue
+              </p>
+              <p className="mt-1 font-medium text-ink">Resume last discussion</p>
+              <p className="mt-1 text-sm text-ink-muted">Pick up where you left off</p>
+            </Link>
+          ) : (
+            <Link
+              href="/babymoon"
+              className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                Continue
+              </p>
+              <p className="mt-1 font-medium text-ink">Continue Babymoon</p>
+              <p className="mt-1 text-sm text-ink-muted">Curated rounds + Essentials</p>
+            </Link>
+          )}
+          {nextQuestions[0] ? (
+            <Link
+              href={`/questions/${nextQuestions[0].slug}`}
+              className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                Next important discussion
+              </p>
+              <p className="mt-1 font-medium text-ink">{nextQuestions[0].text}</p>
+              <p className="mt-1 text-sm text-ink-muted">
+                {nextQuestions[0].estimatedMinutes
+                  ? `About ${nextQuestions[0].estimatedMinutes} min`
+                  : "High-value next topic"}
+              </p>
+            </Link>
+          ) : (
+            <Link
+              href="/discuss"
+              className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                Next important discussion
+              </p>
+              <p className="mt-1 font-medium text-ink">Start a discussion</p>
+              <p className="mt-1 text-sm text-ink-muted">Choose a guided session length</p>
+            </Link>
+          )}
+          <Link
+            href="/questions/before-birth"
+            className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Before Birth
+            </p>
+            <p className="mt-1 font-medium text-ink">
+              {stats.progress.essentialsScreensCompleted} of{" "}
+              {stats.progress.essentialsScreensVisible} Essentials complete
+            </p>
+            <p className="mt-1 text-sm text-ink-muted">Guided planning workshop</p>
+          </Link>
+          <Link
+            href="/decisions?filter=needs_attention"
+            className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Decisions needing attention
+            </p>
+            <p className="mt-1 font-medium text-ink">
+              {attentionDecisions.length} need follow-up
+            </p>
+            <p className="mt-1 text-sm text-ink-muted">Shared positions and open threads</p>
+          </Link>
+          <Link
+            href="/conversations"
+            className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Quick conversation
+            </p>
+            <p className="mt-1 font-medium text-ink">Have 10–15 minutes?</p>
+            <p className="mt-1 text-sm text-ink-muted">Lightning prompts and Babymoon rounds</p>
+          </Link>
+          <Link
+            href="/questions"
+            className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Browse everything
+            </p>
+            <p className="mt-1 font-medium text-ink">Full question library</p>
+            <p className="mt-1 text-sm text-ink-muted">430 topics when you want to explore</p>
+          </Link>
+        </div>
+      </section>
+
       <PrincipleReadyBanner proposals={readyPrinciples} />
       <NextQuestionsPanel items={nextQuestions} />
       <TopicCoveragePanel rows={topicCoverage} />

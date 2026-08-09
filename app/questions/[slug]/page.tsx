@@ -14,11 +14,9 @@ import {
   getQuestionAnswerStatus,
 } from "@/lib/services/question-status";
 import { getResearchForQuestion } from "@/lib/research/services";
-import {
-  RESEARCH_AVAILABILITY_LABELS,
-  RESEARCH_EVIDENCE_RATING_LABELS,
-} from "@/lib/research/types";
 import { requireFamilyContext } from "@/lib/auth/family-context";
+import { ResearchGuidancePanel } from "@/components/questions/ResearchGuidancePanel";
+import { formatAnswerPayload } from "@/lib/questions/answer-display";
 import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
 import {
   decisionHref,
@@ -196,56 +194,10 @@ export default async function QuestionDetailPage({
         <AnswerStatusHeader status={status} />
       </section>
 
-      <section className="surface mb-5 p-5">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="font-display text-xl">Relevant Research</h3>
-          <Link href="/research/new" className="btn btn-ghost">
-            {research.length ? "Add another source" : "Add source"}
-          </Link>
-        </div>
-        {research.length === 0 ? (
-          <p className="text-sm text-ink-muted">
-            No linked research yet.{" "}
-            <Link href="/research/new" className="text-accent hover:underline">
-              Add a source
-            </Link>{" "}
-            — evidence informs discussion and does not replace your answers.
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {research.map(({ link, source, shortFinding }) =>
-              source ? (
-                <li key={link.id} className="rounded-xl border border-border p-3 text-sm">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/research/${source.id}`}
-                      className="font-medium hover:text-accent"
-                    >
-                      {source.title}
-                    </Link>
-                    {source.evidence_rating && (
-                      <span className="badge badge-info">
-                        {RESEARCH_EVIDENCE_RATING_LABELS[source.evidence_rating]}
-                      </span>
-                    )}
-                    <span className="badge">
-                      {RESEARCH_AVAILABILITY_LABELS[source.availability_type]}
-                    </span>
-                  </div>
-                  {(shortFinding || link.relevance_note) && (
-                    <p className="mt-1 text-ink-muted line-clamp-2">
-                      {shortFinding || link.relevance_note}
-                    </p>
-                  )}
-                </li>
-              ) : null,
-            )}
-          </ul>
-        )}
-        <p className="mt-3 text-xs text-ink-subtle">
-          Outside evidence is separate from your family decision.
-        </p>
-      </section>
+      <ResearchGuidancePanel
+        items={research}
+        evidenceNeeded={Boolean(question.evidence_needed)}
+      />
 
       <section className="surface p-5">
         <div className="mb-3 flex flex-wrap gap-2">
@@ -306,6 +258,7 @@ export default async function QuestionDetailPage({
           surface="questions/[slug]"
         />
         <AnswerEditor
+          key={question.id}
           question={question}
           questionId={question.id}
           members={store.members}
@@ -330,7 +283,12 @@ export default async function QuestionDetailPage({
                   className="rounded-xl border border-border p-3 text-sm"
                 >
                   <span className="badge">Shared</span>
-                  <p className="mt-2">{a.payload.text || a.payload.quick || "—"}</p>
+                  <p className="mt-2 whitespace-pre-wrap">
+                    {formatAnswerPayload(
+                      a.payload,
+                      question.response_schema as Record<string, unknown>,
+                    ) || "—"}
+                  </p>
                 </div>
               ))}
           </div>
@@ -345,8 +303,11 @@ export default async function QuestionDetailPage({
                     className="rounded-xl border border-border p-3 text-sm"
                   >
                     <span className="badge">Individual</span>
-                    <p className="mt-2">
-                      {a.payload.text || a.payload.quick || "—"}
+                    <p className="mt-2 whitespace-pre-wrap">
+                      {formatAnswerPayload(
+                        a.payload,
+                        question.response_schema as Record<string, unknown>,
+                      ) || "—"}
                     </p>
                   </div>
                 ))}
@@ -361,8 +322,11 @@ export default async function QuestionDetailPage({
             {versions.map((v) => (
               <li key={v.id} className="rounded-xl border border-border p-3">
                 v{v.version} · {v.created_at.slice(0, 10)} · {v.change_reason}
-                <div className="mt-1 text-ink">
-                  {v.payload.text || v.payload.quick || "—"}
+                <div className="mt-1 whitespace-pre-wrap text-ink">
+                  {formatAnswerPayload(
+                    v.payload,
+                    question.response_schema as Record<string, unknown>,
+                  ) || "—"}
                 </div>
               </li>
             ))}

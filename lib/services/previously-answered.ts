@@ -10,6 +10,7 @@ import {
   buildQuestionStatusIndex,
   type QuestionAnswerStatus,
 } from "@/lib/services/question-status";
+import { formatAnswerPayload } from "@/lib/questions/answer-display";
 
 export function resolveLinkedLibraryQuestion(
   store: AppStore,
@@ -65,18 +66,14 @@ export function previouslyAnsweredLabel(
 }
 
 /** Best-effort text to preview a prior shared/individual answer. */
-export function previewLibraryAnswerText(answers: Answer[]): string | null {
+export function previewLibraryAnswerText(
+  answers: Answer[],
+  schemaRaw?: Record<string, unknown> | null,
+): string | null {
   const shared = answers.find((a) => a.is_shared);
-  const text =
-    shared?.payload.text ||
-    shared?.payload.quick ||
-    (Array.isArray(shared?.payload.choice)
-      ? shared?.payload.choice.join(", ")
-      : typeof shared?.payload.choice === "string"
-        ? shared.payload.choice
-        : null) ||
-    answers.find((a) => a.payload.text)?.payload.text ||
-    null;
+  const source = shared ?? answers.find((a) => a.payload);
+  if (!source) return null;
+  const text = formatAnswerPayload(source.payload, schemaRaw);
   if (!text?.trim()) return null;
   return text.trim().length > 280 ? `${text.trim().slice(0, 277)}…` : text.trim();
 }

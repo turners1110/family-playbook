@@ -1,0 +1,43 @@
+{
+  "apply": true,
+  "generated_at": "2026-08-09T23:30:51.900Z",
+  "planned_updates": 3,
+  "answer_count_before": 35,
+  "decision_count_before": 2,
+  "planned": [
+    {
+      "live_id": "q_what_traits_do_we_most_hope_our_child_develops",
+      "seed_id": "q_what_traits_do_we_most_hope_our_child_develops",
+      "from_minutes": 10,
+      "to_minutes": 10,
+      "from_mode": "multi_select_top_n",
+      "to_mode": "ranking"
+    },
+    {
+      "live_id": "q_should_allowance_be_tied_to_chores",
+      "seed_id": "q_should_allowance_be_tied_to_chores",
+      "from_minutes": 3,
+      "to_minutes": 3,
+      "from_mode": "single_choice",
+      "to_mode": "single_choice"
+    },
+    {
+      "live_id": "q_which_five_adult_traits_matter_most_to_us",
+      "seed_id": "q_which_five_adult_traits_matter_most_to_us",
+      "from_minutes": 10,
+      "to_minutes": 10,
+      "from_mode": "ranking_top_n",
+      "to_mode": "ranking"
+    }
+  ],
+  "verify": {
+    "apply": true,
+    "updated": 3,
+    "answers_unchanged": true,
+    "answer_versions_unchanged": true,
+    "decisions_unchanged": true,
+    "ids_unchanged": true,
+    "answer_count_before": 35,
+    "answer_count_after": 35
+  }
+}

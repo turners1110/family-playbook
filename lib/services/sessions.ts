@@ -10,6 +10,7 @@ import {
   buildQuestionStatusIndex,
   type QuestionAnswerStatus,
 } from "@/lib/services/question-status";
+import { packQuestionsByMinutes } from "@/lib/questions/session-pack";
 
 const PRACTICAL_TYPES = new Set([
   "practical_planning",
@@ -125,7 +126,8 @@ export function filterQuestions(
         const unanswered = statusIndex
           ? !statusIndex.get(q.id)?.fullyAnswered
           : !answeredIds.has(q.id);
-        return unanswered && q.estimated_minutes <= 8;
+        // Prefer items that can fit a short session; packer enforces total budget.
+        return unanswered && q.estimated_minutes <= 15;
       })
       .sort((a, b) => {
         const ap = priorityScore(a);
@@ -213,12 +215,15 @@ export async function createSession(input: CreateSessionInput) {
     statusIndex,
   );
 
-  const count = data.question_ids?.length
-    ? data.question_ids.length
-    : sessionQuestionCount(data.length);
-  const selectedIds =
-    data.question_ids ??
-    filtered.slice(0, count).map((q) => q.id);
+  let selectedIds: string[];
+  if (data.question_ids?.length) {
+    selectedIds = data.question_ids;
+  } else if (data.filters.preset === "fifteen_minutes") {
+    selectedIds = packQuestionsByMinutes(filtered, 15).map((q) => q.id);
+  } else {
+    const count = sessionQuestionCount(data.length);
+    selectedIds = filtered.slice(0, count).map((q) => q.id);
+  }
 
   const timestamp = nowIso();
   let createdId = "";

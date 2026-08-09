@@ -22,6 +22,7 @@ import {
   sessionPrimaryHref,
 } from "@/lib/services/conversation-review";
 import { STATUS_LABELS } from "@/lib/constants/enums";
+import { formatAnswerPayload } from "@/lib/questions/answer-display";
 
 function isQaRecord(row: {
   is_test_data?: boolean;
@@ -245,6 +246,7 @@ function buildCurrentPosition(input: {
   decision?: Decision | null;
   sharedAnswers: Answer[];
   title: string;
+  questions?: Question[];
 }): string {
   if (input.decision?.shared_conclusion?.trim()) {
     return input.decision.shared_conclusion.trim();
@@ -254,11 +256,12 @@ function buildCurrentPosition(input: {
   }
   const withContent = input.sharedAnswers.find((a) => hasAnswerContent(a.payload));
   if (withContent) {
-    const p = withContent.payload;
-    if (p.text?.trim()) return p.text.trim();
-    if (typeof p.choice === "string") return p.choice;
-    if (Array.isArray(p.choice)) return p.choice.join(", ");
-    if (p.notes?.trim()) return p.notes.trim();
+    const q = input.questions?.find((item) => item.id === withContent.question_id);
+    const readable = formatAnswerPayload(
+      withContent.payload,
+      q?.response_schema as Record<string, unknown> | undefined,
+    );
+    if (readable.trim()) return readable.trim();
   }
   return `No shared family position recorded yet for ${input.title}.`;
 }
@@ -530,6 +533,7 @@ export function buildFamilyDecisionGraph(store: AppStore): GraphCache {
       decision: input.decision,
       sharedAnswers,
       title: input.title,
+      questions,
     });
 
     const lastReviewedAt =

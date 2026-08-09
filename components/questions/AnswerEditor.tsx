@@ -17,6 +17,14 @@ import {
   shouldShowSeparateEditors,
   type DiscussionMode,
 } from "@/lib/discussions/discussion-mode";
+import { parseResponseSchema } from "@/lib/questions/response-schema";
+import { formatAnswerPayload } from "@/lib/questions/answer-display";
+import {
+  StructuredAnswerFields,
+  structuredValueFromPayload,
+  structuredValueToPayload,
+  type StructuredAnswerValue,
+} from "@/components/questions/StructuredAnswerFields";
 
 function newMutationId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -47,6 +55,7 @@ export function AnswerEditor({
     | "text"
     | "categories"
     | "why_it_matters"
+    | "response_schema"
   >;
   questionId: string;
   members: FamilyMember[];
@@ -108,7 +117,15 @@ export function AnswerEditor({
       : "shared",
   );
 
+  const schema = parseResponseSchema(question?.response_schema);
+  const hasGuidedFormat =
+    schema.mode !== "open_or_policy" && schema.version === 2;
+
   const [text, setText] = useState(shared?.payload.text ?? "");
+  const [structured, setStructured] = useState<StructuredAnswerValue>(() =>
+    structuredValueFromPayload(shared?.payload, schema),
+  );
+  const [useGuided, setUseGuided] = useState(true);
   const [samText, setSamText] = useState(samAnswer?.payload.text ?? "");
   const [michelleText, setMichelleText] = useState(
     michelleAnswer?.payload.text ?? "",
@@ -122,6 +139,15 @@ export function AnswerEditor({
   const [retryPayload, setRetryPayload] = useState<SaveAnswerInput | null>(null);
   const [diffPrompt, setDiffPrompt] = useState<DiffLevel>(null);
   const [mergeNotes, setMergeNotes] = useState("");
+
+  const priorOpenText =
+    hasGuidedFormat &&
+    shared?.payload.text &&
+    !shared.payload.ranking &&
+    !shared.payload.matrix &&
+    !shared.payload.choice
+      ? shared.payload.text
+      : null;
 
   const bothSaved = Boolean(samAnswer && michelleAnswer);
   const reveal = !hideUntilBoth || bothSaved;
@@ -182,11 +208,19 @@ export function AnswerEditor({
   }
 
   function saveShared(options?: { afterSave?: () => void }) {
+    const payload =
+      hasGuidedFormat && useGuided
+        ? structuredValueToPayload(
+            structured,
+            question?.response_schema,
+            notes,
+          )
+        : { text, notes: notes || undefined };
     runSaveAnswer(
       {
         question_id: questionId,
         is_shared: true,
-        payload: { text, notes: notes || undefined },
+        payload: payload as SaveAnswerInput["payload"],
         status: status as never,
         confidence,
         change_reason: shared
@@ -274,17 +308,72 @@ export function AnswerEditor({
 
       {!needsEitherChoice && uiMode === "shared" ? (
         <section className="space-y-3">
+          {priorOpenText ? (
+            <div className="rounded-xl border border-border bg-bg-elevated/50 p-3 text-sm">
+              <p className="font-medium text-ink">Previous response</p>
+              <p className="mt-1 text-ink-muted">
+                This question now has a guided format. Your earlier answer is
+                preserved.
+              </p>
+              <p className="mt-2 whitespace-pre-wrap text-ink">{priorOpenText}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={pending}
+                  onClick={() => {
+                    setUseGuided(false);
+                    setText(priorOpenText);
+                  }}
+                >
+                  Use previous response
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={pending}
+                  onClick={() => setUseGuided(true)}
+                >
+                  Answer guided version
+                </button>
+              </div>
+            </div>
+          ) : null}
           <div className="field">
-            <label htmlFor="shared" className="font-display text-lg">
+            <label className="font-display text-lg">
               Shared family decision
             </label>
-            <textarea
-              id="shared"
-              className="textarea min-h-40"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Write what you decide together…"
-            />
+            {hasGuidedFormat && useGuided ? (
+              <div className="mt-2">
+                <StructuredAnswerFields
+                  schemaRaw={question?.response_schema}
+                  value={structured}
+                  onChange={setStructured}
+                  disabled={pending}
+                />
+                {shared ? (
+                  <p className="mt-2 text-xs text-ink-subtle whitespace-pre-wrap">
+                    Saved view:{" "}
+                    {formatAnswerPayload(
+                      structuredValueToPayload(
+                        structured,
+                        question?.response_schema,
+                        "",
+                      ),
+                      question?.response_schema,
+                    )}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <textarea
+                id="shared"
+                className="textarea mt-2 min-h-40"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Write what you decide together…"
+              />
+            )}
           </div>
           <div className="field">
             <label htmlFor="notes">Notes</label>

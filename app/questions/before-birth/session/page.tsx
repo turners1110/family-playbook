@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { readStore } from "@/lib/db/store";
 import { buildEssentialsDashboard } from "@/lib/essentials/progress";
+import { planEssentialsByMinutes } from "@/lib/essentials/session-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -17,24 +18,54 @@ export default async function EssentialsSessionPage({
   const store = await readStore();
   const dash = buildEssentialsDashboard(store);
 
-  const incomplete = dash.screens.filter(
-    (s) =>
-      s.visible &&
-      (s.state === "not_started" ||
-        s.state === "in_progress" ||
-        s.state === "needs_follow_up"),
+  const incomplete = dash.screens
+    .filter(
+      (s) =>
+        s.visible &&
+        (s.state === "not_started" ||
+          s.state === "in_progress" ||
+          s.state === "needs_follow_up"),
+    )
+    .map((s) => s.screen);
+
+  const questionMinutes = new Map(
+    store.questions.map((q) => [q.id, q.estimated_minutes]),
   );
 
-  const targetCount =
-    length === "15" ? 2 : length === "30" ? 4 : length === "60" ? 8 : incomplete.length;
+  const budget =
+    length === "15" ? 15 : length === "30" ? 30 : length === "60" ? 60 : 0;
+  const plan = planEssentialsByMinutes(incomplete, budget, questionMinutes);
 
   if (start === "1") {
-    const first = incomplete[0]?.screen.id ?? dash.resume_screen_id;
+    const first = plan.screens[0]?.id ?? dash.resume_screen_id;
     if (first) {
-      redirect(`/questions/before-birth/screen/${first}?session=1`);
+      redirect(`/questions/before-birth/screen/${first}?session=1&length=${length ?? "all"}`);
     }
     redirect("/questions/before-birth/review");
   }
+
+  const options = [
+    {
+      length: "15",
+      label: "About 15 minutes",
+      plan: planEssentialsByMinutes(incomplete, 15, questionMinutes),
+    },
+    {
+      length: "30",
+      label: "About 30 minutes",
+      plan: planEssentialsByMinutes(incomplete, 30, questionMinutes),
+    },
+    {
+      length: "60",
+      label: "About 60 minutes",
+      plan: planEssentialsByMinutes(incomplete, 60, questionMinutes),
+    },
+    {
+      length: "all",
+      label: "Continue until paused",
+      plan: planEssentialsByMinutes(incomplete, 0, questionMinutes),
+    },
+  ];
 
   return (
     <AppShell
@@ -50,15 +81,10 @@ export default async function EssentialsSessionPage({
       <section className="surface space-y-4 p-5">
         <p className="text-sm text-ink-muted">
           {incomplete.length} open essentials discussions remain. Choose a session
-          length — we will walk the next screens in order. No stressful countdown.
+          length — we pack screens by expected discussion time, not a fixed count.
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
-          {[
-            { length: "15", label: "About 15 minutes", count: 2 },
-            { length: "30", label: "About 30 minutes", count: 4 },
-            { length: "60", label: "About 60 minutes", count: 8 },
-            { length: "all", label: "Continue until paused", count: incomplete.length },
-          ].map((opt) => (
+          {options.map((opt) => (
             <Link
               key={opt.length}
               href={`/questions/before-birth/session?length=${opt.length}&start=1`}
@@ -67,7 +93,9 @@ export default async function EssentialsSessionPage({
               <span>
                 {opt.label}
                 <span className="mt-1 block text-xs font-normal opacity-90">
-                  Up to {Math.min(opt.count, incomplete.length || targetCount)} screens
+                  {opt.plan.screens.length} screen
+                  {opt.plan.screens.length === 1 ? "" : "s"} · about{" "}
+                  {opt.plan.aboutMinutes || "—"} min
                 </span>
               </span>
             </Link>
