@@ -20,6 +20,7 @@ import { promptForItem } from "@/lib/conversations/session-builder";
 import { buildSessionSummary } from "@/lib/conversations/summary";
 import { measureActiveSeconds } from "@/lib/conversations/timing";
 import { ensureConversationQuestionOptions } from "@/lib/conversations/ensure-options";
+import { answeredLibraryDeepIds } from "@/lib/services/previously-answered";
 
 function ensureCollections(store: AppStore) {
   if (!store.conversation_sessions) store.conversation_sessions = [];
@@ -190,12 +191,18 @@ export async function startConversationSession(input: {
     ...input.builder,
   };
 
-  // Load recent answers for avoidance.
+  // Load recent answers for avoidance + skip library questions already decided.
   const prior = await readStore();
   ensureCollections(prior);
   builderInput.recentlyAnsweredIds = (prior.conversation_quick_answers ?? [])
     .slice(-80)
     .map((a) => a.prompt_id);
+  if (builderInput.includeUnansweredOnly !== false) {
+    builderInput.answeredLibraryQuestionIds = [
+      ...(builderInput.answeredLibraryQuestionIds ?? []),
+      ...answeredLibraryDeepIds(prior),
+    ];
+  }
 
   const built = buildConversationSession(builderInput);
   const ts = nowIso();

@@ -4,9 +4,14 @@ import { describe, expect, it } from "vitest";
 import {
   auditQuickToDeepLinks,
   conversationReturnHref,
+  questionIdsRelated,
   resolveDeepQuestionTarget,
+  resolveLibraryQuestionId,
 } from "@/lib/conversations/deep-link";
-import { getEssentialsScreenByQuestionId } from "@/lib/essentials/pathway";
+import {
+  getEssentialsScreenByQuestionId,
+  listPrimaryScreens,
+} from "@/lib/essentials/pathway";
 import { clearMemoryStore, readStore } from "@/lib/db/store";
 import { spawnSync } from "child_process";
 import {
@@ -132,6 +137,35 @@ describe("resolveDeepQuestionTarget", () => {
     expect(conversationReturnHref({ sessionId: "s1" })).toBe(
       "/conversations/session/s1",
     );
+  });
+
+  it("resolves truncated remote-store question IDs for Essentials", () => {
+    const full = "q_what_does_success_as_parents_mean_to_us";
+    const truncated = full.slice(0, 32);
+    expect(questionIdsRelated(full, truncated)).toBe(true);
+    const screen = getEssentialsScreenByQuestionId(truncated);
+    expect(screen?.question_id).toBe(full);
+    const target = resolveDeepQuestionTarget({
+      questionId: truncated,
+      sessionId: "sess_1",
+      questions: [{ id: truncated, slug: "success-as-parents" }],
+    });
+    expect(target.type).toBe("essentials_screen");
+    expect(target.href).toContain(`/questions/before-birth/screen/${screen!.id}`);
+    expect(resolveLibraryQuestionId(full, [{ id: truncated }])).toBe(truncated);
+  });
+
+  it("every primary Essentials screen question resolves in a seeded store", async () => {
+    reseed();
+    const store = await readStore();
+    for (const screen of listPrimaryScreens()) {
+      const resolved = resolveLibraryQuestionId(
+        screen.question_id,
+        store.questions,
+      );
+      const question = store.questions.find((q) => q.id === resolved);
+      expect(question, `missing ${screen.id} → ${screen.question_id}`).toBeTruthy();
+    }
   });
 });
 

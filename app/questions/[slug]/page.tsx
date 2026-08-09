@@ -19,7 +19,6 @@ import {
   RESEARCH_EVIDENCE_RATING_LABELS,
 } from "@/lib/research/types";
 import { requireFamilyContext } from "@/lib/auth/family-context";
-import { helperForQuestion } from "@/lib/content/helper-templates";
 import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
 import {
   decisionHref,
@@ -31,6 +30,12 @@ import {
 } from "@/lib/discussions/discussion-mode";
 import { filterAnswersForClient } from "@/lib/discussions/answer-privacy";
 import { DiscussionModeDebug } from "@/components/discussions/DiscussionModeDebug";
+import { QuestionContextPanel } from "@/components/questions/QuestionContextPanel";
+import { sharedContextFromLibraryQuestion } from "@/lib/content/resolve-question-context";
+import {
+  previewLibraryAnswerText,
+  previouslyAnsweredLabel,
+} from "@/lib/services/previously-answered";
 
 export const dynamic = "force-dynamic";
 
@@ -81,8 +86,6 @@ export default async function QuestionDetailPage({
       </AppShell>
     );
   }
-  const helpers = helperForQuestion(question);
-
   const rawAnswers = store.answers.filter((a) => a.question_id === question.id);
   const hasSeparateAnswers = rawAnswers.some((a) => !a.is_shared);
   const discussion = resolveDiscussionMode({
@@ -125,6 +128,21 @@ export default async function QuestionDetailPage({
           testRunId: sp.testRunId,
         })
       : null;
+  const priorLabel = previouslyAnsweredLabel(status);
+  const questionContext = sharedContextFromLibraryQuestion(question, {
+    previouslyAnswered: priorLabel
+      ? {
+          label: priorLabel,
+          previewText: previewLibraryAnswerText(rawAnswers),
+          fullyAnswered: status.fullyAnswered,
+        }
+      : null,
+    whySeeingThis: sp.source === "conversation"
+      ? "Opened from a conversation prompt so you can go deeper."
+      : question.required_before_birth
+        ? "Flagged as useful to discuss before birth."
+        : null,
+  });
 
   return (
     <AppShell
@@ -239,18 +257,9 @@ export default async function QuestionDetailPage({
           )}
         </div>
         <h2 className="font-display text-3xl leading-snug">{question.text}</h2>
-        <p className="mt-3 text-ink-muted">{helpers.why_it_matters}</p>
-        <p className="mt-3 text-sm text-ink-muted">
-          <span className="font-semibold">Discussion guidance:</span>{" "}
-          {helpers.discussion_guidance}
-        </p>
-        {helpers.follow_up_prompts.length > 0 && (
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-muted">
-            {helpers.follow_up_prompts.map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        )}
+        <div className="mt-4">
+          <QuestionContextPanel context={questionContext} />
+        </div>
         <div className="mt-4 grid gap-2 text-sm text-ink-subtle sm:grid-cols-2">
           <div>
             Primary stage:{" "}

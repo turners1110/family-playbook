@@ -5,6 +5,10 @@ import { requireFamilyContext } from "@/lib/auth/family-context";
 import { readStore } from "@/lib/db/store";
 import { ESSENTIALS_MODULES } from "@/lib/essentials/pathway";
 import { buildEssentialsDashboard } from "@/lib/essentials/progress";
+import {
+  resolveEssentialsWorkshopContext,
+  scoreLabel,
+} from "@/lib/essentials/screen-context";
 
 export const dynamic = "force-dynamic";
 
@@ -39,18 +43,29 @@ export default async function EssentialsModulePage({
         min module
       </p>
       <ul className="space-y-3">
-        {screens.map((row) => (
-          <li key={row.screen.id}>
-            <Link
-              href={`/questions/before-birth/screen/${row.screen.id}`}
-              className="surface block p-4 hover:border-accent"
-            >
-              <div className="font-medium text-ink">{row.screen.title}</div>
-              <div className="mt-1 text-sm text-ink-muted">{row.screen.purpose}</div>
-              <div className="mt-2 text-xs text-ink-subtle">{row.label}</div>
-            </Link>
-          </li>
-        ))}
+        {screens.map((row) => {
+          const ctx = resolveEssentialsWorkshopContext(row.screen, row.question);
+          return (
+            <li key={row.screen.id}>
+              <Link
+                href={`/questions/before-birth/screen/${row.screen.id}`}
+                className="surface block p-4 hover:border-accent"
+              >
+                <div className="font-medium text-ink">{row.screen.title}</div>
+                <div className="mt-1 text-sm text-ink-muted">
+                  {row.screen.purpose}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs text-ink-subtle">
+                  <span>{row.label}</span>
+                  {ctx.importance != null ? (
+                    <span>· Importance {scoreLabel(ctx.importance)}</span>
+                  ) : null}
+                  <span>· ~{ctx.estimatedMinutes ?? "?"} min</span>
+                </div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </AppShell>
   );

@@ -20,3 +20,10 @@ export {
   type KnowledgeEdgeType,
   type DecisionTopicSeed,
 } from "@/lib/knowledge/family-decisions";
+
+export {
+  listProposedPrinciples,
+  getProposedPrinciple,
+  type ProposedPrinciple,
+  type PrincipleProposalFeedback,
+} from "@/lib/knowledge/proposed-principles";

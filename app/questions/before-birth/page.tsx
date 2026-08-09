@@ -7,6 +7,10 @@ import { buildEssentialsDashboard } from "@/lib/essentials/progress";
 import { collectTaskSuggestions } from "@/lib/essentials/task-suggestions";
 import { TaskSuggestionPreview } from "@/components/essentials/TaskSuggestionPreview";
 import { BEFORE_BIRTH_PATHWAY_VERSION } from "@/lib/essentials/pathway";
+import {
+  resolveEssentialsWorkshopContext,
+  scoreLabel,
+} from "@/lib/essentials/screen-context";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +28,19 @@ export default async function BeforeBirthEssentialsPage({
   const completedScreens = dash.screens.filter(
     (s) => s.visible && s.state === "completed",
   );
+  const highImpactOpen = dash.screens
+    .filter((s) => s.visible && s.state !== "completed")
+    .map((s) => ({
+      row: s,
+      ctx: resolveEssentialsWorkshopContext(s.screen, s.question),
+    }))
+    .sort(
+      (a, b) =>
+        (b.ctx.importance ?? 0) * 10 +
+        (b.ctx.relevanceNow ?? 0) -
+        ((a.ctx.importance ?? 0) * 10 + (a.ctx.relevanceNow ?? 0)),
+    )
+    .slice(0, 4);
 
   return (
     <AppShell
@@ -64,6 +81,37 @@ export default async function BeforeBirthEssentialsPage({
       }
     >
       <section className="surface mb-5 space-y-3 p-5">
+        <h2 className="font-display text-lg">Suggested workflow</h2>
+        <ol className="grid gap-2 text-sm text-ink-muted sm:grid-cols-4">
+          <li>
+            <span className="font-medium text-ink">1. Learn</span>
+            <p className="mt-0.5">Open an Essential and read the context panel.</p>
+          </li>
+          <li>
+            <span className="font-medium text-ink">2. Discuss</span>
+            <p className="mt-0.5">Answer the related prompts together.</p>
+          </li>
+          <li>
+            <span className="font-medium text-ink">3. Decide</span>
+            <p className="mt-0.5">
+              Capture a shared answer (or{" "}
+              <Link href="/decisions" className="underline">
+                family principle
+              </Link>
+              ).
+            </p>
+          </li>
+          <li>
+            <span className="font-medium text-ink">4. Review</span>
+            <p className="mt-0.5">
+              Use{" "}
+              <Link href="/questions/before-birth/review" className="underline">
+                Review
+              </Link>{" "}
+              when plans change.
+            </p>
+          </li>
+        </ol>
         <p className="text-sm text-ink-muted">
           Prefer a lighter warm-up first?{" "}
           <Link href="/conversations" className="underline">
@@ -72,6 +120,37 @@ export default async function BeforeBirthEssentialsPage({
           — quick prompts link back into these Essentials discussions.
         </p>
       </section>
+
+      {!filterCompleted && highImpactOpen.length > 0 ? (
+        <section className="mb-5 space-y-3">
+          <h2 className="font-display text-xl">High-impact next</h2>
+          <p className="text-sm text-ink-muted">
+            Prioritized by importance and relevance before birth.
+          </p>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {highImpactOpen.map(({ row, ctx }) => (
+              <li key={row.screen.id}>
+                <Link
+                  href={`/questions/before-birth/screen/${row.screen.id}`}
+                  className="surface block p-4 hover:border-accent"
+                >
+                  <div className="font-medium text-ink">{row.screen.title}</div>
+                  <p className="mt-1 text-sm text-ink-muted">{ctx.purpose}</p>
+                  <p className="mt-2 text-xs text-ink-subtle">
+                    {ctx.importance != null
+                      ? `Importance ${scoreLabel(ctx.importance)} · `
+                      : ""}
+                    {ctx.relevanceNow != null
+                      ? `Relevance ${scoreLabel(ctx.relevanceNow)} · `
+                      : ""}
+                    ~{ctx.estimatedMinutes ?? "?"} min
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="surface mb-5 space-y-3 p-5">
         <ProgressBar

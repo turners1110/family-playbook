@@ -6,8 +6,19 @@ import { getConversationSession } from "@/lib/services/conversations";
 import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
 import { getConversationMode } from "@/lib/conversations/modes";
 import { suggestMomentum } from "@/lib/conversations/momentum";
-import { resolveDeepQuestionTarget } from "@/lib/conversations/deep-link";
+import {
+  resolveDeepQuestionTarget,
+  resolveLibraryQuestionId,
+} from "@/lib/conversations/deep-link";
 import { readStore } from "@/lib/db/store";
+import { getQuestionAnswerStatus } from "@/lib/services/question-status";
+import {
+  answeredLibraryDeepIds,
+  libraryAnswersForQuestion,
+  previewLibraryAnswerText,
+  previouslyAnsweredLabel,
+} from "@/lib/services/previously-answered";
+import { sharedContextFromConversationPrompt } from "@/lib/content/resolve-question-context";
 
 export const dynamic = "force-dynamic";
 
@@ -74,11 +85,38 @@ export default async function ConversationSessionPage({
   });
 
   const store = await readStore();
-  const deepQuestionId =
-    item.source_question_id ?? prompt.follow_up_open_question_id ?? null;
+  const deepQuestionId = resolveLibraryQuestionId(
+    item.source_question_id ?? prompt.follow_up_open_question_id ?? null,
+    store.questions,
+  );
   const linkedQuestion = deepQuestionId
     ? store.questions.find((q) => q.id === deepQuestionId) ?? null
     : null;
+  const libraryStatus = deepQuestionId
+    ? getQuestionAnswerStatus(deepQuestionId, store)
+    : null;
+  const libraryAnswers = deepQuestionId
+    ? libraryAnswersForQuestion(store, deepQuestionId)
+    : [];
+  const priorLabel = previouslyAnsweredLabel(libraryStatus);
+  const libraryPrior =
+    priorLabel && libraryStatus
+      ? {
+          label: priorLabel,
+          previewText: previewLibraryAnswerText(libraryAnswers),
+          fullyAnswered: libraryStatus.fullyAnswered,
+        }
+      : null;
+  const babymoonRound = session.session_tag?.match(/round_(\d)/)?.[1]
+    ? Number(session.session_tag.match(/round_(\d)/)?.[1])
+    : null;
+  const questionContext = sharedContextFromConversationPrompt(prompt, {
+    linkedQuestion,
+    previouslyAnswered: libraryPrior,
+    answeredDeepIds: [...answeredLibraryDeepIds(store)],
+    sessionMode: session.mode,
+    babymoonRound,
+  });
   const { resolveDiscussionMode } = await import(
     "@/lib/discussions/discussion-mode"
   );
@@ -119,6 +157,8 @@ export default async function ConversationSessionPage({
         discussionMode={discussion.mode}
         discussionSource={discussion.source}
         discussionReason={discussion.reason}
+        libraryPrior={libraryPrior}
+        questionContext={questionContext}
       />
     </AppShell>
   );

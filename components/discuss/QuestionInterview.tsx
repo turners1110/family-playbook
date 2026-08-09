@@ -13,11 +13,13 @@ import type { Answer, Question, FamilyMember } from "@/lib/types/models";
 import { DECISION_STATUSES, CONFIDENCE_LABELS, QUICK_DECISION_OPTIONS } from "@/lib/constants/enums";
 import { StatusBadge, PriorityBadge, ConfidenceBadge } from "@/components/shared/ui";
 import { LIFE_STAGE_LABELS } from "@/lib/constants/enums";
-import { helperForQuestion } from "@/lib/content/helper-templates";
 import {
   discussionModeIcon,
   resolveDiscussionMode,
 } from "@/lib/discussions/discussion-mode";
+import { QuestionContextPanel } from "@/components/questions/QuestionContextPanel";
+import { sharedContextFromLibraryQuestion } from "@/lib/content/resolve-question-context";
+import { previewLibraryAnswerText } from "@/lib/services/previously-answered";
 
 export function QuestionInterview({
   sessionId,
@@ -91,7 +93,21 @@ export function QuestionInterview({
     () => Math.round(((index + 1) / Math.max(total, 1)) * 100),
     [index, total],
   );
-  const helpers = useMemo(() => helperForQuestion(question), [question]);
+  const questionContext = useMemo(() => {
+    const hasPrior = answers.length > 0;
+    return sharedContextFromLibraryQuestion(question, {
+      previouslyAnswered: hasPrior
+        ? {
+            label: answers.some((a) => a.is_shared)
+              ? "Previously answered"
+              : "Partially answered before",
+            previewText: previewLibraryAnswerText(answers),
+            fullyAnswered: answers.some((a) => a.is_shared),
+          }
+        : null,
+      whySeeingThis: "Included in your current discuss session.",
+    });
+  }, [question, answers]);
 
   function newMutationId() {
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -259,7 +275,6 @@ export function QuestionInterview({
         <h2 className="font-display text-2xl leading-snug text-ink sm:text-3xl">
           {question.text}
         </h2>
-        <p className="mt-3 text-ink-muted">{helpers.why_it_matters}</p>
         <div className="mt-4 grid gap-2 text-sm text-ink-subtle sm:grid-cols-2">
           <div>
             Life stages:{" "}
@@ -271,48 +286,7 @@ export function QuestionInterview({
         </div>
       </div>
 
-      {(helpers.discussion_guidance ||
-        question.evidence_summary ||
-        question.practical_tip ||
-        helpers.follow_up_prompts.length > 0) && (
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="surface p-4">
-            <h3 className="font-display text-lg">Discussion guidance</h3>
-            <p className="mt-2 text-sm text-ink-muted">{helpers.discussion_guidance}</p>
-            {helpers.follow_up_prompts.length > 0 && (
-              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-ink-muted">
-                {helpers.follow_up_prompts.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div className="surface p-4">
-            <h3 className="font-display text-lg">Context</h3>
-            {question.evidence_summary ? (
-              <p className="mt-2 text-sm text-ink-muted">
-                <span className="font-semibold">Evidence summary:</span>{" "}
-                {question.evidence_summary}
-              </p>
-            ) : (
-              <p className="mt-2 text-sm text-ink-muted">
-                No research required for this question unless you want it.
-              </p>
-            )}
-            {question.practical_tip && (
-              <p className="mt-2 text-sm text-ink-muted">
-                <span className="font-semibold">Practical tip:</span>{" "}
-                {question.practical_tip}
-              </p>
-            )}
-            {question.outcomes.length > 0 && (
-              <p className="mt-2 text-sm text-ink-muted">
-                Related outcomes: {question.outcomes.join(", ")}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      <QuestionContextPanel context={questionContext} />
 
       <div className="surface p-4 sm:p-5">
         <div className="mb-4 flex flex-wrap gap-2">

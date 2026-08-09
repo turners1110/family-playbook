@@ -1215,9 +1215,13 @@ export function getEssentialsScreen(screenId: string) {
 }
 
 export function getEssentialsScreenByQuestionId(questionId: string) {
+  const related = (a: string, b: string) =>
+    a === b || a.startsWith(b) || b.startsWith(a);
   return (
-    ESSENTIALS_SCREENS.find((s) => s.question_id === questionId) ??
-    ESSENTIALS_SCREENS.find((s) => s.paired_question_ids?.includes(questionId)) ??
+    ESSENTIALS_SCREENS.find((s) => related(s.question_id, questionId)) ??
+    ESSENTIALS_SCREENS.find((s) =>
+      s.paired_question_ids?.some((p) => related(p, questionId)),
+    ) ??
     null
   );
 }

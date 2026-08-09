@@ -12,7 +12,9 @@ import { nextScreenId } from "@/lib/essentials/progress";
 import { getQuickContextForDeep } from "@/lib/services/conversations";
 import { companionForDeepQuestion } from "@/lib/conversations/companions";
 import { resolveConversationPrompt } from "@/lib/conversations/babymoon-set";
-import { conversationReturnHref } from "@/lib/conversations/deep-link";
+import { conversationReturnHref, resolveLibraryQuestionId } from "@/lib/conversations/deep-link";
+import { getQuestionAnswerStatus } from "@/lib/services/question-status";
+import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -40,18 +42,40 @@ export default async function EssentialsScreenPage({
   const screen = getEssentialsScreen(screenId);
   if (!screen) notFound();
 
-  const question = store.questions.find((q) => q.id === screen.question_id);
+  const resolvedQuestionId = resolveLibraryQuestionId(
+    screen.question_id,
+    store.questions,
+  );
+  const question = store.questions.find((q) => q.id === resolvedQuestionId);
   if (!question) notFound();
 
   const pairedQuestions = (screen.paired_question_ids ?? [])
-    .map((id) => store.questions.find((q) => q.id === id))
+    .map((id) => {
+      const resolved = resolveLibraryQuestionId(id, store.questions);
+      return store.questions.find((q) => q.id === resolved);
+    })
     .filter(Boolean) as typeof store.questions;
 
-  const answers = store.answers.filter((a) => a.question_id === screen.question_id);
+  const answers = store.answers.filter(
+    (a) =>
+      a.question_id === question.id ||
+      a.question_id === screen.question_id ||
+      question.id.startsWith(a.question_id) ||
+      a.question_id.startsWith(question.id),
+  );
   const pairedAnswers: Record<string, typeof answers> = {};
   for (const pq of pairedQuestions) {
-    pairedAnswers[pq.id] = store.answers.filter((a) => a.question_id === pq.id);
+    pairedAnswers[pq.id] = store.answers.filter(
+      (a) =>
+        a.question_id === pq.id ||
+        pq.id.startsWith(a.question_id) ||
+        a.question_id.startsWith(pq.id),
+    );
   }
+
+  const answerStatus = getQuestionAnswerStatus(question.id, store);
+  const previouslyAnswered =
+    answerStatus.fullyAnswered || answerStatus.partiallyAnswered;
 
   const nextId = nextScreenId(screen.id, store);
   const conversationReturn = conversationReturnHref({
@@ -70,8 +94,12 @@ export default async function EssentialsScreenPage({
 
   const mod = getEssentialsModule(screen.module_id);
   const sessionMode = session === "1";
-  const quickContext = getQuickContextForDeep(store, screen.question_id);
-  const companion = companionForDeepQuestion(screen.question_id);
+  const quickContext =
+    getQuickContextForDeep(store, question.id) ??
+    getQuickContextForDeep(store, screen.question_id);
+  const companion =
+    companionForDeepQuestion(question.id) ??
+    companionForDeepQuestion(screen.question_id);
   const quickPrompt = quick
     ? resolveConversationPrompt(quick)
     : companion
@@ -99,6 +127,16 @@ export default async function EssentialsScreenPage({
         </div>
       }
     >
+      {previouslyAnswered ? (
+        <section className="surface mb-4 flex flex-wrap items-center gap-2 p-4">
+          <span className="badge badge-info">Previously answered</span>
+          <AnswerStatusBadge status={answerStatus} compact />
+          <p className="text-sm text-ink-muted">
+            Your existing answer is loaded below. Edit to update, or continue
+            when you are satisfied.
+          </p>
+        </section>
+      ) : null}
       {(quickContext || quickPrompt) && (
         <section className="surface mb-4 p-5">
           <h2 className="font-display text-lg">From your quick prompt</h2>

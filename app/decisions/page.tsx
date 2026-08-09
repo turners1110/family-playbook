@@ -6,8 +6,10 @@ import { DecisionForm } from "@/components/decisions/DecisionForm";
 import {
   decisionHref,
   listFamilyDecisions,
+  listProposedPrinciples,
   type FamilyDecisionNode,
 } from "@/lib/knowledge";
+import { ProposedPrincipleCard } from "@/components/decisions/ProposedPrincipleCard";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,7 @@ export default async function DecisionsPage({
   const params = await searchParams;
   const store = await readStore();
   let decisions = listFamilyDecisions(store);
+  const proposals = listProposedPrinciples(store);
 
   if (params.status) {
     decisions = decisions.filter((d) => d.status === params.status);
@@ -90,6 +93,21 @@ export default async function DecisionsPage({
           Disagreement
         </Link>
       </form>
+
+      {proposals.length > 0 ? (
+        <section className="mb-8 space-y-3">
+          <div>
+            <h2 className="font-display text-2xl">Proposed from your answers</h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              Soft synthesis from related answered questions. Edit, accept into
+              Decisions, or reject.
+            </p>
+          </div>
+          {proposals.map((p) => (
+            <ProposedPrincipleCard key={p.id} proposal={p} />
+          ))}
+        </section>
+      ) : null}
 
       <div className="space-y-3">
         {decisions.map((d) => (

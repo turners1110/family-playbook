@@ -58,6 +58,10 @@ export function assertValidAppStore(data: unknown): asserts data is AppStore {
   if (!Array.isArray(store.qa_runs)) {
     (store as { qa_runs: unknown[] }).qa_runs = [];
   }
+  if (!Array.isArray(store.principle_proposal_feedback)) {
+    (store as { principle_proposal_feedback: unknown[] }).principle_proposal_feedback =
+      [];
+  }
 
   // Soft-normalize Before Baby scheduling settings on older stores.
   const settings = store.settings as Record<string, unknown>;

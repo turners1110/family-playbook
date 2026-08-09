@@ -189,6 +189,37 @@ describe("conversation modes and session builder", () => {
       expect(p.life_stage).not.toBe("teen");
     }
   });
+
+  it("skips prompts whose linked library question is already answered", () => {
+    const answeredId = "q_what_does_success_as_parents_mean_to_us";
+    const full = buildConversationSession({
+      mode: "babymoon",
+      plannedMinutes: 15,
+      babymoonRound: 1,
+      includeUnansweredOnly: false,
+    });
+    const filtered = buildConversationSession({
+      mode: "babymoon",
+      plannedMinutes: 15,
+      babymoonRound: 1,
+      includeUnansweredOnly: true,
+      answeredLibraryQuestionIds: [answeredId],
+    });
+    expect(full.some((i) => i.source_question_id === answeredId)).toBe(true);
+    expect(filtered.every((i) => i.source_question_id !== answeredId)).toBe(
+      true,
+    );
+    // Truncated remote IDs still match
+    const filteredShort = buildConversationSession({
+      mode: "babymoon",
+      plannedMinutes: 15,
+      babymoonRound: 1,
+      answeredLibraryQuestionIds: [answeredId.slice(0, 28)],
+    });
+    expect(
+      filteredShort.every((i) => i.source_question_id !== answeredId),
+    ).toBe(true);
+  });
 });
 
 describe("momentum and timing", () => {

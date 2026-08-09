@@ -874,6 +874,14 @@ export interface AppStore {
   conversation_quick_answers?: ConversationQuickAnswer[];
   conversation_differences?: ConversationDifference[];
   qa_runs?: QaRunRecord[];
+  /** Accept/reject/edit feedback for synthesized principle proposals. */
+  principle_proposal_feedback?: Array<{
+    topic_slug: string;
+    status: "accepted" | "rejected" | "edited";
+    decision_id?: string | null;
+    statement?: string | null;
+    updated_at: string;
+  }>;
   current_user_id: string;
   demo_mode: boolean;
 }

@@ -40,9 +40,14 @@ export type ResolveDeepQuestionInput = {
 };
 
 /**
- * Prompt catalogs sometimes store a fuller ID than the truncated bank ID.
+ * Prompt catalogs / pathway IDs sometimes truncate differently than the store.
  * Prefer exact match; otherwise a unique prefix/extension match.
  */
+export function questionIdsRelated(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  return a === b || a.startsWith(b) || b.startsWith(a);
+}
+
 export function resolveLibraryQuestionId(
   candidateId: string | null | undefined,
   questions: ReadonlyArray<{ id: string; slug?: string }> | undefined,
@@ -51,7 +56,7 @@ export function resolveLibraryQuestionId(
   if (!id || !questions?.length) return id;
   if (questions.some((q) => q.id === id)) return id;
   const fuzzy = questions.filter(
-    (q) => q.id.startsWith(id) || id.startsWith(q.id),
+    (q) => questionIdsRelated(q.id, id),
   );
   if (fuzzy.length === 1) return fuzzy[0]!.id;
   return id;
@@ -79,9 +84,11 @@ function essentialsType(
   screen: EssentialsScreenDef,
   questionId: string,
 ): "essentials_screen" | "essentials_grouped" {
+  if (questionIdsRelated(screen.question_id, questionId)) {
+    return "essentials_screen";
+  }
   if (
-    screen.question_id !== questionId &&
-    screen.paired_question_ids?.includes(questionId)
+    screen.paired_question_ids?.some((p) => questionIdsRelated(p, questionId))
   ) {
     return "essentials_grouped";
   }

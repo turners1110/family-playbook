@@ -17,6 +17,9 @@ import {
   SlowSaveNotice,
 } from "@/components/ui/save-feedback";
 import { essentialsShowSeparateEditors } from "@/lib/discussions/discussion-mode";
+import { sharedContextFromEssentials } from "@/lib/content/resolve-question-context";
+import { QuestionContextPanel } from "@/components/questions/QuestionContextPanel";
+import { previewLibraryAnswerText } from "@/lib/services/previously-answered";
 
 type SaveMode =
   | "continue"
@@ -116,6 +119,24 @@ export function EssentialsScreenView({
   );
   const [identityError, setIdentityError] = useState<string | null>(null);
   const mountQuestionIdRef = useRef(screen.question_id);
+  const questionContext = useMemo(() => {
+    const hasPrior = answers.length > 0;
+    const previouslyAnswered = hasPrior
+      ? {
+          label: shared
+            ? "Previously answered"
+            : "Partially answered before",
+          previewText: previewLibraryAnswerText(answers),
+          fullyAnswered: Boolean(shared),
+        }
+      : null;
+    return sharedContextFromEssentials(screen, question, {
+      previouslyAnswered,
+      whySeeingThis: sessionMode
+        ? "Part of your Babymoon Essentials session path."
+        : "Part of the Before Birth Essentials pathway.",
+    });
+  }, [screen, question, answers, shared, sessionMode]);
 
   const maxMulti =
     screen.id === "b1_labor_priorities" || screen.id === "f1_success" ? 5 : 99;
@@ -374,10 +395,6 @@ export function EssentialsScreenView({
         >
           {screen.title}
         </h1>
-        <p className="text-sm text-ink-muted">{screen.purpose}</p>
-        <p className="rounded-xl bg-bg-elevated px-3 py-2 text-sm text-ink-muted">
-          {screen.helper}
-        </p>
         {identityError ? (
           <p className="text-sm text-danger" role="alert">
             {identityError}
@@ -387,6 +404,8 @@ export function EssentialsScreenView({
           <p className="text-xs font-medium text-amber-800">{screen.provider_label}</p>
         ) : null}
       </header>
+
+      <QuestionContextPanel context={questionContext} />
 
       {optionList.length > 0 &&
       (screen.response_type === "multi_select" ||
@@ -587,15 +606,6 @@ export function EssentialsScreenView({
           />
         </label>
       ) : null}
-
-      <section>
-        <h3 className="text-sm font-medium">Useful prompts</h3>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-muted">
-          {screen.prompts.map((p) => (
-            <li key={p}>{p}</li>
-          ))}
-        </ul>
-      </section>
 
       <label className="block text-sm">
         Optional notes

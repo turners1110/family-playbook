@@ -15,6 +15,7 @@ export type SessionBuilderInput = {
   plannedMinutes: number;
   energyPreference?: ConversationEnergyLevel | "balanced";
   topics?: string[];
+  /** Default true: skip prompts whose linked library question is already answered. */
   includeUnansweredOnly?: boolean;
   includePriorDifferences?: boolean;
   includeDiscussLater?: boolean;
@@ -26,6 +27,8 @@ export type SessionBuilderInput = {
   recentlyAnsweredIds?: string[];
   discussLaterIds?: string[];
   differenceIds?: string[];
+  /** Library deep-question IDs that are fully answered (skipByDefault). */
+  answeredLibraryQuestionIds?: string[];
 };
 
 export type BuiltSessionItem = {
@@ -73,6 +76,12 @@ function scorePrompt(
   if (input.avoidRecentlyAnswered && input.recentlyAnsweredIds?.includes(p.id)) {
     score -= 50;
   }
+  if (
+    input.answeredLibraryQuestionIds?.length &&
+    isLibraryAnswered(p.follow_up_open_question_id, input.answeredLibraryQuestionIds)
+  ) {
+    score -= 80;
+  }
   if (input.includeDiscussLater && input.discussLaterIds?.includes(p.id)) {
     score += 25;
   }
@@ -106,15 +115,41 @@ function isAllowedForMode(
   return true;
 }
 
+function idsRelated(a: string, b: string): boolean {
+  return a === b || a.startsWith(b) || b.startsWith(a);
+}
+
+function isLibraryAnswered(
+  followUpId: string | null | undefined,
+  answeredIds: string[] | undefined,
+): boolean {
+  if (!followUpId || !answeredIds?.length) return false;
+  return answeredIds.some((id) => idsRelated(id, followUpId));
+}
+
 /**
  * Build a stable session item list. Caller persists it so refresh does not reshuffle.
  */
 export function buildConversationSession(
   input: SessionBuilderInput,
 ): BuiltSessionItem[] {
+  const skipAnswered = input.includeUnansweredOnly !== false;
+
   if (input.babymoonRound) {
-    const prompts = getBabymoonRoundPrompts(input.babymoonRound);
-    return prompts.map((p, i) => ({
+    const prompts = getBabymoonRoundPrompts(input.babymoonRound).filter((p) => {
+      if (!skipAnswered) return true;
+      return !isLibraryAnswered(
+        p.follow_up_open_question_id,
+        input.answeredLibraryQuestionIds,
+      );
+    });
+    // If filtering emptied the round (everything already answered), keep originals
+    // so Start-again / revisit still works — UI labels them Previously answered.
+    const list =
+      prompts.length > 0
+        ? prompts
+        : getBabymoonRoundPrompts(input.babymoonRound);
+    return list.map((p, i) => ({
       prompt_id: p.id,
       source_question_id: p.follow_up_open_question_id,
       item_type: p.response_type,
@@ -139,6 +174,16 @@ export function buildConversationSession(
     seen.add(p.id);
     return true;
   });
+
+  if (skipAnswered && input.answeredLibraryQuestionIds?.length) {
+    pool = pool.filter(
+      (p) =>
+        !isLibraryAnswered(
+          p.follow_up_open_question_id,
+          input.answeredLibraryQuestionIds,
+        ),
+    );
+  }
 
   if (input.mode === "babymoon") {
     // Prefer babymoon-tagged prompts first.

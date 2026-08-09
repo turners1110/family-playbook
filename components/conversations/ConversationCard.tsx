@@ -57,6 +57,8 @@ import {
   discussionModeIcon,
   shouldShowSeparateEditors,
 } from "@/lib/discussions/discussion-mode";
+import type { SharedQuestionContext } from "@/lib/content/question-context";
+import { QuestionContextPanel } from "@/components/questions/QuestionContextPanel";
 
 function answerSnapshot(a?: ConversationQuickAnswer | null): string {
   if (!a) return "";
@@ -100,6 +102,12 @@ function stateFromAnswers(
   };
 }
 
+export type LibraryPriorAnswer = {
+  label: string;
+  previewText: string | null;
+  fullyAnswered: boolean;
+};
+
 export function ConversationCard({
   session,
   item,
@@ -117,6 +125,8 @@ export function ConversationCard({
   discussionMode = "shared_first",
   discussionSource = "fallback",
   discussionReason = null,
+  libraryPrior = null,
+  questionContext = null,
 }: {
   session: ConversationSession;
   item: ConversationSessionItem;
@@ -134,6 +144,9 @@ export function ConversationCard({
   discussionMode?: DiscussionMode;
   discussionSource?: DiscussionResolutionSource;
   discussionReason?: string | null;
+  /** Library answer already on file for the linked deep question. */
+  libraryPrior?: LibraryPriorAnswer | null;
+  questionContext?: SharedQuestionContext | null;
 }) {
   void _difference;
   const router = useRouter();
@@ -198,6 +211,8 @@ export function ConversationCard({
     return choices.filter((c) => allowed.has(c));
   }
 
+  const [revisitPrior, setRevisitPrior] = useState(false);
+
   const [form, setForm] = useState(() => {
     if (typeof window !== "undefined") {
       const draft = readDraft(draftKey);
@@ -231,6 +246,19 @@ export function ConversationCard({
       };
     }
     void joint;
+    // Prefill from library when this prompt has no session answers yet.
+    if (
+      !samAns &&
+      !michelleAns &&
+      !sharedAns &&
+      libraryPrior?.previewText
+    ) {
+      return {
+        ...emptyFormState(),
+        samText: libraryPrior.previewText,
+        sharedText: libraryPrior.previewText,
+      };
+    }
     return {
       ...fromAnswers,
       samChoices: filterChoices(fromAnswers.samChoices),
@@ -582,6 +610,56 @@ export function ConversationCard({
         >
           {prompt.prompt}
         </h1>
+        {questionContext ? (
+          <div className="mt-3">
+            <QuestionContextPanel context={questionContext} />
+          </div>
+        ) : null}
+        {libraryPrior ? (
+          <section
+            className="mt-3 space-y-2 rounded-xl border border-accent/30 bg-accent-soft/40 p-3"
+            role="status"
+          >
+            <p className="text-sm text-ink-muted">
+              {libraryPrior.fullyAnswered
+                ? "This is already in your playbook. Keep it, or update below."
+                : "You started this before. Keep going, or revise below."}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn btn-primary min-h-10"
+                disabled={pending}
+                onClick={() =>
+                  runGuarded(() =>
+                    actionSkipConversationItem(
+                      session.id,
+                      item.id,
+                      "skipped",
+                      save.mutationId(),
+                    ),
+                  )
+                }
+              >
+                Keep previous & continue
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost min-h-10"
+                disabled={pending}
+                onClick={() => setRevisitPrior(true)}
+              >
+                Update answer
+              </button>
+            </div>
+            {!revisitPrior && libraryPrior.fullyAnswered ? (
+              <p className="text-xs text-ink-muted">
+                Editors stay available below if you want to revise without
+                tapping Update.
+              </p>
+            ) : null}
+          </section>
+        ) : null}
         {draftRestored ? (
           <p className="mt-2 text-sm text-accent-strong" role="status">
             Unsaved draft restored
@@ -994,7 +1072,7 @@ export function ConversationCard({
                 )
               }
             >
-              Skip
+              {libraryPrior ? "Keep previous" : "Skip"}
             </button>
             <button
               type="button"
