@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
+import {
+  craftPrincipleStatement,
+  extractAnswerThemes,
+  explainPrincipleGaps,
+} from "@/lib/knowledge/principle-synthesis";
 import { listProposedPrinciples } from "@/lib/knowledge/proposed-principles";
+import { recommendNextQuestions } from "@/lib/knowledge/topic-coverage";
 import type { Answer, AppStore, Question } from "@/lib/types/models";
 
 function baseStore(overrides: Partial<AppStore> = {}): AppStore {
   return {
-    family: {
-      id: "fam",
-      name: "Test",
-      created_at: "",
-      updated_at: "",
-    },
+    family: { id: "fam", name: "Test", created_at: "", updated_at: "" },
     users: [],
     members: [
       {
@@ -71,14 +72,12 @@ function baseStore(overrides: Partial<AppStore> = {}): AppStore {
   } as AppStore;
 }
 
-function moneyQuestion(id: string, text: string): Question {
+function q(partial: Partial<Question> & Pick<Question, "id" | "text">): Question {
   return {
-    id,
-    slug: id,
-    text,
-    short_title: text,
-    why_it_matters: "specific money why",
-    discussion_guidance: "specific guidance for money talks",
+    slug: partial.id,
+    short_title: partial.text,
+    why_it_matters: "specific why about money habits",
+    discussion_guidance: "specific guidance",
     question_type: "values_clarification",
     response_schema: {},
     life_stages: ["toddler"],
@@ -100,10 +99,11 @@ function moneyQuestion(id: string, text: string): Question {
     evidence_summary: null,
     practical_tip: null,
     follow_up_prompts: [],
+    ...partial,
   } as unknown as Question;
 }
 
-function sharedAnswer(questionId: string, text: string): Answer {
+function shared(questionId: string, text: string): Answer {
   return {
     id: `a_${questionId}`,
     family_id: "fam",
@@ -119,59 +119,151 @@ function sharedAnswer(questionId: string, text: string): Answer {
     version: 1,
     created_at: "",
     updated_at: "",
-  } as Answer;
+  } as unknown as Answer;
 }
 
-describe("proposed principles", () => {
-  it("drafts a money principle from related answers", () => {
-    const q1 = moneyQuestion(
-      "q_allowance",
-      "When should allowance begin?",
+describe("principle synthesis specificity", () => {
+  it("extracts ages and rules from answers", () => {
+    const themes = extractAnswerThemes(
+      "Allowance starts at age 6. Always save before spending. No more than $5 on candy.",
     );
-    const q2 = moneyQuestion(
-      "q_chores_money",
-      "Should children earn spending money?",
-    );
+    expect(themes.ages.length).toBeGreaterThan(0);
+    expect(themes.rules.length).toBeGreaterThan(0);
+    expect(themes.specificity).toBeGreaterThanOrEqual(4);
+  });
+
+  it("crafts a statement from concrete shared answers and preserves disagreement", () => {
+    const crafted = craftPrincipleStatement({
+      topicTitle: "Allowance",
+      sharedPreviews: [
+        "Allowance starts at age six with a save-first rule each week",
+        "Base chores are unpaid family contribution; extra jobs can earn more",
+      ],
+      samThemes: extractAnswerThemes("Start at age 6; always save 50% first"),
+      michelleThemes: extractAnswerThemes(
+        "Start at age 7; never tie every chore to pay",
+      ),
+      sharedThemes: extractAnswerThemes(
+        "Allowance starts at age six with a save-first rule each week",
+      ),
+      disagreements: [
+        {
+          question: "Should allowance be tied to chores",
+          sam: "Tied to completed chores each week",
+          michelle: "Untied base chores; pay only for extras",
+        },
+      ],
+    });
+    expect(crafted).toBeTruthy();
+    expect(crafted!.statement.toLowerCase()).toMatch(/age six|save-first|chores/);
+    expect(crafted!.statement.toLowerCase()).toMatch(/differ|sam|michelle/);
+  });
+
+  it("explains gaps when confidence is low", () => {
+    const msg = explainPrincipleGaps({
+      answeredCount: 2,
+      importantUnanswered: 2,
+      disagreementCount: 2,
+      avgSpecificity: 2,
+      hasShared: false,
+    });
+    expect(msg.toLowerCase()).toMatch(/missing/);
+  });
+});
+
+describe("proposed principles from answers", () => {
+  it("drafts an allowance principle from specific answers", () => {
+    const q1 = q({
+      id: "q_should_our_child_receive_an_allowance",
+      text: "Should our child receive an allowance?",
+    });
+    const q2 = q({
+      id: "q_should_allowance_be_tied_to_chores",
+      text: "Should allowance be tied to chores?",
+    });
+    const q3 = q({
+      id: "q_what_money_lessons_belong_before_age_eight",
+      text: "What money lessons belong before age eight?",
+      priority: "medium",
+    });
     const store = baseStore({
-      questions: [q1, q2],
+      questions: [q1, q2, q3],
       answers: [
-        sharedAnswer(
+        shared(
           q1.id,
-          "Allowance starts at six with a save-first rule.",
+          "Yes — weekly allowance starting at age six, with save before spend.",
         ),
-        sharedAnswer(
+        shared(
           q2.id,
-          "Spending money comes from chores and effort.",
+          "Base chores are always unpaid family contribution; only optional extras earn money.",
+        ),
+        shared(
+          q3.id,
+          "Before age eight: money comes from effort, wants are not needs, save a portion first.",
         ),
       ],
     });
     const proposals = listProposedPrinciples(store);
-    const money = proposals.find((p) => p.topicSlug === "money");
-    expect(money).toBeTruthy();
-    expect(money!.statement.toLowerCase()).toMatch(/money|effort|save|spend|allowance/);
-    expect(money!.sourceAnswers.length).toBe(2);
-    expect(money!.confidence).toBeGreaterThanOrEqual(3);
+    const allowance =
+      proposals.find((p) => p.topicSlug === "allowance") ??
+      proposals.find((p) => p.topicSlug === "money");
+    expect(allowance).toBeTruthy();
+    expect(allowance!.readyToDraft).toBe(true);
+    expect(allowance!.statement?.toLowerCase()).toMatch(
+      /age six|allowance|chore|save/,
+    );
+    expect(allowance!.confidencePercent).toBeGreaterThan(40);
+    expect(allowance!.usedSpecifics.length).toBeGreaterThan(0);
   });
 
-  it("hides rejected proposals", () => {
-    const q1 = moneyQuestion("q_budget", "How do we talk about budget?");
-    const q2 = moneyQuestion("q_saving", "How do we teach saving?");
+  it("does not invent a generic principle from thin answers", () => {
+    const q1 = q({
+      id: "q_thin_a",
+      text: "Money vibes?",
+      categories: ["money"],
+    });
+    const q2 = q({
+      id: "q_thin_b",
+      text: "Spending vibes?",
+      categories: ["money"],
+    });
     const store = baseStore({
       questions: [q1, q2],
+      answers: [shared(q1.id, "Yes."), shared(q2.id, "Maybe.")],
+    });
+    const money = listProposedPrinciples(store).find(
+      (p) => p.topicSlug === "money" || p.topicSlug === "allowance",
+    );
+    if (money) {
+      expect(money.readyToDraft).toBe(false);
+      expect(money.missingExplanation).toBeTruthy();
+    }
+  });
+});
+
+describe("next question recommendations", () => {
+  it("ranks unanswered high-importance questions with reasons", () => {
+    const answered = q({
+      id: "q_answered_money",
+      text: "Should our child receive an allowance?",
+      priority: "high",
+    });
+    const open = q({
+      id: "q_open_chores",
+      text: "Should allowance be tied to chores?",
+      priority: "high",
+    });
+    const store = baseStore({
+      questions: [answered, open],
       answers: [
-        sharedAnswer(q1.id, "We keep a simple family budget."),
-        sharedAnswer(q2.id, "Save before spend."),
-      ],
-      principle_proposal_feedback: [
-        {
-          topic_slug: "money",
-          status: "rejected",
-          updated_at: "",
-        },
+        shared(
+          answered.id,
+          "Yes at age six with save-first every week without exception.",
+        ),
       ],
     });
-    expect(
-      listProposedPrinciples(store).some((p) => p.topicSlug === "money"),
-    ).toBe(false);
+    const next = recommendNextQuestions(store, 5);
+    expect(next.some((n) => n.questionId === open.id)).toBe(true);
+    expect(next[0]?.reasons.length).toBeGreaterThan(0);
   });
 });

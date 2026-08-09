@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ProposedPrinciple } from "@/lib/knowledge/proposed-principles";
 import {
   actionAcceptPrincipleProposal,
+  actionDeferPrincipleProposal,
   actionRejectPrincipleProposal,
   actionSavePrincipleProposalEdit,
 } from "@/lib/actions/principle-proposals";
@@ -19,7 +20,7 @@ export function ProposedPrincipleCard({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
-  const [statement, setStatement] = useState(proposal.statement);
+  const [statement, setStatement] = useState(proposal.statement ?? "");
   const [error, setError] = useState<string | null>(null);
 
   function run(fn: () => Promise<unknown>) {
@@ -35,26 +36,75 @@ export function ProposedPrincipleCard({
   }
 
   return (
-    <article className="surface space-y-3 p-5">
+    <article
+      id={`principle-${proposal.topicSlug}`}
+      className="surface space-y-3 p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-accent-strong">
-            Proposed Family Principle
+            {proposal.readyToDraft
+              ? "Proposed Family Principle"
+              : "Principle cluster forming"}
           </p>
           <h3 className="font-display text-xl text-ink">{proposal.title}</h3>
         </div>
-        <ConfidenceBadge confidence={proposal.confidence} />
+        <div className="flex flex-wrap gap-2">
+          <span className="badge badge-info">
+            {proposal.confidencePercent}% confidence
+          </span>
+          <ConfidenceBadge confidence={proposal.confidence} />
+        </div>
       </div>
 
-      {editing ? (
-        <textarea
-          className="input min-h-28 w-full"
-          value={statement}
-          onChange={(e) => setStatement(e.target.value)}
-          disabled={pending}
-        />
+      <p className="text-xs text-ink-subtle">
+        {proposal.importantAnswered} / {proposal.importantTotal} important
+        questions answered · {proposal.answeredCount} answers in cluster
+      </p>
+
+      {proposal.statement ? (
+        editing ? (
+          <textarea
+            className="input min-h-28 w-full"
+            value={statement}
+            onChange={(e) => setStatement(e.target.value)}
+            disabled={pending}
+          />
+        ) : (
+          <p className="text-ink leading-relaxed">“{proposal.statement}”</p>
+        )
       ) : (
-        <p className="text-ink leading-relaxed">“{statement}”</p>
+        <p className="text-sm text-ink-muted">
+          Not enough specific detail yet to draft a playbook-ready principle.
+        </p>
+      )}
+
+      {proposal.missingExplanation ? (
+        <div className="rounded-xl border border-border bg-bg-elevated/50 px-3 py-2 text-sm text-ink-muted">
+          <span className="font-medium text-ink">What’s missing: </span>
+          {proposal.missingExplanation}
+        </div>
+      ) : null}
+
+      {(proposal.samThemes.length > 0 || proposal.michelleThemes.length > 0) && (
+        <div className="grid gap-2 text-sm sm:grid-cols-2">
+          <div>
+            <h4 className="font-medium text-ink">Stronger themes from Sam</h4>
+            <p className="mt-1 text-ink-muted">
+              {proposal.samThemes.length
+                ? proposal.samThemes.join(" · ")
+                : "—"}
+            </p>
+          </div>
+          <div>
+            <h4 className="font-medium text-ink">Stronger themes from Michelle</h4>
+            <p className="mt-1 text-ink-muted">
+              {proposal.michelleThemes.length
+                ? proposal.michelleThemes.join(" · ")
+                : "—"}
+            </p>
+          </div>
+        </div>
       )}
 
       <div className="grid gap-3 text-sm sm:grid-cols-2">
@@ -63,8 +113,13 @@ export function ProposedPrincipleCard({
           <ul className="mt-1 space-y-1 text-ink-muted">
             {proposal.sourceAnswers.slice(0, 5).map((s) => (
               <li key={s.questionId}>
-                <span className="font-medium text-ink">{s.questionText}:</span>{" "}
-                {s.preview}
+                <Link
+                  href={`/questions/${s.questionSlug}`}
+                  className="font-medium text-ink underline decoration-border"
+                >
+                  {s.questionText}
+                </Link>
+                : {s.preview}
               </li>
             ))}
           </ul>
@@ -100,7 +155,7 @@ export function ProposedPrincipleCard({
       {proposal.questionsBeforeFinalizing.length > 0 ? (
         <div className="rounded-xl border border-border bg-bg-elevated/50 p-3 text-sm">
           <h4 className="font-medium text-ink">
-            Worth answering before finalizing
+            Highest-value questions before finalizing
           </h4>
           <ul className="mt-2 space-y-1 text-ink-muted">
             {proposal.questionsBeforeFinalizing.map((q) => (
@@ -112,6 +167,7 @@ export function ProposedPrincipleCard({
                 >
                   {q.text}
                 </Link>
+                <span className="text-ink-subtle"> — {q.reason}</span>
               </li>
             ))}
           </ul>
@@ -125,42 +181,44 @@ export function ProposedPrincipleCard({
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        {editing ? (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={pending || !statement.trim()}
-            onClick={() =>
-              run(async () => {
-                await actionSavePrincipleProposalEdit(
-                  proposal.topicSlug,
-                  statement,
-                );
-                setEditing(false);
-              })
-            }
-          >
-            Save edit
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-secondary"
-            disabled={pending}
-            onClick={() => setEditing(true)}
-          >
-            Edit
-          </button>
-        )}
+        {proposal.statement ? (
+          editing ? (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending || !statement.trim()}
+              onClick={() =>
+                run(async () => {
+                  await actionSavePrincipleProposalEdit(
+                    proposal.topicSlug,
+                    statement,
+                  );
+                  setEditing(false);
+                })
+              }
+            >
+              Save edit
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={pending}
+              onClick={() => setEditing(true)}
+            >
+              Edit
+            </button>
+          )
+        ) : null}
         <button
           type="button"
           className="btn btn-primary"
-          disabled={pending}
+          disabled={pending || (!proposal.statement && !statement.trim())}
           onClick={() =>
             run(async () => {
               const res = await actionAcceptPrincipleProposal({
                 topicSlug: proposal.topicSlug,
-                statement,
+                statement: statement || proposal.statement || undefined,
               });
               if (res.decisionId) {
                 router.push(`/decisions/${res.decisionId}`);
@@ -175,15 +233,22 @@ export function ProposedPrincipleCard({
           className="btn btn-ghost"
           disabled={pending}
           onClick={() =>
+            run(() => actionDeferPrincipleProposal(proposal.topicSlug))
+          }
+        >
+          Save for later
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          disabled={pending}
+          onClick={() =>
             run(() => actionRejectPrincipleProposal(proposal.topicSlug))
           }
         >
           Reject
         </button>
       </div>
-      <p className="text-xs text-ink-subtle">
-        Based on {proposal.answeredCount} related answers · soft suggestion only
-      </p>
     </article>
   );
 }

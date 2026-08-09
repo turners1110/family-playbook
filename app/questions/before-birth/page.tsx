@@ -11,6 +11,8 @@ import {
   resolveEssentialsWorkshopContext,
   scoreLabel,
 } from "@/lib/essentials/screen-context";
+import { listReadyPrincipleProposals } from "@/lib/knowledge";
+import { PrincipleReadyBanner } from "@/components/decisions/PrincipleReadyBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,7 @@ export default async function BeforeBirthEssentialsPage({
   const completedScreens = dash.screens.filter(
     (s) => s.visible && s.state === "completed",
   );
+  const readyPrinciples = listReadyPrincipleProposals(store).slice(0, 2);
   const highImpactOpen = dash.screens
     .filter((s) => s.visible && s.state !== "completed")
     .map((s) => ({
@@ -80,6 +83,8 @@ export default async function BeforeBirthEssentialsPage({
         </div>
       }
     >
+      <PrincipleReadyBanner proposals={readyPrinciples} />
+
       <section className="surface mb-5 space-y-3 p-5">
         <h2 className="font-display text-lg">Suggested workflow</h2>
         <ol className="grid gap-2 text-sm text-ink-muted sm:grid-cols-4">

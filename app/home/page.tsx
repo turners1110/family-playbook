@@ -7,10 +7,18 @@ import { getDashboardStats } from "@/lib/services/stats";
 import { readStore } from "@/lib/db/store";
 import { buildQuestionStatusIndex } from "@/lib/services/question-status";
 import {
+  buildTopicCoverage,
   decisionHref,
   decisionsNeedingAttention,
+  listReadyPrincipleProposals,
+  recommendNextQuestions,
 } from "@/lib/knowledge";
 import { buildDiscussionModeHomeStats } from "@/lib/discussions/discussion-stats";
+import { PrincipleReadyBanner } from "@/components/decisions/PrincipleReadyBanner";
+import {
+  NextQuestionsPanel,
+  TopicCoveragePanel,
+} from "@/components/decisions/TopicCoveragePanels";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +28,9 @@ export default async function HomePage() {
   const statusIndex = buildQuestionStatusIndex(store);
   const attentionDecisions = decisionsNeedingAttention(store).slice(0, 5);
   const discussionStats = buildDiscussionModeHomeStats(store);
+  const readyPrinciples = listReadyPrincipleProposals(store).slice(0, 2);
+  const nextQuestions = recommendNextQuestions(store, 5);
+  const topicCoverage = buildTopicCoverage(store);
 
   return (
     <AppShell
@@ -58,6 +69,10 @@ export default async function HomePage() {
           <ProgressBar value={stats.babymoonPct} label="Babymoon-weighted progress" />
         </div>
       </section>
+
+      <PrincipleReadyBanner proposals={readyPrinciples} />
+      <NextQuestionsPanel items={nextQuestions} />
+      <TopicCoveragePanel rows={topicCoverage} />
 
       <section className="surface mb-6 p-5 sm:p-6">
         <h2 className="font-display text-2xl text-ink">Your progress</h2>

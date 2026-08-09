@@ -7,6 +7,8 @@ import { evaluateSessionCompletion } from "@/lib/services/round-status";
 import { readStore } from "@/lib/db/store";
 import { parseBabymoonRound } from "@/lib/services/round-status";
 import { notFound, redirect } from "next/navigation";
+import { readyProposalsForQuestionIds } from "@/lib/knowledge";
+import { PrincipleReadyBanner } from "@/components/decisions/PrincipleReadyBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -54,9 +56,17 @@ export default async function SessionCompletePage({
 
   const followUps = eval_.followUps;
   const nextRound = round && round < 3 ? ((round + 1) as 2 | 3) : null;
+  const touchedQuestionIds = detail.items
+    .map((i) => i.source_question_id)
+    .filter((id): id is string => Boolean(id));
+  const readyPrinciples = readyProposalsForQuestionIds(
+    store,
+    touchedQuestionIds,
+  );
 
   return (
     <AppShell title={title} subtitle="Nice work — your progress is saved.">
+      <PrincipleReadyBanner proposals={readyPrinciples} />
       <section className="surface mb-5 p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.12em] text-accent">
           Round finished

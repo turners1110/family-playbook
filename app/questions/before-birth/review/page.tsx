@@ -6,6 +6,12 @@ import { buildEssentialsDashboard } from "@/lib/essentials/progress";
 import { buildBabymoonSummary } from "@/lib/essentials/summary";
 import { collectTaskSuggestions } from "@/lib/essentials/task-suggestions";
 import { TaskSuggestionPreview } from "@/components/essentials/TaskSuggestionPreview";
+import {
+  listReadyPrincipleProposals,
+  buildTopicCoverage,
+} from "@/lib/knowledge";
+import { PrincipleReadyBanner } from "@/components/decisions/PrincipleReadyBanner";
+import { TopicCoveragePanel } from "@/components/decisions/TopicCoveragePanels";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +21,17 @@ export default async function EssentialsReviewPage() {
   const dash = buildEssentialsDashboard(store);
   const summary = buildBabymoonSummary(store);
   const suggestions = collectTaskSuggestions(store);
+  const readyPrinciples = listReadyPrincipleProposals(store);
+  const topicCoverage = buildTopicCoverage(store).filter((r) =>
+    [
+      "visitors-after-birth",
+      "sleep",
+      "feeding",
+      "birth-plan",
+      "partnership",
+      "childcare",
+    ].includes(r.topicSlug),
+  );
 
   const agreed = dash.screens.filter((s) => s.visible && s.state === "completed");
   const different = dash.unresolved_disagreements;
@@ -50,6 +67,9 @@ export default async function EssentialsReviewPage() {
         </div>
       }
     >
+      <PrincipleReadyBanner proposals={readyPrinciples} />
+      <TopicCoveragePanel rows={topicCoverage} />
+
       <section className="surface mb-5 space-y-3 p-5">
         <h2 className="font-display text-xl">Babymoon summary</h2>
         <p className="text-sm text-ink-muted">

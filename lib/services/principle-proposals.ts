@@ -37,6 +37,20 @@ export async function rejectPrincipleProposal(topicSlug: string) {
   );
 }
 
+export async function deferPrincipleProposal(topicSlug: string) {
+  return updateStore(
+    (store) => {
+      upsertFeedback(store, {
+        topic_slug: topicSlug,
+        status: "deferred",
+        updated_at: nowIso(),
+      });
+      return store;
+    },
+    { operation: "deferPrincipleProposal" },
+  );
+}
+
 export async function savePrincipleProposalEdit(
   topicSlug: string,
   statement: string,
@@ -62,8 +76,11 @@ export async function acceptPrincipleProposal(input: {
   const store = await readStore();
   const proposal = getProposedPrinciple(store, input.topicSlug);
   if (!proposal) throw new Error("Proposal not found or no longer eligible.");
+  if (!proposal.statement && !input.statement?.trim()) {
+    throw new Error("This cluster is not ready to accept yet.");
+  }
 
-  const statement = (input.statement ?? proposal.statement).trim();
+  const statement = (input.statement ?? proposal.statement ?? "").trim();
   const timestamp = nowIso();
   let decisionId = "";
 

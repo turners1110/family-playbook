@@ -23,7 +23,17 @@ export {
 
 export {
   listProposedPrinciples,
+  listReadyPrincipleProposals,
   getProposedPrinciple,
+  readyProposalsForQuestionIds,
+  PRINCIPLE_TOPICS,
   type ProposedPrinciple,
   type PrincipleProposalFeedback,
 } from "@/lib/knowledge/proposed-principles";
+
+export {
+  buildTopicCoverage,
+  recommendNextQuestions,
+  type TopicCoverage,
+  type NextQuestionRecommendation,
+} from "@/lib/knowledge/topic-coverage";

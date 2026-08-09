@@ -4,12 +4,18 @@ import { StatusBadge, ConfidenceBadge } from "@/components/shared/ui";
 import { readStore } from "@/lib/db/store";
 import { DecisionForm } from "@/components/decisions/DecisionForm";
 import {
+  buildTopicCoverage,
   decisionHref,
   listFamilyDecisions,
   listProposedPrinciples,
+  recommendNextQuestions,
   type FamilyDecisionNode,
 } from "@/lib/knowledge";
 import { ProposedPrincipleCard } from "@/components/decisions/ProposedPrincipleCard";
+import {
+  NextQuestionsPanel,
+  TopicCoveragePanel,
+} from "@/components/decisions/TopicCoveragePanels";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +28,8 @@ export default async function DecisionsPage({
   const store = await readStore();
   let decisions = listFamilyDecisions(store);
   const proposals = listProposedPrinciples(store);
+  const topicCoverage = buildTopicCoverage(store);
+  const nextQuestions = recommendNextQuestions(store, 5);
 
   if (params.status) {
     decisions = decisions.filter((d) => d.status === params.status);
@@ -94,13 +102,16 @@ export default async function DecisionsPage({
         </Link>
       </form>
 
+      <TopicCoveragePanel rows={topicCoverage} />
+      <NextQuestionsPanel items={nextQuestions} />
+
       {proposals.length > 0 ? (
         <section className="mb-8 space-y-3">
           <div>
             <h2 className="font-display text-2xl">Proposed from your answers</h2>
             <p className="mt-1 text-sm text-ink-muted">
-              Soft synthesis from related answered questions. Edit, accept into
-              Decisions, or reject.
+              Answer-specific drafts for the Turner Family Playbook. Edit, accept,
+              save for later, or reject.
             </p>
           </div>
           {proposals.map((p) => (

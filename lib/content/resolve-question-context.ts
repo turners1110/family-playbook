@@ -20,6 +20,7 @@ import {
   type SoftRecommendation,
 } from "@/lib/content/question-context";
 import { questionIdsRelated } from "@/lib/conversations/deep-link";
+import { getLibraryQuestionEnrichment } from "@/lib/content/library-question-context";
 import type { Question } from "@/lib/types/models";
 
 function priorityToImportance(
@@ -127,6 +128,46 @@ export function sharedContextFromLibraryQuestion(
     return sharedContextFromEssentials(hit.screen, question, extras);
   }
 
+  const lib = getLibraryQuestionEnrichment(question.id);
+  const recommendations = [...(extras?.recommendations ?? [])];
+
+  if (lib) {
+    if (lib.importance >= 4) {
+      recommendations.push(
+        softRec(
+          "high_impact",
+          "Curated as a high-impact library question for your playbook.",
+        ),
+      );
+    }
+    if (extras?.previouslyAnswered) {
+      recommendations.push(
+        softRec(
+          "previously_answered",
+          extras.previouslyAnswered.fullyAnswered
+            ? "You already answered this in your playbook."
+            : "You have started this answer before.",
+        ),
+      );
+    }
+    return {
+      purpose: specificOrNull(lib.purpose),
+      explanation: specificOrNull(lib.explanation),
+      howTo: null,
+      examples: lib.examples,
+      prompts: lib.prompts,
+      relatedResearch: specificOrNull(lib.related_research),
+      importance: lib.importance,
+      relevanceNow: lib.relevance_now,
+      difficulty: lib.difficulty,
+      estimatedMinutes: lib.estimated_minutes,
+      previouslyAnswered: extras?.previouslyAnswered ?? null,
+      recommendations,
+      whySeeingThis:
+        extras?.whySeeingThis ?? recommendations[0]?.reason ?? null,
+    };
+  }
+
   // Library seed text is mostly generic — only surface non-filler fields.
   const why = specificOrNull(question.why_it_matters);
   const howTo = specificOrNull(question.discussion_guidance);
@@ -135,7 +176,6 @@ export function sharedContextFromLibraryQuestion(
   );
   const research = specificOrNull(question.evidence_summary);
   const tip = specificOrNull(question.practical_tip);
-  const recommendations = [...(extras?.recommendations ?? [])];
 
   if (
     question.priority === "essential_before_birth" ||

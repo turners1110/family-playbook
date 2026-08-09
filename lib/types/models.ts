@@ -877,7 +877,7 @@ export interface AppStore {
   /** Accept/reject/edit feedback for synthesized principle proposals. */
   principle_proposal_feedback?: Array<{
     topic_slug: string;
-    status: "accepted" | "rejected" | "edited";
+    status: "accepted" | "rejected" | "edited" | "deferred";
     decision_id?: string | null;
     statement?: string | null;
     updated_at: string;
