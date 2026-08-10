@@ -37,3 +37,5 @@ export {
   type TopicCoverage,
   type NextQuestionRecommendation,
 } from "@/lib/knowledge/topic-coverage";
+
+export { buildDecisionEvidence } from "@/lib/knowledge/decision-evidence";

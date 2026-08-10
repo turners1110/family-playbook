@@ -12,6 +12,9 @@ import {
   getFamilyDecisionBySlugOrId,
   getRelatedDecisions,
 } from "@/lib/knowledge";
+import { DecisionEvidencePanel } from "@/components/decisions/DecisionEvidencePanel";
+import { buildDecisionEvidence } from "@/lib/knowledge/decision-evidence";
+import { requireFamilyContext } from "@/lib/auth/family-context";
 
 export const dynamic = "force-dynamic";
 
@@ -58,6 +61,7 @@ export default async function DecisionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const ctx = await requireFamilyContext();
   const store = await readStore();
   const hub = getFamilyDecisionBySlugOrId(store, id);
   const persisted = await getDecision(id);
@@ -81,6 +85,17 @@ export default async function DecisionDetailPage({
     decision?.shared_conclusion ??
     decision?.statement ??
     "";
+
+  const questionIds =
+    node?.questions.map((q) => q.id) ??
+    decision?.source_question_ids ??
+    [];
+  const evidence = await buildDecisionEvidence({
+    store,
+    questionIds,
+    familyPosition: position,
+    ctx,
+  });
 
   return (
     <AppShell
@@ -119,6 +134,23 @@ export default async function DecisionDetailPage({
             ))}
           </ul>
         ) : null}
+        {node ? (
+          <div className="mt-4 grid gap-1 text-sm text-ink-muted sm:grid-cols-2">
+            <p>Discussion: {node.health.discussionComplete ? "Complete" : "Incomplete"}</p>
+            <p>Shared position: {node.health.sharedAnswer ? "Yes" : "No"}</p>
+            <p>
+              Evidence reviewed:{" "}
+              {node.health.evidenceReviewed ? "Yes" : "Partial / none"}
+            </p>
+            <p>Open disagreement: {node.health.noConflicts ? "No" : "Yes"}</p>
+            <p>
+              Provider input: {node.health.providerReviewed ? "Reviewed" : "Pending"}
+            </p>
+            <p>
+              Tasks: {node.health.checklistComplete ? "Complete" : "Open items"}
+            </p>
+          </div>
+        ) : null}
         <div className="mt-4 grid gap-2 text-sm text-ink-muted sm:grid-cols-2">
           <div>
             Updated{" "}
@@ -152,6 +184,13 @@ export default async function DecisionDetailPage({
           ) : null}
         </div>
       </section>
+
+      <DecisionEvidencePanel
+        synthesis={evidence.synthesis}
+        findings={evidence.findings}
+        familyPosition={position}
+        mismatchSummary={evidence.mismatchSummary}
+      />
 
       {(decision?.sam_perspective || decision?.michelle_perspective) && (
         <section className="surface mb-5 p-5">

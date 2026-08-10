@@ -17,6 +17,9 @@ import { getResearchForQuestion } from "@/lib/research/services";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { ResearchGuidancePanel } from "@/components/questions/ResearchGuidancePanel";
 import { formatAnswerPayload } from "@/lib/questions/answer-display";
+import { groundedFindingsFromLinks } from "@/lib/research/ground-findings";
+import { synthesizeEvidence } from "@/lib/research/synthesis";
+import { classifyResearchValue } from "@/lib/research/research-value";
 import { CreateChecklistTaskButton } from "@/components/checklists/CreateChecklistTaskButton";
 import {
   decisionHref,
@@ -117,6 +120,17 @@ export default async function QuestionDetailPage({
   );
   const member = store.members.find((m) => m.user_id === store.current_user_id)!;
   const research = await getResearchForQuestion(question.id, ctx);
+  const researchFindings = groundedFindingsFromLinks(research, question.id);
+  const researchSynthesis = synthesizeEvidence(researchFindings);
+  const researchValue = classifyResearchValue({
+    id: question.id,
+    title: question.short_title,
+    text: question.text,
+    categories: question.categories,
+    evidence_needed: question.evidence_needed,
+    research_mode: question.research_mode,
+    priority: question.priority,
+  });
   const relatedDecisions = getDecisionsForQuestion(store, question.id);
   const returnHref =
     sp.source === "conversation" || sp.returnTo || sp.sessionId || sp.testRunId
@@ -195,8 +209,11 @@ export default async function QuestionDetailPage({
       </section>
 
       <ResearchGuidancePanel
-        items={research}
+        synthesis={researchSynthesis}
+        findings={researchFindings}
+        researchValue={researchValue.class}
         evidenceNeeded={Boolean(question.evidence_needed)}
+        questionSlug={question.slug}
       />
 
       <section className="surface p-5">

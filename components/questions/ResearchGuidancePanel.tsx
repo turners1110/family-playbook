@@ -1,140 +1,171 @@
 "use client";
 
 import Link from "next/link";
-import type {
-  ResearchAvailabilityType,
-  ResearchEvidenceRating,
-} from "@/lib/research/types";
-import {
-  RESEARCH_AVAILABILITY_LABELS,
-  RESEARCH_EVIDENCE_RATING_LABELS,
-} from "@/lib/research/types";
-
-export type ResearchPanelItem = {
-  link: {
-    id: string;
-    relevance_note?: string | null;
-    link_type?: string | null;
-  };
-  source: {
-    id: string;
-    title: string;
-    evidence_rating?: ResearchEvidenceRating | null;
-    availability_type: ResearchAvailabilityType;
-  } | null;
-  shortFinding: string | null;
-};
+import type { EvidenceSynthesis } from "@/lib/research/synthesis";
+import type { GroundedFinding } from "@/lib/research/evidence-model";
+import type { ResearchValueClass } from "@/lib/research/research-value";
 
 /**
  * Compact research panel — informs, does not decide.
+ * Never shows fabricated evidence.
  */
 export function ResearchGuidancePanel({
-  items,
+  synthesis,
+  findings,
+  researchValue,
   evidenceNeeded,
+  questionSlug,
 }: {
-  items: ResearchPanelItem[];
+  synthesis: EvidenceSynthesis;
+  findings: GroundedFinding[];
+  researchValue?: ResearchValueClass;
   evidenceNeeded?: boolean;
+  questionSlug?: string;
 }) {
-  const linked = items.filter((i) => i.source);
-  const ratings = linked
-    .map((i) => i.source?.evidence_rating)
-    .filter(Boolean) as ResearchEvidenceRating[];
-  const moderateOrHigher = ratings.some((r) =>
-    r === "high" || r === "moderate",
-  );
+  const showEmptyHelp =
+    !synthesis.has_grounded_evidence &&
+    (evidenceNeeded ||
+      researchValue === "CRITICAL" ||
+      researchValue === "HIGH" ||
+      researchValue === "MODERATE");
 
-  if (linked.length === 0) {
+  // Values questions: hide empty research chrome entirely
+  if (
+    !synthesis.has_grounded_evidence &&
+    (researchValue === "NONE" || researchValue === "LOW") &&
+    !evidenceNeeded
+  ) {
+    return null;
+  }
+
+  if (!synthesis.has_grounded_evidence) {
+    if (!showEmptyHelp) return null;
     return (
       <section className="surface mb-5 p-5">
         <h3 className="font-display text-xl">Research & guidance</h3>
-        {evidenceNeeded ? (
-          <p className="mt-2 text-sm text-ink-muted">
-            Research would help here. Evidence informs your conversation — it does
-            not decide for you.
-          </p>
-        ) : (
-          <p className="mt-2 text-sm text-ink-muted">
-            No linked research yet.
-          </p>
-        )}
+        <p className="mt-2 text-sm text-ink-muted">
+          Research would help here. Evidence informs your conversation — it does
+          not decide for you.
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <Link href="/research/new" className="btn btn-secondary">
-            Add source
-          </Link>
-          <Link href="/research" className="btn btn-ghost">
+          <Link href="/research" className="btn btn-secondary">
             Search library
           </Link>
+          <Link href="/research/new" className="btn btn-ghost">
+            Add source
+          </Link>
+          {questionSlug ? (
+            <Link href={`/research?queue=${questionSlug}`} className="btn btn-ghost">
+              Add to research queue
+            </Link>
+          ) : null}
         </div>
       </section>
     );
   }
 
-  const synthesis = linked
-    .map((i) => i.shortFinding || i.link.relevance_note)
-    .filter(Boolean)
-    .slice(0, 2)
-    .join(" ");
+  const topFindings = findings.slice(0, 4);
+  const sources = [...new Map(findings.map((f) => [f.source_id, f])).values()].slice(
+    0,
+    3,
+  );
 
   return (
     <section className="surface mb-5 p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-display text-xl">Research & guidance</h3>
-        <Link href="/research/new" className="btn btn-ghost">
-          Add source
+        <Link href="/research" className="btn btn-ghost">
+          View evidence
         </Link>
       </div>
       <p className="mt-1 text-sm text-ink-muted">
-        {linked.length} source{linked.length === 1 ? "" : "s"}
-        {ratings.length
-          ? ` · ${moderateOrHigher ? "Moderate+" : "Limited"} evidence signals`
-          : ""}
+        {synthesis.finding_count} finding{synthesis.finding_count === 1 ? "" : "s"} ·{" "}
+        {synthesis.source_count} source{synthesis.source_count === 1 ? "" : "s"} ·
+        Evidence picture:{" "}
+        <span className="font-medium text-ink">{synthesis.evidence_picture_label}</span>
       </p>
-      {synthesis ? (
-        <p className="mt-3 text-sm text-ink">{synthesis}</p>
+      <p className="mt-1 text-xs text-ink-subtle">{synthesis.picture_reason}</p>
+
+      {synthesis.key_takeaway ? (
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            Key takeaway
+          </p>
+          <p className="mt-1 text-sm text-ink">{synthesis.key_takeaway}</p>
+        </div>
       ) : null}
-      <ul className="mt-3 space-y-2">
-        {linked.slice(0, 3).map(({ link, source, shortFinding }) =>
-          source ? (
-            <li
-              key={link.id}
-              className="rounded-xl border border-border px-3 py-2 text-sm"
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <Link
-                  href={`/research/${source.id}`}
-                  className="font-medium hover:text-accent"
-                >
-                  {source.title}
-                </Link>
-                {source.evidence_rating ? (
-                  <span className="badge badge-info">
-                    {RESEARCH_EVIDENCE_RATING_LABELS[source.evidence_rating]}
-                  </span>
-                ) : null}
-                <span className="badge">
-                  {RESEARCH_AVAILABILITY_LABELS[source.availability_type]}
-                </span>
-                {link.link_type ? (
-                  <span className="badge">{link.link_type}</span>
-                ) : null}
-              </div>
-              {(shortFinding || link.relevance_note) && (
-                <p className="mt-1 text-ink-muted line-clamp-2">
-                  {shortFinding || link.relevance_note}
+
+      {synthesis.key_considerations.length > 0 ? (
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            Key considerations
+          </p>
+          <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-ink">
+            {synthesis.key_considerations.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {synthesis.areas_of_disagreement.length > 0 ? (
+        <div className="mt-3 rounded-xl border border-border px-3 py-2">
+          <p className="text-sm font-medium text-ink">Evidence is mixed</p>
+          <ul className="mt-1 space-y-1 text-sm text-ink-muted">
+            {synthesis.areas_of_disagreement.map((d) => (
+              <li key={d}>{d}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="mt-3">
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          Sources
+        </p>
+        <ul className="mt-2 space-y-2">
+          {sources.map((f) => (
+            <li key={f.source_id} className="rounded-xl border border-border px-3 py-2 text-sm">
+              <Link href={`/research/${f.source_id}`} className="font-medium hover:text-accent">
+                {f.source_title}
+              </Link>
+              {f.location || f.chapter ? (
+                <p className="text-xs text-ink-subtle">
+                  {[f.chapter, f.location].filter(Boolean).join(" · ")}
                 </p>
-              )}
+              ) : null}
             </li>
-          ) : null,
-        )}
-      </ul>
+          ))}
+        </ul>
+      </div>
+
+      {topFindings.length > 0 ? (
+        <details className="mt-3">
+          <summary className="cursor-pointer text-sm text-ink-muted">
+            Findings ({topFindings.length})
+          </summary>
+          <ul className="mt-2 space-y-2 text-sm">
+            {topFindings.map((f) => (
+              <li key={f.id} className="rounded-xl border border-border px-3 py-2">
+                <p className="text-ink">{f.finding_text}</p>
+                <p className="mt-1 text-xs text-ink-subtle">
+                  {f.source_title}
+                  {f.relationship ? ` · ${f.relationship.replace(/_/g, " ")}` : ""}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+
       <div className="mt-3 grid gap-2 text-xs text-ink-subtle sm:grid-cols-2">
         <p>
-          <span className="font-medium text-ink">What evidence says</span> — outside
-          sources and books.
+          <span className="font-medium text-ink">What evidence says</span> — grounded
+          sources only.
         </p>
         <p>
-          <span className="font-medium text-ink">What you decide</span> — recorded
-          below as your family position.
+          <span className="font-medium text-ink">What you decide</span> — recorded below
+          as your family position.
         </p>
       </div>
     </section>

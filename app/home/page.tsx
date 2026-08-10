@@ -19,6 +19,12 @@ import {
   NextQuestionsPanel,
   TopicCoveragePanel,
 } from "@/components/decisions/TopicCoveragePanels";
+import {
+  classifyPrebirthBucket,
+  whyNowExplanation,
+  PREBIRTH_BUCKET_LABELS,
+} from "@/lib/research/prebirth-priority";
+import { classifyResearchValue } from "@/lib/research/research-value";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +37,39 @@ export default async function HomePage() {
   const readyPrinciples = listReadyPrincipleProposals(store).slice(0, 2);
   const nextQuestions = recommendNextQuestions(store, 5);
   const topicCoverage = buildTopicCoverage(store);
+  const nextQuestion = nextQuestions[0]
+    ? store.questions.find((q) => q.id === nextQuestions[0]!.questionId)
+    : null;
+  const nextValue = nextQuestion
+    ? classifyResearchValue({
+        id: nextQuestion.id,
+        title: nextQuestion.short_title,
+        text: nextQuestion.text,
+        categories: nextQuestion.categories,
+        evidence_needed: nextQuestion.evidence_needed,
+        research_mode: nextQuestion.research_mode,
+        priority: nextQuestion.priority,
+      })
+    : null;
+  const nextBucket = nextQuestion
+    ? classifyPrebirthBucket({
+        title: nextQuestion.short_title,
+        text: nextQuestion.text,
+        priority: nextQuestion.priority,
+        required_before_birth: nextQuestion.required_before_birth,
+        babymoon_priority: nextQuestion.babymoon_priority,
+        research_value: nextValue?.class,
+        estimated_minutes: nextQuestion.estimated_minutes,
+        life_stages: nextQuestion.life_stages,
+      })
+    : null;
+  const nextWhy = nextBucket
+    ? whyNowExplanation({
+        bucket: nextBucket.bucket,
+        title: nextQuestion?.short_title ?? "",
+        estimated_minutes: nextQuestion?.estimated_minutes,
+      })
+    : null;
 
   return (
     <AppShell
@@ -113,7 +152,15 @@ export default async function HomePage() {
                 {nextQuestions[0].estimatedMinutes
                   ? `About ${nextQuestions[0].estimatedMinutes} min`
                   : "High-value next topic"}
+                {nextBucket
+                  ? ` · ${PREBIRTH_BUCKET_LABELS[nextBucket.bucket]}`
+                  : ""}
               </p>
+              {nextWhy ? (
+                <p className="mt-2 text-xs text-ink-subtle">
+                  Why now? {nextWhy}
+                </p>
+              ) : null}
             </Link>
           ) : (
             <Link
