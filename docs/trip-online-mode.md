@@ -1,12 +1,14 @@
-# Trip Online Mode (temporary)
+# Trip Online Mode
 
-Emergency phone-friendly access while Supabase magic-link PKCE is debugged.
-Magic-link auth at `/login` stays available for parallel testing.
+Emergency phone-friendly access **alongside** normal Supabase magic-link login at `/login`.
+
+Do not treat this as a substitute for magic-link once login is healthy. Keep both available.
 
 ## Enable
 
 1. Apply `supabase/migrations/0003_remote_json_store.sql` in the Supabase SQL editor.
 2. Apply `supabase/migrations/0006_remote_store_mutations.sql` (mutation IDs + jsonb RPC result).
+3. Apply later migrations through `0012_secure_reference_tables.sql` if not already applied.
 3. Confirm Turner Family exists (`pnpm setup:family`).
 4. Upload local data:
 
@@ -21,7 +23,7 @@ pnpm upload:remote-store
 | `EMERGENCY_ACCESS_MODE` | `true` |
 | `EMERGENCY_ACCESS_CODE` | long shared code (not committed) |
 | `EMERGENCY_COOKIE_SECRET` | long random secret (not committed) |
-| `USE_REMOTE_JSON_STORE` | `true` |
+| `USE_REMOTE_JSON_STORE` | `true` (required on Vercel; no local filesystem fallback) |
 | `SUPABASE_SERVICE_ROLE_KEY` | existing service role (server only) |
 | `TURNER_FAMILY_NAME` | `Turner Family` |
 

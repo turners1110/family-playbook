@@ -16,6 +16,19 @@ import { saveDecision } from "@/lib/services/decisions";
 import { createSession, getSession } from "@/lib/services/sessions";
 import { getDashboardStats } from "@/lib/services/stats";
 
+describe("remote JSON family boundary", () => {
+  it("does not accept a caller-supplied family_id on read/write", async () => {
+    const source = await fs.readFile(
+      path.join(process.cwd(), "lib/db/remote-json-store.ts"),
+      "utf8",
+    );
+    expect(source).toMatch(/export async function readStore\(\): Promise<AppStore>/);
+    expect(source).toMatch(/export async function writeStore\(store: AppStore\)/);
+    expect(source).toMatch(/const familyId = await resolveTurnerFamilyId\(\)/);
+    expect(source).not.toMatch(/readStore\(familyId/);
+  });
+});
+
 describe("store facade selection", () => {
   afterEach(() => {
     vi.unstubAllEnvs();

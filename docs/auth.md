@@ -2,8 +2,10 @@
 
 ## Overview
 
-Identity comes from Supabase Auth (magic link). Product discussion data still
-reads/writes the JSON store (local or Trip Mode remote) until later migration phases.
+Identity comes from Supabase Auth (magic link). Shared product data lives in the
+remote JSON AppStore (`family_json_stores`, service-role only) when
+`USE_REMOTE_JSON_STORE=true`. Local filesystem storage is development-only and is
+rejected on Vercel.
 
 ## Required environment variables
 
@@ -90,6 +92,8 @@ The wildcard Preview entry covers other branch deployments. The explicit
 2. `0002_auth_and_identity.sql` — profile trigger, profile RLS, backfill
 3. `0003_remote_json_store.sql` — Trip Online Mode remote JSON bridge (service-role only)
 4. `0004_research_library.sql` / `0005_research_storage_policies.sql` — Research & Books
+5. `0006`–`0011` — remote mutations, recommended library, public-book research, EPUB, Before Baby columns
+6. `0012_secure_reference_tables.sql` — RLS on `question_options` and `outcome_development_maps`
 
 ## Trip Online Mode
 

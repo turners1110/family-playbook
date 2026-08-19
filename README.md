@@ -22,15 +22,17 @@ Copy `.env.example` to `.env.local` and set:
 
 ### 2. Apply migrations
 
-In the Supabase SQL editor (or CLI), run in order:
+In the Supabase SQL editor (or CLI), run every file in `supabase/migrations/` in numeric order (`0001` … `0012`).
 
-1. `supabase/migrations/0001_init.sql`
-2. `supabase/migrations/0002_auth_and_identity.sql`
-3. `supabase/migrations/0003_remote_json_store.sql` (Trip Online Mode remote JSON bridge)
+Shared family data on Vercel uses the remote JSON AppStore (`0003` + `0006`) with `USE_REMOTE_JSON_STORE=true`. Local `data/local-store.json` is development-only and is rejected on Vercel.
 
-### Trip Online Mode (temporary)
+Latest security migration: `0012_secure_reference_tables.sql`. Applying the file in git does not secure production until it has been run against the live database. See `docs/supabase-rls-audit.md`.
 
-See [docs/trip-online-mode.md](docs/trip-online-mode.md) for enabling shared-code access + remote JSON storage on Vercel while magic-link auth is debugged.
+### Trip Online Mode
+
+Emergency shared-code access for phones, **in addition to** normal magic-link login. See [docs/trip-online-mode.md](docs/trip-online-mode.md).
+
+Preview/Production require `USE_REMOTE_JSON_STORE=true`. The app will not silently use the deploy filesystem.
 
 ```bash
 pnpm upload:remote-store
@@ -77,7 +79,7 @@ Open [http://localhost:3000/login](http://localhost:3000/login), enter your emai
 - Protected routes via `proxy.ts` + server-side `requireFamilyContext()`
 - Profiles created by DB trigger on `auth.users`
 - Fake header identity switcher removed
-- Product discussion data still uses `data/local-store.json` until later phases
+- Shared product data: remote JSON AppStore on Vercel (`family_json_stores`, service-role). Local JSON is development-only.
 
 ## Scripts
 

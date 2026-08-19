@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-08-19T19:20:58.021Z",
+  "note": "Service-role counts. Does not prove RLS. No family answers exported.",
+  "counts": {
+    "questions": 1,
+    "question_options": 0,
+    "outcome_development_maps": 0,
+    "outcomes": 0,
+    "life_stages": 0,
+    "categories": 0
+  }
+}

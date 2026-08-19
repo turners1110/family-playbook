@@ -7,8 +7,9 @@ Turner Family Principles is a Next.js App Router application with:
 - TypeScript (strict)
 - Tailwind CSS design system
 - Zod validation
-- Local JSON store for demo / offline-friendly development
-- Supabase Postgres + Auth + RLS for production
+- Local JSON AppStore for **local development only**
+- Shared remote JSONB AppStore (`USE_REMOTE_JSON_STORE=true`) on Vercel Preview/Production — no silent filesystem fallback
+- Supabase Postgres + Auth + RLS for identity, research library, and the remote JSON bridge
 
 ```mermaid
 flowchart TB
@@ -27,7 +28,7 @@ flowchart TB
 2. **Components** — interview UI, libraries, forms
 3. **Server actions** — validated writes + revalidation
 4. **Services** — answers, sessions, decisions, playbook, search, stats, AI
-5. **Store / DB** — local JSON or Supabase
+5. **Store / DB** — remote JSONB on Vercel; local JSON only in development
 
 ## Data model
 

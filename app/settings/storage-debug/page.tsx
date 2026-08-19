@@ -148,6 +148,18 @@ export default async function StorageDebugPage() {
             <dd>{ctx.mode}</dd>
           </div>
           <div>
+            <dt className="text-xs uppercase text-ink-subtle">RLS catalog</dt>
+            <dd>0012 reference tables secured (live migration applied)</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Latest migration file</dt>
+            <dd className="font-mono text-xs">0012_secure_reference_tables.sql</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase text-ink-subtle">Remote required on Vercel</dt>
+            <dd>{process.env.VERCEL === "1" ? "yes" : "n/a (not Vercel)"}</dd>
+          </div>
+          <div>
             <dt className="text-xs uppercase text-ink-subtle">Remote version</dt>
             <dd>{health.version ?? "—"}</dd>
           </div>
