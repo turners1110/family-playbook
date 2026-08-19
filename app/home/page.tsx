@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { ProgressBar, StatCard } from "@/components/shared/ui";
+import { EmptyState, ProgressBar, StatCard } from "@/components/shared/ui";
 import { ProgressTile } from "@/components/home/ProgressTile";
 import { AnswerStatusBadge } from "@/components/questions/AnswerStatusBadge";
 import { getDashboardStats } from "@/lib/services/stats";
@@ -409,7 +409,12 @@ export default async function HomePage() {
           <h3 className="font-display text-xl">Recent decisions</h3>
           <ul className="mt-4 space-y-3">
             {stats.recentDecisions.length === 0 && (
-              <li className="text-sm text-ink-muted">No decisions yet.</li>
+              <li>
+                <EmptyState
+                  title="Nothing needs attention here."
+                  body="No decisions yet."
+                />
+              </li>
             )}
             {stats.recentDecisions.map((d) => (
               <li key={d.id}>

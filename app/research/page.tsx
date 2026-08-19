@@ -16,6 +16,7 @@ import {
   RESEARCH_TOPIC_LABELS,
 } from "@/lib/research/types";
 import { LIFE_STAGE_LABELS, LIFE_STAGES } from "@/lib/constants/enums";
+import { EmptyState } from "@/components/shared/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -223,20 +224,23 @@ export default async function ResearchLibraryPage({
           </div>
 
           {sources.length === 0 ? (
-            <div className="surface p-8 text-center">
-              <p className="text-ink-muted">
-                {tab === "my-library"
+            <EmptyState
+              title="No research is linked yet."
+              body={
+                tab === "my-library"
                   ? "My Library is empty. Add a recommendation or create a source."
                   : tab === "added"
                     ? "No recommended sources added yet."
-                    : "No sources match these filters."}
-              </p>
-              {tab === "my-library" ? (
-                <Link href="/research" className="btn btn-primary mt-4">
-                  Browse Recommended Library
-                </Link>
-              ) : null}
-            </div>
+                    : "No sources match these filters."
+              }
+              action={
+                tab === "my-library" ? (
+                  <Link href="/research" className="btn btn-primary">
+                    Browse Recommended Library
+                  </Link>
+                ) : undefined
+              }
+            />
           ) : view === "shelf" ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {sources.map((source) => (

@@ -53,6 +53,22 @@ export function classifySaveError(error: unknown): {
       message: "Another update was saved first. Retry to keep your answer.",
     };
   }
+  if (
+    /failed to fetch|networkerror|network down|offline|econn|connection lost|load failed/i.test(
+      message,
+    )
+  ) {
+    return {
+      state: "failed",
+      message: "Connection lost. Retry when you're back online.",
+    };
+  }
+  if (/unauthenticated|session expired|unauthorized|jwt expired/i.test(message)) {
+    return {
+      state: "failed",
+      message: "Your session expired. Sign in again.",
+    };
+  }
   return {
     state: "failed",
     message: message || "Couldn’t save. Your answer is still on this screen.",

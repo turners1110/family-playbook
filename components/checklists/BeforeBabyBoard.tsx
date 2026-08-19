@@ -22,6 +22,9 @@ import {
   groupTasksByCategory,
 } from "@/lib/checklists/dashboard";
 import { clsx } from "clsx";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import { saveButtonIdleLabel } from "@/lib/ui/save-feedback";
+import { SaveStatus } from "@/components/ui/save-feedback";
 
 type FilterStatus = "all" | "open" | "done" | "overdue";
 type SortMode = "category" | "due" | "priority" | "title";
@@ -560,7 +563,7 @@ function AddCustomTaskForm({
   checklistId: string;
   onAdded: () => void;
 }) {
-  const [pending, startTransition] = useTransition();
+  const save = useSaveFeedback();
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -579,27 +582,44 @@ function AddCustomTaskForm({
   return (
     <form
       className="surface space-y-3 p-5"
-      action={(formData) => {
+      onSubmit={(e) => {
+        e.preventDefault();
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        const title = String(formData.get("title") ?? "").trim();
+        if (!title) {
+          setError("Add a task title.");
+          return;
+        }
         setError(null);
-        startTransition(async () => {
-          const result = await actionAddCustomChecklistTask({
-            checklistId,
-            title: String(formData.get("title") ?? ""),
-            notes: String(formData.get("notes") ?? "") || null,
-            due_date: String(formData.get("due_date") ?? "") || null,
-            owner: String(formData.get("owner") ?? "both") as ChecklistOwner,
-            priority: String(
-              formData.get("priority") ?? "medium",
-            ) as ChecklistPriority,
-            category: "custom",
-            category_label: "Custom",
-          });
-          if (!result.ok) {
-            setError(result.error);
-            return;
-          }
-          onAdded();
-        });
+        void save.runSave(
+          async () => {
+            const result = await actionAddCustomChecklistTask({
+              checklistId,
+              title,
+              notes: String(formData.get("notes") ?? "") || null,
+              due_date: String(formData.get("due_date") ?? "") || null,
+              owner: String(formData.get("owner") ?? "both") as ChecklistOwner,
+              priority: String(
+                formData.get("priority") ?? "medium",
+              ) as ChecklistPriority,
+              category: "custom",
+              category_label: "Custom",
+            });
+            if (!result.ok) {
+              throw new Error(result.error);
+            }
+            return result;
+          },
+          {
+            operation: "add_checklist_task",
+            route: "/before-baby",
+            onSuccess: async () => {
+              onAdded();
+              form.reset();
+            },
+          },
+        );
       }}
     >
       <h3 className="font-display text-xl">Custom task</h3>
@@ -633,10 +653,21 @@ function AddCustomTaskForm({
           <textarea name="notes" className="input min-h-20" />
         </label>
       </div>
-      {error && <p className="text-sm text-danger">{error}</p>}
+      {error && <p className="text-sm text-danger" role="alert">{error}</p>}
+      <SaveStatus
+        state={save.state}
+        message={save.statusMessage}
+        slowTier={save.slowTier}
+        onRetry={() => void save.retry()}
+      />
       <div className="flex flex-wrap gap-2">
-        <button type="submit" className="btn btn-primary" disabled={pending}>
-          {pending ? "Saving…" : "Add task"}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={save.isBusy}
+          aria-busy={save.isBusy}
+        >
+          {saveButtonIdleLabel(save.state, "Add task")}
         </button>
         <button
           type="button"

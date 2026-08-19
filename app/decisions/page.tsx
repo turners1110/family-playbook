@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { StatusBadge, ConfidenceBadge } from "@/components/shared/ui";
+import { EmptyState, StatusBadge, ConfidenceBadge } from "@/components/shared/ui";
 import { readStore } from "@/lib/db/store";
 import { DecisionForm } from "@/components/decisions/DecisionForm";
 import {
@@ -125,7 +125,14 @@ export default async function DecisionsPage({
           <DecisionListCard key={d.id} decision={d} />
         ))}
         {decisions.length === 0 ? (
-          <p className="text-ink-muted">No decisions match this filter.</p>
+          <EmptyState
+            title="Nothing needs attention here."
+            body={
+              params.status || params.filter
+                ? "No decisions match this filter."
+                : "No decisions yet. Create one below or save a shared family position from a conversation."
+            }
+          />
         ) : null}
       </div>
 

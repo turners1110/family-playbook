@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { actionSaveDecision } from "@/lib/actions";
 import type { Decision, Outcome, Principle, Question } from "@/lib/types/models";
 import { DECISION_STATUSES, DECISION_TYPES, EVIDENCE_QUALITY, CONFIDENCE_LABELS } from "@/lib/constants/enums";
+import { saveButtonIdleLabel } from "@/lib/ui/save-feedback";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import { SaveStatus } from "@/components/ui/save-feedback";
 
 export function DecisionForm({
   decision,
@@ -18,7 +21,7 @@ export function DecisionForm({
   questions: Question[];
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const save = useSaveFeedback();
   const [title, setTitle] = useState(decision?.title ?? "");
   const [statement, setStatement] = useState(decision?.statement ?? "");
   const [status, setStatus] = useState(decision?.status ?? "in_discussion");
@@ -46,39 +49,47 @@ export function DecisionForm({
       className="mt-4 space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        startTransition(async () => {
-          await actionSaveDecision({
-            id: decision?.id,
-            title,
-            statement,
-            status: status as never,
-            confidence: confidence as 1 | 2 | 3 | 4 | 5 | null,
-            decision_type: decisionType as never,
-            reasoning,
-            sam_perspective: sam || null,
-            michelle_perspective: michelle || null,
-            shared_conclusion: shared || null,
-            started_mode: startedMode as never,
-            merged_at:
-              sam || michelle
-                ? decision?.merged_at ?? new Date().toISOString()
-                : decision?.merged_at ?? null,
-            merge_initiated_by:
-              sam || michelle
-                ? decision?.merge_initiated_by ?? "family"
-                : decision?.merge_initiated_by ?? null,
-            outcome_ids: outcomeIds,
-            source_question_ids: sourceQuestions,
-            principle_ids: principles.slice(0, 1).map((p) => p.id),
-            evidence_strength: decision?.evidence_strength ?? "practical_guidance",
-            change_reason: decision ? "Updated decision" : "Created decision",
-          });
-          router.refresh();
-          if (!decision) {
-            setTitle("");
-            setStatement("");
-          }
-        });
+        void save.runSave(
+          async () => {
+            await actionSaveDecision({
+              id: decision?.id,
+              title,
+              statement,
+              status: status as never,
+              confidence: confidence as 1 | 2 | 3 | 4 | 5 | null,
+              decision_type: decisionType as never,
+              reasoning,
+              sam_perspective: sam || null,
+              michelle_perspective: michelle || null,
+              shared_conclusion: shared || null,
+              started_mode: startedMode as never,
+              merged_at:
+                sam || michelle
+                  ? decision?.merged_at ?? new Date().toISOString()
+                  : decision?.merged_at ?? null,
+              merge_initiated_by:
+                sam || michelle
+                  ? decision?.merge_initiated_by ?? "family"
+                  : decision?.merge_initiated_by ?? null,
+              outcome_ids: outcomeIds,
+              source_question_ids: sourceQuestions,
+              principle_ids: principles.slice(0, 1).map((p) => p.id),
+              evidence_strength: decision?.evidence_strength ?? "practical_guidance",
+              change_reason: decision ? "Updated decision" : "Created decision",
+            });
+          },
+          {
+            operation: "save_decision",
+            route: "/decisions",
+            onSuccess: async () => {
+              router.refresh();
+              if (!decision) {
+                setTitle("");
+                setStatement("");
+              }
+            },
+          },
+        );
       }}
     >
       <div className="field">
@@ -215,8 +226,23 @@ export function DecisionForm({
       <p className="text-xs text-ink-subtle">
         Evidence quality options include: {EVIDENCE_QUALITY.join(", ")}.
       </p>
-      <button type="submit" className="btn btn-primary" disabled={pending}>
-        {pending ? "Saving…" : decision ? "Update decision" : "Create decision"}
+      <SaveStatus
+        state={save.state}
+        message={save.statusMessage}
+        slowTier={save.slowTier}
+        onRetry={() => void save.retry()}
+      />
+      <button
+        type="submit"
+        className="btn btn-primary min-h-11"
+        disabled={save.isBusy}
+        aria-busy={save.isBusy}
+        aria-live="polite"
+      >
+        {saveButtonIdleLabel(
+          save.state,
+          decision ? "Update decision" : "Create decision",
+        )}
       </button>
     </form>
   );

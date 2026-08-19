@@ -6,8 +6,9 @@ import {
 } from "@/lib/services/conversations";
 import { formatApproximateActiveTime } from "@/lib/conversations/timing";
 import { evaluateSessionCompletion } from "@/lib/services/round-status";
-import { readStore } from "@/lib/db/store";
 import { parseBabymoonRound } from "@/lib/services/round-status";
+import { readStore } from "@/lib/db/store";
+import { EmptyState } from "@/components/shared/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,15 @@ export default async function ConversationHistoryPage({
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-ink-muted">No conversation sessions in this filter.</p>
+        <EmptyState
+          title="Nothing needs attention here."
+          body="No conversation sessions in this filter."
+          action={
+            <Link href="/conversations" className="btn btn-primary">
+              Start a conversation
+            </Link>
+          }
+        />
       ) : (
         <ul className="space-y-4">
           {filtered.map(

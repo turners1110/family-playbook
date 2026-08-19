@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { NAV_ITEMS } from "@/lib/constants/enums";
 import { requireFamilyContext } from "@/lib/auth/family-context";
 import { syncLocalIdentityFromAuth } from "@/lib/auth/local-bridge";
+import { PrimaryNav } from "@/components/layout/PrimaryNav";
 import { AuthStatus } from "@/components/layout/AuthStatus";
 import { storageBackupLabel } from "@/lib/db/durable-save";
 
@@ -81,21 +81,7 @@ export async function AppShell({
             />
           </div>
         </div>
-        {!focusMode ? (
-          <nav aria-label="Primary" className="border-t border-border/60">
-            <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-2 py-2 scrollbar-none">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-ink-muted transition hover:bg-bg-muted hover:text-ink"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-          </nav>
-        ) : null}
+        {!focusMode ? <PrimaryNav /> : null}
       </header>
 
       <main id="main" className="mx-auto max-w-6xl px-4 py-6 sm:py-8">

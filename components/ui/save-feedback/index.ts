@@ -6,3 +6,4 @@ export { CardSkeleton } from "./CardSkeleton";
 export { RetrySavePanel } from "./RetrySavePanel";
 export { PendingNavigationGuard } from "./PendingNavigationGuard";
 export { SaveStatusBanner } from "./SaveStatusBanner";
+export { SaveStatus } from "./SaveStatus";

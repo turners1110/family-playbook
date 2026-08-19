@@ -19,19 +19,19 @@ import {
 } from "@/lib/discussions/discussion-mode";
 import { parseResponseSchema } from "@/lib/questions/response-schema";
 import { formatAnswerPayload } from "@/lib/questions/answer-display";
+import { clientValidateStructuredAnswer } from "@/lib/questions/structured-client-validation";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import {
+  PendingNavigationGuard,
+  SaveButton,
+  SaveStatus,
+} from "@/components/ui/save-feedback";
 import {
   StructuredAnswerFields,
   structuredValueFromPayload,
   structuredValueToPayload,
   type StructuredAnswerValue,
 } from "@/components/questions/StructuredAnswerFields";
-
-function newMutationId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return `mut_${crypto.randomUUID()}`;
-  }
-  return `mut_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
 
 type DiffLevel = "none" | "minor" | "major" | null;
 type UiMode = "shared" | "separate";
@@ -65,6 +65,8 @@ export function AnswerEditor({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const save = useSaveFeedback();
+  const busy = pending || save.isBusy;
   const sam = members.find((m) => m.display_name === "Sam");
   const michelle = members.find((m) => m.display_name === "Michelle");
   const shared = answers.find((a) => a.is_shared);
@@ -135,8 +137,7 @@ export function AnswerEditor({
     shared?.confidence ?? 3,
   );
   const [notes, setNotes] = useState(shared?.payload.notes ?? "");
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [retryPayload, setRetryPayload] = useState<SaveAnswerInput | null>(null);
+  const [clientHint, setClientHint] = useState<string | null>(null);
   const [diffPrompt, setDiffPrompt] = useState<DiffLevel>(null);
   const [mergeNotes, setMergeNotes] = useState("");
 
@@ -167,27 +168,37 @@ export function AnswerEditor({
   }, [samText, michelleText]);
 
   function runSaveAnswer(input: SaveAnswerInput, after?: () => void) {
-    const payload: SaveAnswerInput = {
-      ...input,
-      mutation_id: input.mutation_id ?? newMutationId(),
-    };
-    setRetryPayload(payload);
-    startTransition(async () => {
-      setSaveError(null);
-      const result = await actionSaveAnswer(payload);
-      if (result && "ok" in result && result.ok === false) {
-        setSaveError(result.error);
+    if (hasGuidedFormat && useGuided && input.is_shared) {
+      const hint = clientValidateStructuredAnswer(schema, structured);
+      if (hint) {
+        setClientHint(hint);
         return;
       }
-      setRetryPayload(null);
-      after?.();
-      router.refresh();
+    }
+    setClientHint(null);
+    const payload: SaveAnswerInput = {
+      ...input,
+      mutation_id: input.mutation_id ?? save.mutationId(),
+    };
+    void save.runSave(async () => {
+      const result = await actionSaveAnswer(payload);
+      if (result && "ok" in result && result.ok === false) {
+        throw new Error(result.error);
+      }
+      return result;
+    }, {
+      operation: "save_answer",
+      route: "/questions",
+      questionId,
+      onSuccess: async () => {
+        after?.();
+        router.refresh();
+      },
     });
   }
 
   function saveOther(task: () => Promise<void>) {
     startTransition(async () => {
-      setSaveError(null);
       await task();
       router.refresh();
     });
@@ -235,28 +246,16 @@ export function AnswerEditor({
 
   return (
     <div className="mt-4 space-y-4">
-      {saveError ? (
-        <div
-          className="rounded-lg border border-border bg-accent-soft px-3 py-3 text-sm text-ink"
-          role="alert"
-        >
-          <p>{saveError}</p>
-          {retryPayload ? (
-            <button
-              type="button"
-              className="btn btn-secondary mt-2"
-              disabled={pending}
-              onClick={() =>
-                runSaveAnswer({
-                  ...retryPayload,
-                  mutation_id: newMutationId(),
-                })
-              }
-            >
-              Retry
-            </button>
-          ) : null}
-        </div>
+      <SaveStatus
+        state={save.state}
+        message={clientHint ?? save.statusMessage}
+        slowTier={save.slowTier}
+        onRetry={() => void save.retry()}
+      />
+      {clientHint ? (
+        <p className="text-sm text-danger" role="alert">
+          {clientHint}
+        </p>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-2 text-sm text-ink-muted">
@@ -320,7 +319,7 @@ export function AnswerEditor({
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  disabled={pending}
+                  disabled={busy}
                   onClick={() => {
                     setUseGuided(false);
                     setText(priorOpenText);
@@ -331,7 +330,7 @@ export function AnswerEditor({
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  disabled={pending}
+                  disabled={busy}
                   onClick={() => setUseGuided(true)}
                 >
                   Answer guided version
@@ -349,7 +348,7 @@ export function AnswerEditor({
                   schemaRaw={question?.response_schema}
                   value={structured}
                   onChange={setStructured}
-                  disabled={pending}
+                  disabled={busy}
                 />
                 {shared ? (
                   <p className="mt-2 text-xs text-ink-subtle whitespace-pre-wrap">
@@ -424,22 +423,20 @@ export function AnswerEditor({
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="btn btn-primary"
-              disabled={pending}
+            <SaveButton
+              state={save.state}
+              idleLabel="Save"
               onClick={() =>
                 saveShared({
                   afterSave: () => setDiffPrompt("none"),
                 })
               }
-            >
-              Save
-            </button>
+              disabled={busy}
+            />
             <button
               type="button"
               className="btn btn-secondary"
-              disabled={pending}
+              disabled={busy}
               onClick={captureSeparate}
             >
               Capture separate perspectives
@@ -491,7 +488,7 @@ export function AnswerEditor({
               <button
                 type="button"
                 className="btn btn-secondary mt-2"
-                disabled={pending}
+                disabled={busy}
                 onClick={() => {
                   saveShared({ afterSave: () => setDiffPrompt(null) });
                 }}
@@ -538,7 +535,7 @@ export function AnswerEditor({
               <button
                 type="button"
                 className="btn btn-secondary"
-                disabled={pending || !sam || (!samVisible && Boolean(samAnswer))}
+                disabled={busy || !sam || (!samVisible && Boolean(samAnswer))}
                 onClick={() =>
                   runSaveAnswer({
                     question_id: questionId,
@@ -576,7 +573,7 @@ export function AnswerEditor({
                 type="button"
                 className="btn btn-secondary"
                 disabled={
-                  pending ||
+                  busy ||
                   !michelle ||
                   (!michelleVisible && Boolean(michelleAnswer))
                 }
@@ -638,7 +635,7 @@ export function AnswerEditor({
               <button
                 type="button"
                 className="btn btn-primary"
-                disabled={pending}
+                disabled={busy}
                 onClick={() =>
                   runSaveAnswer({
                     question_id: questionId,
@@ -676,7 +673,7 @@ export function AnswerEditor({
         <button
           type="button"
           className="btn btn-secondary"
-          disabled={pending}
+          disabled={busy}
           onClick={() =>
             runSaveAnswer({
               question_id: questionId,
@@ -693,7 +690,7 @@ export function AnswerEditor({
         <button
           type="button"
           className="btn btn-secondary"
-          disabled={pending}
+          disabled={busy}
           onClick={() =>
             saveOther(async () => {
               await actionStartCoolingOff({
@@ -709,7 +706,7 @@ export function AnswerEditor({
         <button
           type="button"
           className="btn btn-secondary"
-          disabled={pending}
+          disabled={busy}
           onClick={() =>
             saveOther(async () => {
               await actionScheduleReview({
@@ -727,7 +724,7 @@ export function AnswerEditor({
         <button
           type="button"
           className="btn btn-ghost"
-          disabled={pending}
+          disabled={busy}
           onClick={() =>
             saveOther(async () => {
               await actionToggleBookmark(questionId, currentMemberId);
@@ -737,6 +734,11 @@ export function AnswerEditor({
           Bookmark
         </button>
       </div>
+      <PendingNavigationGuard
+        open={save.showLeaveGuard}
+        onStay={save.confirmStay}
+        onLeave={save.confirmLeave}
+      />
     </div>
   );
 }

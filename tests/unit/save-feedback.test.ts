@@ -57,7 +57,7 @@ describe("save feedback helpers", () => {
 
     const failed = classifySaveError(new Error("network down"));
     expect(failed.state).toBe("failed");
-    expect(failed.message).toMatch(/network down|still on this screen/i);
+    expect(failed.message).toMatch(/Connection lost|still on this screen|network down/i);
   });
 
   it("keeps one idempotency key until release mints a new one", () => {

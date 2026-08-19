@@ -16,7 +16,10 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Turner Family Principles",
+  title: {
+    default: "Turner Family Playbook",
+    template: "%s | Turner Family Playbook",
+  },
   description:
     "A private guided parenting decision system for Sam and Michelle Turner.",
 };

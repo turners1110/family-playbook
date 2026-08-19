@@ -20,6 +20,8 @@ import {
 import { QuestionContextPanel } from "@/components/questions/QuestionContextPanel";
 import { sharedContextFromLibraryQuestion } from "@/lib/content/resolve-question-context";
 import { previewLibraryAnswerText } from "@/lib/services/previously-answered";
+import { classifySaveError } from "@/lib/ui/save-feedback";
+import { SaveStatus } from "@/components/ui/save-feedback";
 
 export function QuestionInterview({
   sessionId,
@@ -129,12 +131,9 @@ export function QuestionInterview({
         setRetryAction(null);
         router.refresh();
       } catch (error) {
+        const classified = classifySaveError(error);
         setSaveStatus("error");
-        setSaveError(
-          error instanceof Error
-            ? error.message
-            : "Another update was saved at the same time. Please retry.",
-        );
+        setSaveError(classified.message);
       }
     });
   }
@@ -226,35 +225,24 @@ export function QuestionInterview({
           <span>
             Question {index + 1} of {total}
           </span>
-          <span>
-            Save status:{" "}
-            {saveStatus === "idle"
-              ? "Ready"
-              : saveStatus === "saving"
-                ? "Saving…"
+          <SaveStatus
+            state={
+              saveStatus === "saving"
+                ? "saving"
                 : saveStatus === "saved"
-                  ? "Saved"
-                  : "Error"}
-          </span>
+                  ? "saved"
+                  : saveStatus === "error"
+                    ? "failed"
+                    : "idle"
+            }
+            message={saveError}
+            onRetry={
+              retryAction
+                ? () => run(retryAction, { allowRetry: true })
+                : undefined
+            }
+          />
         </div>
-        {saveError ? (
-          <div
-            className="mb-4 rounded-lg border border-border bg-accent-soft px-3 py-3 text-sm text-ink"
-            role="alert"
-          >
-            <p>{saveError}</p>
-            {retryAction ? (
-              <button
-                type="button"
-                className="btn btn-secondary mt-2"
-                disabled={pending}
-                onClick={() => run(retryAction, { allowRetry: true })}
-              >
-                Retry
-              </button>
-            ) : null}
-          </div>
-        ) : null}
         <div className="progress-track mb-4">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
