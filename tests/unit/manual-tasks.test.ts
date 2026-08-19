@@ -183,7 +183,12 @@ describe("manual task UI contracts", () => {
     );
     expect(scheduler).toMatch(/QuickAddTaskSheet/);
     expect(scheduler).toMatch(/\+ Add Task/);
-    expect(scheduler).toMatch(/Inbox/);
+    expect(scheduler).toMatch(/ADVANCED_FILTERS/);
+    const views = readFileSync(
+      path.join(root, "lib/checklists/view-state.ts"),
+      "utf8",
+    );
+    expect(views).toMatch(/Inbox/);
 
     const sheet = readFileSync(
       path.join(root, "components/checklists/QuickAddTaskSheet.tsx"),

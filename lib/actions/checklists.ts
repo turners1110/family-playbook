@@ -10,6 +10,7 @@ import {
   bulkAssignChecklistOwners,
   bulkCompleteChecklistTasks,
   generateBeforeBabySchedule,
+  getBeforeBabyChecklist,
   importAfterBirthTemplate,
   importBeforeBabyTemplate,
   previewActualBirthDate,
@@ -68,9 +69,10 @@ export async function actionToggleChecklistTask(
 ) {
   await requireIdentity();
   try {
-    await setChecklistTaskCompleted(taskId, completed);
+    const result = await setChecklistTaskCompleted(taskId, completed);
     revalidateChecklist();
-    return { ok: true as const };
+    const { tasks } = await getBeforeBabyChecklist();
+    return { ok: true as const, task: result, tasks };
   } catch (error) {
     logStoreError("toggle_checklist_task", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
@@ -85,7 +87,8 @@ export async function actionBulkCompleteChecklistTasks(
   try {
     const count = await bulkCompleteChecklistTasks(taskIds, completed);
     revalidateChecklist();
-    return { ok: true as const, count };
+    const { tasks } = await getBeforeBabyChecklist();
+    return { ok: true as const, count, tasks };
   } catch (error) {
     logStoreError("bulk_checklist", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
@@ -170,9 +173,10 @@ export async function actionUpdateChecklistTask(
   const ctx = await requireIdentity();
   try {
     assertCanEdit(ctx);
-    await updateChecklistTask(taskId, patch);
+    const updated = await updateChecklistTask(taskId, patch);
     revalidateChecklist();
-    return { ok: true as const };
+    const { tasks } = await getBeforeBabyChecklist();
+    return { ok: true as const, task: updated, tasks };
   } catch (error) {
     logStoreError("update_checklist_task", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
@@ -208,7 +212,8 @@ export async function actionArchiveChecklistTask(taskId: string) {
     assertCanEdit(ctx);
     await archiveChecklistTask(taskId);
     revalidateChecklist();
-    return { ok: true as const };
+    const { tasks } = await getBeforeBabyChecklist();
+    return { ok: true as const, taskId, tasks };
   } catch (error) {
     logStoreError("archive_checklist_task", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
@@ -255,7 +260,11 @@ export async function actionGenerateBeforeBabySchedule(force = false) {
       forceRecalculateManual: force,
     });
     revalidateChecklist();
-    return { ok: true as const, tasksUpdated: result.tasksUpdated };
+    return {
+      ok: true as const,
+      tasksUpdated: result.tasksUpdated,
+      tasks: result.tasks,
+    };
   } catch (error) {
     logStoreError("generate_before_baby_schedule", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };
@@ -284,7 +293,8 @@ export async function actionAssignChecklistOwner(
     assertCanEdit(ctx);
     await assignChecklistTaskOwner(taskId, owner, { source });
     revalidateChecklist();
-    return { ok: true as const };
+    const { tasks } = await getBeforeBabyChecklist();
+    return { ok: true as const, tasks };
   } catch (error) {
     logStoreError("assign_checklist_owner", error);
     return { ok: false as const, error: publicRemoteStoreMessage(error) };

@@ -498,6 +498,7 @@ export async function importBeforeBabyTemplate(): Promise<{
   checklistId: string;
   added: number;
   totalDefaults: number;
+  tasks: ChecklistTask[];
 }> {
   const template = BEFORE_BABY_TEMPLATE;
   const totalDefaults = countTemplateTasks(template);
@@ -548,7 +549,8 @@ export async function importBeforeBabyTemplate(): Promise<{
     return store;
   }, { operation: "ensureBeforeBabyChecklist" });
 
-  return { checklistId, added, totalDefaults };
+  const snap = await getBeforeBabyChecklist();
+  return { checklistId, added, totalDefaults, tasks: snap.tasks };
 }
 
 export async function addCustomChecklistTask(input: {
@@ -938,6 +940,7 @@ export async function updateBeforeBabySchedulingSettings(
   settings: FamilySettings;
   preview: ReturnType<typeof previewDueDateChange> | null;
   tasksUpdated: number;
+  tasks: ChecklistTask[];
 }> {
   let settings!: FamilySettings;
   let preview: ReturnType<typeof previewDueDateChange> | null = null;
@@ -1011,7 +1014,8 @@ export async function updateBeforeBabySchedulingSettings(
     return store;
   }, { operation: "updateBeforeBabySchedulingSettings" });
 
-  return { settings, preview, tasksUpdated };
+  const snap = await getBeforeBabyChecklist();
+  return { settings, preview, tasksUpdated, tasks: snap.tasks };
 }
 
 export async function generateBeforeBabySchedule(options?: {

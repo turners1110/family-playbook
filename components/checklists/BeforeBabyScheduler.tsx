@@ -1,72 +1,60 @@
 "use client";
 
-import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { Suspense, useMemo, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { clsx } from "clsx";
 import type { ChecklistTask, FamilySettings } from "@/lib/types/models";
 import type { PregnancyProgress } from "@/lib/checklists/date-math";
 import {
   CHECKLIST_OWNER_LABELS,
   CHECKLIST_PRIORITY_LABELS,
-  type ChecklistOwner,
-  type ChecklistPriority,
 } from "@/lib/checklists";
 import {
-  actionArchiveChecklistTask,
   actionGenerateBeforeBabySchedule,
   actionImportBeforeBaby,
   actionToggleChecklistTask,
-  actionUpdateChecklistTask,
 } from "@/lib/actions/checklists";
 import { ProgressBar, StatCard } from "@/components/shared/ui";
 import { buildChecklistDashboard } from "@/lib/checklists/dashboard";
 import {
-  TIMELINE_BADGE_LABELS,
-  effectiveDueDate,
   filterTasksByView,
-  getTimelineBadge,
   groupTasksForTimeline,
-  recommendedByLabel,
-  type TimelineView,
 } from "@/lib/checklists/scheduling";
+import {
+  buildBeforeBabyAttention,
+  type AttentionTask,
+} from "@/lib/checklists/attention";
+import { ADVANCED_FILTERS } from "@/lib/checklists/view-state";
 import { DueDateHeader } from "@/components/checklists/DueDateHeader";
 import { BeforeBabySchedulingSettings } from "@/components/checklists/BeforeBabySchedulingSettings";
 import { MilestoneBoard } from "@/components/checklists/MilestoneBoard";
 import { QuickAddTaskSheet } from "@/components/checklists/QuickAddTaskSheet";
+import { BeforeBabyTaskCard } from "@/components/checklists/BeforeBabyTaskCard";
 import {
-  formatRelativeTimingDisplay,
-  taskOriginBadge,
-} from "@/lib/checklists/manual-tasks";
+  BeforeBabyAttentionSummary,
+  BeforeBabyCaughtUp,
+} from "@/components/checklists/BeforeBabyAttentionSummary";
+import { useBeforeBabyViewState } from "@/hooks/useBeforeBabyViewState";
+import { useSaveFeedback } from "@/hooks/useSaveFeedback";
+import { SaveStatus } from "@/components/ui/save-feedback";
+import { saveButtonIdleLabel } from "@/lib/ui/save-feedback";
 
-type BoardMode = "milestones" | "timeline" | "owner" | "category";
+export function BeforeBabyScheduler(props: {
+  checklistId: string | null;
+  initialTasks: ChecklistTask[];
+  templateTaskCount: number;
+  settings: FamilySettings;
+  pregnancy: PregnancyProgress | null;
+}) {
+  return (
+    <Suspense fallback={<p className="text-sm text-ink-muted">Loading checklist…</p>}>
+      <BeforeBabySchedulerInner {...props} />
+    </Suspense>
+  );
+}
 
-const BOARD_MODES: Array<{ id: BoardMode; label: string }> = [
-  { id: "milestones", label: "Milestones" },
-  { id: "timeline", label: "Timeline" },
-  { id: "owner", label: "Owner" },
-  { id: "category", label: "Category" },
-];
-
-const VIEWS: Array<{ id: TimelineView; label: string }> = [
-  { id: "inbox", label: "Inbox" },
-  { id: "recommended", label: "Recommended timeline" },
-  { id: "do_now", label: "Do now" },
-  { id: "today", label: "Today" },
-  { id: "this_week", label: "This week" },
-  { id: "next_week", label: "Next week" },
-  { id: "next_2_weeks", label: "Next 2 weeks" },
-  { id: "final_month", label: "Final month" },
-  { id: "final_week", label: "Final week" },
-  { id: "after_birth", label: "After birth" },
-  { id: "overdue", label: "Overdue" },
-  { id: "by_priority", label: "Priority" },
-  { id: "by_category", label: "By category" },
-  { id: "by_owner", label: "By owner" },
-  { id: "completed", label: "Completed" },
-  { id: "all", label: "All tasks" },
-];
-
-export function BeforeBabyScheduler({
+function BeforeBabySchedulerInner({
   checklistId,
   initialTasks,
   templateTaskCount,
@@ -93,161 +81,132 @@ export function BeforeBabyScheduler({
           : task,
       ),
   );
-  const [pending, startTransition] = useTransition();
-  const [boardMode, setBoardMode] = useState<BoardMode>("milestones");
-  const [view, setView] = useState<TimelineView>("recommended");
+  const save = useSaveFeedback();
+  const [, startTransition] = useTransition();
+  const { state, setDisplayMode, setGroupBy, setFilter, setTimeline } =
+    useBeforeBabyViewState();
   const [query, setQuery] = useState("");
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [showSettings, setShowSettings] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-
   const dueDate = settings.expected_due_date ?? null;
+
   const dashboard = useMemo(
     () => buildChecklistDashboard(optimisticTasks),
     [optimisticTasks],
   );
-  const inboxCount = useMemo(
-    () =>
-      optimisticTasks.filter(
-        (t) =>
-          !t.archived &&
-          !t.completed &&
-          (t.inbox ||
-            (t.is_custom &&
-              t.owner === "unassigned" &&
-              (!t.due_date || t.date_source === "none") &&
-              (t.category === "inbox" || t.category === "custom"))),
-      ).length,
-    [optimisticTasks],
+  const attention = useMemo(
+    () => buildBeforeBabyAttention({ tasks: optimisticTasks, settings }),
+    [optimisticTasks, settings],
   );
 
   const visible = useMemo(() => {
-    let list = filterTasksByView(optimisticTasks, view, dueDate, {
-      includePostBirth: settings.before_baby_include_post_birth !== false,
-      hideCompleted: Boolean(settings.before_baby_hide_completed),
-    });
+    if (state.displayMode === "attention") return optimisticTasks;
+    let list = filterTasksByView(
+      optimisticTasks,
+      state.filter === "attention" ? "all" : state.filter,
+      dueDate,
+      {
+        includePostBirth: settings.before_baby_include_post_birth !== false,
+        hideCompleted: Boolean(settings.before_baby_hide_completed),
+      },
+    );
     const q = query.trim().toLowerCase();
-    if (q) {
-      list = list.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          (t.notes ?? "").toLowerCase().includes(q) ||
-          t.category_label.toLowerCase().includes(q) ||
-          CHECKLIST_OWNER_LABELS[t.owner]?.toLowerCase().includes(q) ||
-          CHECKLIST_PRIORITY_LABELS[t.priority]?.toLowerCase().includes(q) ||
-          (t.relative_timing_label ?? "").toLowerCase().includes(q) ||
-          (t.created_from_label ?? "").toLowerCase().includes(q) ||
-          (t.linked_question_ids ?? []).some((id) => id.toLowerCase().includes(q)) ||
-          (t.linked_conversation_ids ?? []).some((id) =>
-            id.toLowerCase().includes(q),
-          ),
-      );
-    }
+    if (q) list = list.filter((t) => matchesQuery(t, q));
     return list;
-  }, [optimisticTasks, view, dueDate, settings, query]);
+  }, [optimisticTasks, state, dueDate, settings, query]);
 
   const groups = useMemo(() => {
-    if (view === "by_category") {
-      const map = new Map<string, ChecklistTask[]>();
-      for (const t of visible) {
-        if (!map.has(t.category_label)) map.set(t.category_label, []);
-        map.get(t.category_label)!.push(t);
-      }
-      return [...map.entries()].map(([label, items]) => ({
-        group: label,
-        label,
-        tasks: items,
-      }));
+    if (state.displayMode === "attention") return [];
+    if (state.groupBy === "category") {
+      return groupByLabel(visible, (t) => t.category_label);
     }
-    if (view === "by_owner") {
-      const map = new Map<string, ChecklistTask[]>();
-      for (const t of visible) {
-        const label = CHECKLIST_OWNER_LABELS[t.owner];
-        if (!map.has(label)) map.set(label, []);
-        map.get(label)!.push(t);
-      }
-      return [...map.entries()].map(([label, items]) => ({
-        group: label,
-        label,
-        tasks: items,
-      }));
+    if (state.groupBy === "owner") {
+      return groupByLabel(visible, (t) => CHECKLIST_OWNER_LABELS[t.owner]);
     }
     return groupTasksForTimeline(visible, dueDate).map((g) => ({
       group: g.group,
       label: g.label,
       tasks: g.tasks,
     }));
-  }, [visible, view, dueDate]);
+  }, [visible, state, dueDate]);
+
+  const searchHits = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return null;
+    return optimisticTasks.filter((t) => matchesQuery(t, q));
+  }, [optimisticTasks, query]);
 
   if (!checklistId) {
     return (
       <EmptyImport
         templateTaskCount={templateTaskCount}
-        onError={setError}
+        onImported={(next) => setTasks(next)}
       />
     );
   }
 
+  function reconcile(next: ChecklistTask[]) {
+    setTasks(next);
+  }
+
   function toggleOne(task: ChecklistTask) {
     const nextCompleted = !task.completed;
-    setError(null);
-    startTransition(async () => {
+    startTransition(() => {
       applyOptimistic({ ids: [task.id], completed: nextCompleted });
-      const result = await actionToggleChecklistTask(task.id, nextCompleted);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === task.id
-            ? {
-                ...t,
-                completed: nextCompleted,
-                completed_at: nextCompleted ? new Date().toISOString() : null,
-              }
-            : t,
-        ),
-      );
-      setMessage(nextCompleted ? "Task complete." : "Marked incomplete.");
     });
+    void save.runSave(
+      async () => {
+        const result = await actionToggleChecklistTask(task.id, nextCompleted);
+        if (!result.ok) throw new Error(result.error);
+        return result;
+      },
+      {
+        operation: "toggle_checklist_task",
+        route: "/before-baby",
+        onSuccess: async (result) => {
+          const payload = result as { tasks?: ChecklistTask[] };
+          if (payload.tasks) reconcile(payload.tasks);
+        },
+      },
+    );
   }
 
   function generate() {
-    setError(null);
-    startTransition(async () => {
-      const result = await actionGenerateBeforeBabySchedule(false);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setMessage(`Schedule generated — ${result.tasksUpdated} tasks updated.`);
-      window.location.reload();
-    });
+    void save.runSave(
+      async () => {
+        const result = await actionGenerateBeforeBabySchedule(false);
+        if (!result.ok) throw new Error(result.error);
+        return result;
+      },
+      {
+        operation: "generate_before_baby_schedule",
+        route: "/before-baby",
+        onSuccess: async (result) => {
+          const payload = result as { tasks?: ChecklistTask[] };
+          if (payload.tasks) reconcile(payload.tasks);
+        },
+      },
+    );
   }
 
   function importMissing() {
-    setError(null);
-    setMessage(null);
-    startTransition(async () => {
-      const result = await actionImportBeforeBaby();
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      if (result.added > 0) {
-        setMessage(
-          `Imported ${result.added} missing default task(s). Generate schedule to place dates.`,
-        );
-        window.location.reload();
-        return;
-      }
-      setMessage(
-        `All ${result.totalDefaults} default Before Baby tasks are already present.`,
-      );
-    });
+    void save.runSave(
+      async () => {
+        const result = await actionImportBeforeBaby();
+        if (!result.ok) throw new Error(result.error);
+        return result;
+      },
+      {
+        operation: "import_before_baby",
+        route: "/before-baby",
+        onSuccess: async (result) => {
+          const payload = result as { tasks?: ChecklistTask[] };
+          if (payload.tasks) reconcile(payload.tasks);
+        },
+      },
+    );
   }
 
   const missingDefaults = Math.max(
@@ -256,20 +215,21 @@ export function BeforeBabyScheduler({
       optimisticTasks.filter((t) => t.is_default && Boolean(t.template_task_slug))
         .length,
   );
+  const attentionEmpty =
+    attention.overdue.length +
+      attention.needsAttentionNow.length +
+      attention.thisWeek.length ===
+    0;
 
   return (
     <div className="space-y-4">
       <DueDateHeader settings={settings} pregnancy={pregnancy} />
+      <BeforeBabyAttentionSummary attention={attention} />
 
       <section className="surface p-4 sm:p-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-accent">
-              Before Baby
-            </p>
-            <h2 className="mt-1 font-display text-2xl text-ink sm:text-3xl">
-              Checklist
-            </h2>
+            <h2 className="font-display text-2xl text-ink">Checklist</h2>
             {missingDefaults > 0 ? (
               <p className="mt-1 text-sm text-ink-muted">
                 {missingDefaults} seeded default task(s) not in your checklist yet.
@@ -277,31 +237,23 @@ export function BeforeBabyScheduler({
             ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
-            {checklistId ? (
-              <button
-                type="button"
-                className="btn btn-primary hidden sm:inline-flex"
-                onClick={() => setAddOpen(true)}
-              >
-                + Add Task
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="btn btn-primary hidden sm:inline-flex"
+              onClick={() => setAddOpen(true)}
+            >
+              + Add Task
+            </button>
             <button
               type="button"
               className="btn btn-secondary"
-              disabled={pending}
+              disabled={save.isBusy}
               onClick={importMissing}
             >
-              {pending ? "Importing…" : "Import missing tasks"}
+              {saveButtonIdleLabel(save.state, "Import missing tasks")}
             </button>
             <Link href="/before-baby/assign" className="btn btn-secondary">
               Assign owners
-            </Link>
-            <Link href="/after-birth" className="btn btn-secondary">
-              First Month
-            </Link>
-            <Link href="/before-baby/plan" className="btn btn-secondary">
-              Plan
             </Link>
             <button
               type="button"
@@ -313,10 +265,10 @@ export function BeforeBabyScheduler({
             <button
               type="button"
               className="btn btn-primary"
-              disabled={pending || !dueDate}
+              disabled={save.isBusy || !dueDate}
               onClick={generate}
             >
-              Generate my schedule
+              {saveButtonIdleLabel(save.state, "Generate my schedule")}
             </button>
           </div>
         </div>
@@ -326,389 +278,373 @@ export function BeforeBabyScheduler({
             label={`${dashboard.completed} / ${dashboard.total} complete`}
           />
         </div>
+        <SaveStatus
+          state={save.state}
+          message={save.statusMessage}
+          slowTier={save.slowTier}
+          onRetry={() => void save.retry()}
+        />
       </section>
 
-      {showSettings ? <BeforeBabySchedulingSettings settings={settings} compact /> : null}
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard label="Remaining" value={dashboard.remaining} />
-        <StatCard label="Inbox" value={inboxCount} />
-        <StatCard label="Overdue" value={dashboard.overdue.length} />
-        <StatCard label="This week" value={dashboard.dueThisWeek.length} />
-        <StatCard
-          label="High priority open"
-          value={optimisticTasks.filter((t) => !t.completed && (t.priority === "high" || t.priority === "critical")).length}
+      {showSettings ? (
+        <BeforeBabySchedulingSettings
+          settings={settings}
+          compact
+          onTasksUpdated={reconcile}
         />
+      ) : null}
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Remaining" value={dashboard.remaining} />
+        <StatCard label="Overdue" value={attention.summary.overdueCount} />
+        <StatCard label="This week" value={attention.summary.thisWeekCount} />
+        <StatCard label="Coming next" value={attention.summary.comingNextCount} />
       </div>
 
-      {(message || error) && (
-        <div className="rounded-xl border border-border bg-bg-elevated px-4 py-3 text-sm">
-          {error ? (
-            <span className="text-danger">{error}</span>
-          ) : (
-            <span className="text-accent-strong">{message}</span>
-          )}
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2">
-        {BOARD_MODES.map((item) => (
+      <div className="sticky top-0 z-10 -mx-1 space-y-3 bg-bg/95 px-1 py-2 backdrop-blur">
+        <div className="flex flex-wrap gap-2">
           <button
-            key={item.id}
             type="button"
             className={clsx(
-              "btn",
-              boardMode === item.id ? "btn-primary" : "btn-ghost",
+              "btn min-h-11",
+              state.displayMode === "attention" ? "btn-primary" : "btn-ghost",
             )}
-            onClick={() => {
-              setBoardMode(item.id);
-              if (item.id === "owner") setView("by_owner");
-              if (item.id === "category") setView("by_category");
-              if (item.id === "timeline") setView("recommended");
-            }}
+            onClick={() => setDisplayMode("attention")}
           >
-            {item.label}
+            What needs attention
           </button>
-        ))}
-      </div>
-
-      {boardMode === "milestones" ? (
-        <MilestoneBoard tasks={optimisticTasks} settings={settings} />
-      ) : (
-        <>
-      <div className="sticky top-0 z-10 -mx-1 space-y-3 bg-bg/95 px-1 py-2 backdrop-blur">
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {VIEWS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={clsx(
-                "badge shrink-0",
-                view === item.id ? "badge-accent" : "",
-              )}
-              onClick={() => setView(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
+          <button
+            type="button"
+            className={clsx(
+              "btn min-h-11",
+              state.displayMode === "milestones" ? "btn-primary" : "btn-ghost",
+            )}
+            onClick={() => setDisplayMode("milestones")}
+          >
+            Milestones
+          </button>
+          <button
+            type="button"
+            className={clsx(
+              "btn min-h-11",
+              state.displayMode === "timeline" && state.groupBy === "none"
+                ? "btn-primary"
+                : "btn-ghost",
+            )}
+            onClick={() => setTimeline("none")}
+          >
+            Timeline
+          </button>
+          <button
+            type="button"
+            className={clsx(
+              "btn min-h-11",
+              state.groupBy === "owner" ? "btn-primary" : "btn-ghost",
+            )}
+            onClick={() => setGroupBy("owner")}
+          >
+            Owner
+          </button>
+          <button
+            type="button"
+            className={clsx(
+              "btn min-h-11",
+              state.groupBy === "category" ? "btn-primary" : "btn-ghost",
+            )}
+            onClick={() => setGroupBy("category")}
+          >
+            Category
+          </button>
         </div>
         <input
           className="input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search tasks…"
+          aria-label="Search tasks"
         />
-      </div>
-
-      <div className="space-y-3">
-        {groups.map((group) => {
-          const key = group.group;
-          const isCollapsed = collapsed[key];
-          return (
-            <section key={key} className="surface overflow-hidden">
+        {query.trim() ? (
+          <p className="text-xs text-ink-muted">
+            Showing search results across the whole checklist.
+          </p>
+        ) : null}
+        <button
+          type="button"
+          className="btn btn-ghost min-h-11"
+          aria-expanded={showAdvanced}
+          onClick={() => setShowAdvanced((v) => !v)}
+        >
+          {showAdvanced ? "Hide filters" : "Filters"}
+        </button>
+        {showAdvanced ? (
+          <div className="flex flex-wrap gap-2">
+            {ADVANCED_FILTERS.map((item) => (
               <button
+                key={item.id}
                 type="button"
-                className="flex w-full items-center justify-between px-4 py-3 text-left"
-                onClick={() =>
-                  setCollapsed((c) => ({ ...c, [key]: !c[key] }))
-                }
+                className={clsx(
+                  "badge min-h-11 shrink-0 px-3",
+                  state.displayMode === "timeline" && state.filter === item.id
+                    ? "badge-accent"
+                    : "",
+                )}
+                onClick={() => setFilter(item.id)}
               >
-                <span className="font-medium">
-                  {group.label}{" "}
-                  <span className="text-ink-subtle">({group.tasks.length})</span>
-                </span>
-                <span className="text-ink-subtle">{isCollapsed ? "+" : "−"}</span>
+                {item.label}
               </button>
-              {!isCollapsed ? (
-                <ul className="divide-y divide-border border-t border-border">
-                  {group.tasks.map((task) => (
-                    <CompactTaskRow
-                      key={task.id}
-                      task={task}
-                      dueDate={dueDate}
-                      onToggle={() => toggleOne(task)}
-                      onSave={async (patch) => {
-                        const result = await actionUpdateChecklistTask(task.id, patch);
-                        if (!result.ok) setError(result.error);
-                        else window.location.reload();
-                      }}
-                    />
-                  ))}
-                </ul>
-              ) : null}
-            </section>
-          );
-        })}
-        {groups.length === 0 ? (
-          <p className="text-sm text-ink-muted">No tasks in this view.</p>
+            ))}
+          </div>
         ) : null}
       </div>
-        </>
+
+      {searchHits ? (
+        <TaskGroupList
+          groups={[{ group: "search", label: "Search results", tasks: searchHits }]}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          dueDate={dueDate}
+          onToggle={toggleOne}
+          onReconcile={reconcile}
+        />
+      ) : state.displayMode === "milestones" ? (
+        <MilestoneBoard tasks={optimisticTasks} settings={settings} />
+      ) : state.displayMode === "attention" ? (
+        <AttentionLists
+          attention={attention}
+          empty={attentionEmpty}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          dueDate={dueDate}
+          onToggle={toggleOne}
+          onReconcile={reconcile}
+        />
+      ) : (
+        <TaskGroupList
+          groups={groups}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+          dueDate={dueDate}
+          onToggle={toggleOne}
+          onReconcile={reconcile}
+        />
       )}
 
-      {checklistId ? (
-        <>
-          <div className="h-20 sm:hidden" aria-hidden />
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-bg/95 p-3 backdrop-blur sm:hidden">
-            <button
-              type="button"
-              className="btn btn-primary min-h-12 w-full"
-              onClick={() => setAddOpen(true)}
-            >
-              + Add Task
-            </button>
-          </div>
-          <QuickAddTaskSheet
-            open={addOpen}
-            onClose={() => setAddOpen(false)}
-            checklistId={checklistId}
-            existingTasks={optimisticTasks}
-            dueDate={dueDate}
-            onCreated={(task) => {
-              setTasks((prev) => [...prev, task]);
-              setMessage(`Added “${task.title}”.`);
-              if (task.inbox) setView("inbox");
-            }}
-          />
-        </>
-      ) : null}
+      <div className="h-20 sm:hidden" aria-hidden />
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-bg/95 p-3 backdrop-blur sm:hidden">
+        <button
+          type="button"
+          className="btn btn-primary min-h-12 w-full"
+          onClick={() => setAddOpen(true)}
+        >
+          + Add Task
+        </button>
+      </div>
+      <QuickAddTaskSheet
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        checklistId={checklistId}
+        existingTasks={optimisticTasks}
+        dueDate={dueDate}
+        onCreated={(task) => {
+          setTasks((prev) => [...prev, task]);
+        }}
+      />
     </div>
   );
 }
 
-function CompactTaskRow({
-  task,
+function AttentionLists({
+  attention,
+  empty,
+  collapsed,
+  setCollapsed,
   dueDate,
   onToggle,
-  onSave,
+  onReconcile,
 }: {
-  task: ChecklistTask;
+  attention: ReturnType<typeof buildBeforeBabyAttention>;
+  empty: boolean;
+  collapsed: Record<string, boolean>;
+  setCollapsed: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   dueDate: string | null;
-  onToggle: () => void;
-  onSave: (patch: {
-    title?: string;
-    notes?: string | null;
-    due_date?: string | null;
-    owner?: ChecklistOwner;
-    priority?: ChecklistPriority;
-    manual_timing?: { mode: "remove" } | { mode: "exact"; date: string };
-  }) => Promise<void>;
+  onToggle: (task: ChecklistTask) => void;
+  onReconcile: (tasks: ChecklistTask[]) => void;
 }) {
-  const [open, setOpen] = useState(false);
-  const [pending, startTransition] = useTransition();
-  const badge = getTimelineBadge(task, dueDate);
-  const due = effectiveDueDate(task);
-  const why = task.timing_reason;
-  const recommended = recommendedByLabel(task);
+  if (attention.postBirth) {
+    return (
+      <TaskGroupList
+        groups={[
+          {
+            group: "still",
+            label: "Still worth finishing",
+            tasks: attention.stillWorthFinishing.map((r) => r.task),
+          },
+          {
+            group: "first",
+            label: "First days",
+            tasks: attention.firstDays.map((r) => r.task),
+          },
+          {
+            group: "later",
+            label: "Later",
+            tasks: attention.later.map((r) => r.task),
+          },
+          {
+            group: "done",
+            label: "Recently completed",
+            tasks: attention.recentlyCompleted,
+          },
+        ].filter((g) => g.tasks.length > 0)}
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        dueDate={dueDate}
+        onToggle={onToggle}
+        onReconcile={onReconcile}
+      />
+    );
+  }
+
+  if (empty) {
+    const allComplete =
+      attention.summary.remainingBeforeBirth === 0 &&
+      attention.comingNext.length === 0 &&
+      attention.firstDays.length === 0;
+    return (
+      <BeforeBabyCaughtUp
+        nextTitle={attention.comingNext[0]?.task.title ?? null}
+        allComplete={allComplete}
+      />
+    );
+  }
+
+  const sections: Array<{ id: string; label: string; rows: AttentionTask[] }> = [
+    { id: "overdue", label: "Overdue", rows: attention.overdue },
+    { id: "now", label: "Needs attention now", rows: attention.needsAttentionNow },
+    { id: "week", label: "This week", rows: attention.thisWeek },
+    { id: "next", label: "Coming next", rows: attention.comingNext },
+    {
+      id: "done",
+      label: "Recently completed",
+      rows: attention.recentlyCompleted.map((task) => ({
+        task,
+        group: "recently_completed",
+        blocked: false,
+        blockedReason: null,
+      })),
+    },
+  ];
 
   return (
-    <li className="px-3 py-3 sm:px-4">
-      <div className="flex items-start gap-3">
-        <button
-          type="button"
-          onClick={onToggle}
-          className={clsx(
-            "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-lg transition",
-            task.completed
-              ? "border-accent bg-accent text-white"
-              : "border-border bg-bg hover:border-accent",
-          )}
-          aria-label={task.completed ? "Mark incomplete" : "Complete"}
-        >
-          {task.completed ? "✓" : ""}
-        </button>
-        <div className="min-w-0 flex-1">
-          <button
-            type="button"
-            className={clsx(
-              "text-left font-medium",
-              task.completed ? "text-ink-subtle line-through" : "text-ink",
-            )}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {task.title}
-          </button>
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {taskOriginBadge(task) ? (
-              <span
-                className={clsx(
-                  "badge",
-                  taskOriginBadge(task) === "Manual" && "badge-accent",
-                )}
-              >
-                {taskOriginBadge(task)}
-              </span>
-            ) : null}
-            {task.inbox ? <span className="badge badge-warning">Inbox</span> : null}
-            <span className="badge">{TIMELINE_BADGE_LABELS[badge]}</span>
-            <span className="badge">{CHECKLIST_OWNER_LABELS[task.owner]}</span>
-            {task.priority === "high" || task.priority === "critical" ? (
-              <span className="badge badge-warning">
-                {CHECKLIST_PRIORITY_LABELS[task.priority]}
-              </span>
-            ) : null}
-            {formatRelativeTimingDisplay(task) ? (
-              <span className="badge">{formatRelativeTimingDisplay(task)}</span>
-            ) : recommended ? (
-              <span className="badge">{recommended}</span>
-            ) : null}
-            {task.dependency_status === "blocked" ? (
-              <span className="badge badge-warning">Blocked</span>
-            ) : null}
-            {task.date_estimated ? (
-              <span className="badge">Estimated</span>
-            ) : null}
-          </div>
-          {task.created_from_label ? (
-            <p className="mt-1 text-xs text-ink-subtle">
-              Created from: {task.created_from_label}
-            </p>
-          ) : null}
-          {task.dependency_reason ? (
-            <p className="mt-1 text-xs text-amber-800">{task.dependency_reason}</p>
-          ) : null}
-          {why ? (
-            <p className="mt-1 text-xs text-ink-subtle">
-              Why: {why}
-            </p>
-          ) : null}
-          {open ? (
-            <form
-              className="mt-3 grid gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = new FormData(e.currentTarget);
-                const nextDue = String(form.get("due_date") || "");
-                const nextOwner = String(form.get("owner") || task.owner) as ChecklistOwner;
-                const nextPriority = String(
-                  form.get("priority") || task.priority,
-                ) as ChecklistPriority;
-                const nextTitle = String(form.get("title") || task.title);
-                const nextNotes = String(form.get("notes") || "");
-                startTransition(async () => {
-                  await onSave({
-                    title: nextTitle,
-                    notes: nextNotes || null,
-                    owner: nextOwner,
-                    priority: nextPriority,
-                    ...(nextDue
-                      ? { manual_timing: { mode: "exact", date: nextDue } }
-                      : {}),
-                  });
-                });
-              }}
-            >
-              <label className="field">
-                <span>Title</span>
-                <input
-                  name="title"
-                  className="input"
-                  defaultValue={task.title}
-                />
-              </label>
-              <label className="field">
-                <span>Notes</span>
-                <textarea
-                  name="notes"
-                  className="input min-h-16"
-                  defaultValue={task.notes ?? ""}
-                />
-              </label>
-              <label className="field">
-                <span>Owner</span>
-                <select name="owner" className="input" defaultValue={task.owner}>
-                  {(["unassigned", "sam", "michelle", "both"] as const).map(
-                    (o) => (
-                      <option key={o} value={o}>
-                        {CHECKLIST_OWNER_LABELS[o]}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </label>
-              <label className="field">
-                <span>Priority</span>
-                <select
-                  name="priority"
-                  className="input"
-                  defaultValue={task.priority}
-                >
-                  {(
-                    ["low", "medium", "high", "critical"] as ChecklistPriority[]
-                  ).map((p) => (
-                    <option key={p} value={p}>
-                      {CHECKLIST_PRIORITY_LABELS[p]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Manual due date</span>
-                <input
-                  name="due_date"
-                  type="date"
-                  className="input"
-                  defaultValue={due ?? ""}
-                />
-              </label>
-              {task.subtasks && task.subtasks.length > 0 ? (
-                <ul className="space-y-1 text-sm">
-                  {task.subtasks.map((s) => (
-                    <li key={s.id} className="flex items-center gap-2">
-                      <span>{s.completed ? "✓" : "□"}</span>
-                      <span>{s.title}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-              <div className="flex flex-wrap gap-2">
-                <button type="submit" className="btn btn-primary" disabled={pending}>
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  disabled={pending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      await onSave({ manual_timing: { mode: "remove" } });
-                    })
-                  }
-                >
-                  Remove date
-                </button>
-                {task.is_custom ? (
-                  <button
-                    type="button"
-                    className="btn btn-ghost text-danger"
-                    disabled={pending}
-                    onClick={() =>
-                      startTransition(async () => {
-                        await actionArchiveChecklistTask(task.id);
-                        window.location.reload();
-                      })
-                    }
-                  >
-                    Delete
-                  </button>
-                ) : null}
-              </div>
-            </form>
-          ) : null}
-        </div>
-      </div>
-    </li>
+    <TaskGroupList
+      groups={sections
+        .filter((s) => s.rows.length > 0)
+        .map((s) => ({
+          group: s.id,
+          label: s.label,
+          tasks: s.rows.map((r) => r.task),
+        }))}
+      collapsed={collapsed}
+      setCollapsed={setCollapsed}
+      dueDate={dueDate}
+      onToggle={onToggle}
+      onReconcile={onReconcile}
+    />
   );
+}
+
+function TaskGroupList({
+  groups,
+  collapsed,
+  setCollapsed,
+  dueDate,
+  onToggle,
+  onReconcile,
+}: {
+  groups: Array<{ group: string; label: string; tasks: ChecklistTask[] }>;
+  collapsed: Record<string, boolean>;
+  setCollapsed: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+  dueDate: string | null;
+  onToggle: (task: ChecklistTask) => void;
+  onReconcile: (tasks: ChecklistTask[]) => void;
+}) {
+  if (groups.length === 0) {
+    return <p className="text-sm text-ink-muted">No tasks in this view.</p>;
+  }
+  return (
+    <div className="space-y-3">
+      {groups.map((group) => {
+        const isCollapsed = collapsed[group.group];
+        return (
+          <section key={group.group} className="surface overflow-hidden">
+            <button
+              type="button"
+              className="flex min-h-11 w-full items-center justify-between px-4 py-3 text-left"
+              onClick={() =>
+                setCollapsed((c) => ({ ...c, [group.group]: !c[group.group] }))
+              }
+            >
+              <span className="font-medium">
+                {group.label}{" "}
+                <span className="text-ink-subtle">({group.tasks.length})</span>
+              </span>
+              <span className="text-ink-subtle">{isCollapsed ? "+" : "−"}</span>
+            </button>
+            {!isCollapsed ? (
+              <ul className="divide-y divide-border border-t border-border">
+                {group.tasks.map((task) => (
+                  <BeforeBabyTaskCard
+                    key={task.id}
+                    task={task}
+                    dueDate={dueDate}
+                    onToggle={() => onToggle(task)}
+                    onReconcile={onReconcile}
+                  />
+                ))}
+              </ul>
+            ) : null}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function matchesQuery(task: ChecklistTask, q: string) {
+  return (
+    task.title.toLowerCase().includes(q) ||
+    (task.notes ?? "").toLowerCase().includes(q) ||
+    task.category_label.toLowerCase().includes(q) ||
+    CHECKLIST_OWNER_LABELS[task.owner]?.toLowerCase().includes(q) ||
+    CHECKLIST_PRIORITY_LABELS[task.priority]?.toLowerCase().includes(q)
+  );
+}
+
+function groupByLabel(
+  tasks: ChecklistTask[],
+  labelFor: (task: ChecklistTask) => string,
+) {
+  const map = new Map<string, ChecklistTask[]>();
+  for (const t of tasks) {
+    const label = labelFor(t);
+    if (!map.has(label)) map.set(label, []);
+    map.get(label)!.push(t);
+  }
+  return [...map.entries()].map(([label, items]) => ({
+    group: label,
+    label,
+    tasks: items,
+  }));
 }
 
 function EmptyImport({
   templateTaskCount,
-  onError,
+  onImported,
 }: {
   templateTaskCount: number;
-  onError: (msg: string) => void;
+  onImported: (tasks: ChecklistTask[]) => void;
 }) {
-  const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const save = useSaveFeedback();
   return (
     <section className="surface space-y-4 p-6">
       <h2 className="font-display text-2xl">Start Before Baby</h2>
@@ -716,22 +652,36 @@ function EmptyImport({
         Import {templateTaskCount} default prep tasks, then set your due date to
         build a timeline.
       </p>
+      <SaveStatus
+        state={save.state}
+        message={save.statusMessage}
+        slowTier={save.slowTier}
+        onRetry={() => void save.retry()}
+      />
       <button
         type="button"
-        className="btn btn-primary"
-        disabled={pending}
+        className="btn btn-primary min-h-11"
+        disabled={save.isBusy}
         onClick={() => {
-          startTransition(async () => {
-            const result = await actionImportBeforeBaby();
-            if (!result.ok) {
-              onError(result.error);
-              return;
-            }
-            window.location.href = "/before-baby";
-          });
+          void save.runSave(
+            async () => {
+              const result = await actionImportBeforeBaby();
+              if (!result.ok) throw new Error(result.error);
+              return result;
+            },
+            {
+              operation: "import_before_baby_bootstrap",
+              route: "/before-baby",
+              onSuccess: async (result) => {
+                const payload = result as { tasks?: ChecklistTask[] };
+                if (payload.tasks) onImported(payload.tasks);
+                router.refresh();
+              },
+            },
+          );
         }}
       >
-        {pending ? "Importing…" : "Import Before Baby checklist"}
+        {saveButtonIdleLabel(save.state, "Import Before Baby checklist")}
       </button>
     </section>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { ChecklistTask } from "@/lib/types/models";
 import {
   CHECKLIST_OWNER_LABELS,
@@ -220,8 +221,6 @@ export function BeforeBabyBoard({
               ? `Imported ${added} Before Baby tasks.`
               : "Before Baby checklist is ready.",
           );
-          // Soft reload via navigation
-          window.location.href = "/before-baby";
           void id;
         }}
         onError={setError}
@@ -380,8 +379,9 @@ export function BeforeBabyBoard({
 
       <AddCustomTaskForm
         checklistId={checklistId}
-        onAdded={() => {
-          window.location.reload();
+        onAdded={(task) => {
+          setTasks((prev) => [...prev, task]);
+          setMessage(`Added “${task.title}”.`);
         }}
       />
 
@@ -474,13 +474,13 @@ export function BeforeBabyBoard({
           </div>
           <ImportButton
             label="Import missing defaults"
-            onDone={(added) => {
+            onDone={(added, _id, nextTasks) => {
               setMessage(
                 added > 0
                   ? `Added ${added} missing default tasks.`
                   : "You already have every default task.",
               );
-              if (added > 0) window.location.reload();
+              if (nextTasks) setTasks(nextTasks);
             }}
             onError={setError}
           />
@@ -499,6 +499,7 @@ function EmptyImport({
   onImported: (added: number, checklistId: string) => void;
   onError: (message: string) => void;
 }) {
+  const router = useRouter();
   return (
     <div className="surface px-6 py-12 text-center">
       <p className="text-sm font-semibold uppercase tracking-[0.14em] text-accent">
@@ -515,7 +516,10 @@ function EmptyImport({
         <ImportButton
           label="Import Default Before Baby Checklist"
           primary
-          onDone={(added, checklistId) => onImported(added, checklistId ?? "")}
+          onDone={(added, checklistId) => {
+            onImported(added, checklistId ?? "");
+            router.refresh();
+          }}
           onError={onError}
         />
       </div>
@@ -531,7 +535,7 @@ function ImportButton({
 }: {
   label: string;
   primary?: boolean;
-  onDone: (added: number, checklistId?: string) => void;
+  onDone: (added: number, checklistId?: string, tasks?: ChecklistTask[]) => void;
   onError: (message: string) => void;
 }) {
   const [pending, startTransition] = useTransition();
@@ -547,7 +551,7 @@ function ImportButton({
             onError(result.error);
             return;
           }
-          onDone(result.added, result.checklistId);
+          onDone(result.added, result.checklistId, result.tasks);
         });
       }}
     >
@@ -561,7 +565,7 @@ function AddCustomTaskForm({
   onAdded,
 }: {
   checklistId: string;
-  onAdded: () => void;
+  onAdded: (task: ChecklistTask) => void;
 }) {
   const save = useSaveFeedback();
   const [error, setError] = useState<string | null>(null);
@@ -614,8 +618,9 @@ function AddCustomTaskForm({
           {
             operation: "add_checklist_task",
             route: "/before-baby",
-            onSuccess: async () => {
-              onAdded();
+            onSuccess: async (result) => {
+              const payload = result as { task?: ChecklistTask };
+              if (payload.task) onAdded(payload.task);
               form.reset();
             },
           },

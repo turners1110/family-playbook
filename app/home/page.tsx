@@ -25,6 +25,8 @@ import {
   PREBIRTH_BUCKET_LABELS,
 } from "@/lib/research/prebirth-priority";
 import { classifyResearchValue } from "@/lib/research/research-value";
+import { getBeforeBabyChecklist } from "@/lib/services/checklists";
+import { buildBeforeBabyAttention } from "@/lib/checklists/attention";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +72,17 @@ export default async function HomePage() {
         estimated_minutes: nextQuestion?.estimated_minutes,
       })
     : null;
+  const beforeBaby = await getBeforeBabyChecklist();
+  const babyAttention = buildBeforeBabyAttention({
+    tasks: beforeBaby.tasks,
+    settings: beforeBaby.settings,
+  });
+  const nextBabyTask =
+    babyAttention.overdue[0]?.task ??
+    babyAttention.needsAttentionNow[0]?.task ??
+    babyAttention.thisWeek[0]?.task ??
+    babyAttention.comingNext[0]?.task ??
+    null;
 
   return (
     <AppShell
@@ -116,6 +129,28 @@ export default async function HomePage() {
           choose between Questions and Conversations.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/before-baby?view=attention"
+            className="rounded-xl border border-border px-4 py-3 hover:border-accent"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Before Baby
+            </p>
+            <p className="mt-1 font-medium text-ink">{babyAttention.summary.headline}</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              {babyAttention.summary.thisWeekCount} thing
+              {babyAttention.summary.thisWeekCount === 1 ? "" : "s"} need attention this
+              week
+              {babyAttention.summary.overdueCount
+                ? ` · ${babyAttention.summary.overdueCount} overdue`
+                : ""}
+            </p>
+            {nextBabyTask ? (
+              <p className="mt-1 text-sm text-ink">Next: {nextBabyTask.title}</p>
+            ) : (
+              <p className="mt-1 text-sm text-ink-muted">Open checklist</p>
+            )}
+          </Link>
           {stats.lastSession && stats.lastSession.status !== "completed" ? (
             <Link
               href={`/discuss/${stats.lastSession.id}`}

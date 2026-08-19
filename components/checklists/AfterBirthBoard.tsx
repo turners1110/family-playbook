@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import type { ChecklistTask, FamilySettings } from "@/lib/types/models";
 import {
   actionImportAfterBirth,
@@ -37,6 +38,7 @@ export function AfterBirthBoard({
   const [previewText, setPreviewText] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const groups = useMemo(() => {
     const map = new Map<string, ChecklistTask[]>();
@@ -161,7 +163,7 @@ export function AfterBirthBoard({
                 const result = await actionImportAfterBirth();
                 if (result.ok) {
                   setMessage(`Added ${result.added} First Month tasks.`);
-                  window.location.reload();
+                  router.refresh();
                 } else setMessage(result.error);
               })
             }

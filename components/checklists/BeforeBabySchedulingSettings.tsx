@@ -12,9 +12,11 @@ const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export function BeforeBabySchedulingSettings({
   settings,
   compact = false,
+  onTasksUpdated,
 }: {
   settings: FamilySettings;
   compact?: boolean;
+  onTasksUpdated?: (tasks: import("@/lib/types/models").ChecklistTask[]) => void;
 }) {
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<BeforeBabySchedulingMode>(
@@ -74,6 +76,7 @@ export function BeforeBabySchedulingSettings({
         return;
       }
       setMessage(`Scheduling preferences saved. ${result.tasksUpdated} tasks updated.`);
+      if (result.tasks) onTasksUpdated?.(result.tasks);
     });
   }
 
@@ -200,7 +203,7 @@ export function BeforeBabySchedulingSettings({
         disabled={pending}
         onClick={save}
       >
-        {pending ? "Saving…" : "Save scheduling"}
+        {pending ? "Updating schedule…" : "Save scheduling"}
       </button>
       {message ? <p className="text-sm text-accent-strong">{message}</p> : null}
       {error ? <p className="text-sm text-danger">{error}</p> : null}
