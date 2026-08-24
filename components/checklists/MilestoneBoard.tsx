@@ -9,6 +9,7 @@ import {
   actionSetDependencyOverride,
   actionToggleChecklistTask,
 } from "@/lib/actions/checklists";
+import { TaskDetailModal } from "@/components/checklists/TaskDetailModal";
 
 export function MilestoneBoard({
   tasks: initialTasks,
@@ -19,6 +20,7 @@ export function MilestoneBoard({
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [detailTask, setDetailTask] = useState<ChecklistTask | null>(null);
   const due = settings.expected_due_date ?? null;
 
   const milestones = useMemo(
@@ -134,7 +136,17 @@ export function MilestoneBoard({
                         onChange={(e) => toggle(step.id, e.target.checked)}
                       />
                       <span className="min-w-0 flex-1">
-                        <span className="font-medium">{step.title}</span>
+                        <button
+                          type="button"
+                          className="text-left font-medium underline decoration-dotted underline-offset-2"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDetailTask(step);
+                          }}
+                        >
+                          {step.title}
+                        </button>
                         {step.dependency_reason ? (
                           <span className="mt-1 block text-xs text-amber-800">
                             {step.dependency_reason}
@@ -164,6 +176,9 @@ export function MilestoneBoard({
           </section>
         );
       })}
+      {detailTask ? (
+        <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} />
+      ) : null}
     </div>
   );
 }

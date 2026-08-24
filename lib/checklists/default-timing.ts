@@ -180,6 +180,17 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
     confirm_with_provider: true,
     timing_flexibility: "optional",
   }),
+  hospital_birth_19: before(-45, "Discuss pain management preferences before final birth-plan review.", {
+    start: -90,
+    confirm_with_provider: true,
+  }),
+  hospital_birth_20: before(-45, "Delivery-room expectations are best set before the final month.", {
+    start: -90,
+  }),
+  hospital_birth_21: before(-45, "Photo and video boundaries should be agreed before delivery-day pressure.", {
+    start: -90,
+    timing_flexibility: "optional",
+  }),
 
   // Medical
   medical_1: before(-90, "Completing this early leaves time to interview another pediatrician.", {
@@ -212,6 +223,15 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
   medical_7: before(-21, "Know after-hours pediatric contact before the final week.", {
     start: -45,
     confirm_with_provider: true,
+  }),
+  medical_8: before(-60, "Feeding approach affects supplies and support planning.", {
+    start: -100,
+    confirm_with_provider: true,
+    timing_flexibility: "flexible",
+  }),
+  medical_9: before(-70, "Newborn-care basics are useful before the final month.", {
+    start: -120,
+    task_tags: ["training"],
   }),
 
   // Home
@@ -345,6 +365,10 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
     start: -60,
     timing_flexibility: "optional",
   }),
+  baby_gear_24: before(-21, "Set aside the going-home outfit while packing hospital bags.", {
+    start: -35,
+    timing_flexibility: "optional",
+  }),
 
   // Paperwork
   paperwork_1: before(-140, "Parental leave discussions need employer lead time.", {
@@ -423,6 +447,9 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
   relationship_5: before(-45, "Stress-night communication plans help early nights.", {
     start: -90,
   }),
+  relationship_6: before(-45, "Postpartum mood-warning signs are easier to learn before exhaustion starts.", {
+    start: -90,
+  }),
 
   // Pets
   pets_1: before(-56, "Give Lulu time to adjust to gear and routines.", {
@@ -496,6 +523,13 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
   }),
   postpartum_prep_7: before(-45, "Create emergency contact list.", {
     start: -75,
+  }),
+  postpartum_prep_8: before(-35, "A concrete help schedule works best before visitors and meal support begin.", {
+    start: -60,
+  }),
+  postpartum_prep_9: before(-75, "Postpartum doula or night-nurse decisions need booking and budget lead time.", {
+    start: -120,
+    timing_flexibility: "optional",
   }),
 
   // Legal extras
@@ -572,6 +606,19 @@ export const BEFORE_BABY_TASK_TIMING: Record<string, TaskTimingDef> = {
   final_week_10: finalCheck(-3, "Rest and reduce workload near the due date."),
   final_week_11: finalCheck(-5, "Reconfirm dog sitter for labor day."),
   final_week_12: finalCheck(-5, "Confirm hospital route one last time."),
+
+  // Announcements & support network
+  announcements_and_support_1: before(-21, "First-call order is a light final-month planning task.", {
+    start: -45,
+    timing_flexibility: "optional",
+  }),
+  announcements_and_support_2: before(-21, "Announcement preferences are easier to settle before sleep-deprived decisions.", {
+    start: -45,
+    timing_flexibility: "optional",
+  }),
+  announcements_and_support_3: before(-45, "Immediate backup contact planning belongs before the final month.", {
+    start: -75,
+  }),
 
   // After-birth / First Month
   first_72h_1: after(1, "Confirm baby is on hospital records."),
@@ -656,6 +703,10 @@ const SECTION_DEFAULTS: Record<string, TaskTimingDef> = {
   }),
   lulu_extra: before(-42, "Lulu logistics before the final two weeks.", { start: -75 }),
   home_extra: before(-28, "Home readiness before the final stretch.", { start: -56 }),
+  announcements_and_support: before(-21, "Announcement and support-network planning fits the final month.", {
+    start: -45,
+    timing_flexibility: "optional",
+  }),
   first_72h: after(2, "First 72 hours planning reminders."),
   first_week: after(7, "First-week planning reminders."),
   week_two: after(14, "Week-two family check-ins."),

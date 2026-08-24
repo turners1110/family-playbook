@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { readStore } from "@/lib/db/local-store";
 import { buildPlaybookPreview, playbookToMarkdown, playbookToHtml } from "@/lib/services/playbook";
 import { ExportButtons } from "@/components/settings/ExportButtons";
+import { ContentExportButtons } from "@/components/settings/ContentExportButtons";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,10 @@ export default async function ExportPage() {
         markdown={markdown}
         html={html}
       />
+
+      <div className="mt-5">
+        <ContentExportButtons />
+      </div>
 
       <section className="surface mt-5 p-5 text-sm text-ink-muted">
         <h2 className="font-display text-xl text-ink">Import</h2>

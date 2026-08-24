@@ -47,6 +47,7 @@ describe("Before Baby template system", () => {
       "lulu_extra",
       "home_extra",
       "final_week",
+      "announcements_and_support",
     ]);
     expect(countTemplateTasks(BEFORE_BABY_TEMPLATE)).toBeGreaterThan(110);
     expect(listChecklistTemplates().some((t) => t.slug === "before-baby")).toBe(

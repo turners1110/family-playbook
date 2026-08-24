@@ -26,6 +26,7 @@ import {
   actionArchiveChecklistTask,
   actionUpdateChecklistTask,
 } from "@/lib/actions/checklists";
+import { TaskDetailModal } from "@/components/checklists/TaskDetailModal";
 
 export function BeforeBabyTaskCard({
   task,
@@ -39,6 +40,7 @@ export function BeforeBabyTaskCard({
   onReconcile: (tasks: ChecklistTask[]) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const save = useSaveFeedback();
   const badge = getTimelineBadge(task, dueDate);
   const due = effectiveDueDate(task);
@@ -76,9 +78,16 @@ export function BeforeBabyTaskCard({
               "min-h-11 text-left font-medium",
               task.completed ? "text-ink-subtle line-through" : "text-ink",
             )}
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setDetailOpen(true)}
           >
             {task.title}
+          </button>
+          <button
+            type="button"
+            className="ml-2 text-xs text-ink-subtle underline"
+            onClick={() => setOpen((v) => !v)}
+          >
+            Edit
           </button>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {origin ? (
@@ -234,6 +243,9 @@ export function BeforeBabyTaskCard({
           ) : null}
         </div>
       </div>
+      {detailOpen ? (
+        <TaskDetailModal task={task} onClose={() => setDetailOpen(false)} />
+      ) : null}
     </li>
   );
 }
